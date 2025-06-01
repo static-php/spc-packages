@@ -1,0 +1,40 @@
+{
+  "name": "static-php/spc-packages",
+  "description": "Build packages using static-php-cli",
+  "type": "application",
+  "homepage": "https://static-php.dev",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Marc Henderkes",
+      "email": "m@pyc.ac",
+      "role": "lead"
+    },
+    {
+      "name": "Jerry Ma",
+      "email": "admin@zhamao.me",
+      "role": "lead"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/static-php/spc-packages/issues"
+  },
+  "config": {
+    "platform": {
+      "php": "8.4.0"
+    },
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "prefer-stable": true,
+  "require": {
+    "php": ">=8.3",
+    "crazywhalecc/static-php-cli": "dev-fix/icurel",
+    "laravel/helpers": "^1.7"
+  },
+  "autoload": {
+    "classmap": [
+      "src/"
+    ]
+  }
+}
