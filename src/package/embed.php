@@ -4,7 +4,7 @@ namespace staticphp\package;
 
 use staticphp\package;
 
-class embedded implements package
+class embed implements package
 {
     public function getFpmConfig(): array
     {
@@ -17,7 +17,7 @@ class embedded implements package
                 'libphp.so',
             ],
             'files' => [
-                __DIR__ . '/php.ini' => '/etc/static-php/php.ini',
+                INI_PATH . '/php.ini' => '/etc/static-php/php.ini',
                 BUILD_LIB_PATH . '/libphp.so' => '/usr/static-php/libphp.so',
             ]
         ];

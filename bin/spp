@@ -7,6 +7,7 @@
 // Define constants
 define('BASE_PATH', dirname(__DIR__));
 const BUILD_ROOT_PATH = BASE_PATH . '/build';
+const INI_PATH = BASE_PATH . '/src/ini';
 const BUILD_BIN_PATH = BUILD_ROOT_PATH . '/bin';
 const BUILD_LIB_PATH = BUILD_ROOT_PATH . '/lib';
 const BUILD_MODULES_PATH = BUILD_ROOT_PATH . '/modules';
@@ -20,12 +21,15 @@ require_once BASE_PATH . '/vendor/autoload.php';
 // Parse command line arguments
 $action = $argv[1] ?? 'help';
 
-// Check if --docker flag is present
-$useDocker = false;
-foreach ($argv as $arg) {
-    if ($arg === '--docker') {
-        $useDocker = true;
-        break;
+// Check for command line flags
+$command = 'spc-gnu-docker';
+$debug = false;
+
+foreach ($argv as $i => $arg) {
+    if (str_starts_with($arg, '--command=')) {
+        $command = substr($arg, 10);
+    } elseif ($arg === '--debug') {
+        $debug = true;
     }
 }
 
@@ -57,7 +61,7 @@ switch ($action) {
     case 'build':
         // Run SPC to build PHP with all extensions
         echo "Building PHP with extensions using static-php-cli...\n";
-        staticphp\step\RunSPC::run();
+        staticphp\step\RunSPC::run($command, $debug);
         break;
 
     case 'package':
@@ -69,7 +73,7 @@ switch ($action) {
     case 'all':
         // Run both build and package steps
         echo "Building PHP with extensions using static-php-cli...\n";
-        staticphp\step\RunSPC::run();
+        staticphp\step\RunSPC::run($command, $debug);
 
         echo "Creating packages for all extensions...\n";
         staticphp\step\CreatePackages::run();
@@ -83,6 +87,7 @@ switch ($action) {
         echo "  package - Create packages for all extensions\n";
         echo "  all     - Run both build and package steps\n";
         echo "Options:\n";
-        echo "  --docker - Use Docker container for building (bin/spc-gnu-docker)\n";
+        echo "  --command=<cmd> - Specify which command to use (default: spc, alternatives: spc-gnu-docker, spc-alpine-docker)\n";
+        echo "  --debug         - Print debug messages\n";
         break;
 }

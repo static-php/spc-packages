@@ -17,7 +17,7 @@ class cli implements package
                 'php',
             ],
             'files' => [
-                __DIR__ . '/php.ini' => '/etc/static-php/php.ini',
+                INI_PATH . '/php.ini' => '/etc/static-php/php.ini',
                 BUILD_BIN_PATH . '/php' => '/usr/static-php/php'
             ]
         ];

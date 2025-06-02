@@ -17,17 +17,17 @@ class fpm implements package
                 'php-fpm',
             ],
             'files' => [
-                __DIR__ . '/php.ini' => '/etc/static-php/php.ini',
-                __DIR__ . '/php-fpm.conf' => '/etc/static-php/php-fpm.conf',
+                INI_PATH . '/php.ini' => '/etc/static-php/php.ini',
+                INI_PATH . '/php-fpm.conf' => '/etc/static-php/php-fpm.conf',
+                INI_PATH . '/www.conf' => '/etc/static-php/php-fpm.d/conf',
                 BUILD_BIN_PATH . '/php-fpm' => '/usr/static-php/php-fpm',
-                '' => [
-                    '/etc/static-php/php-fpm.d/',
-                    '/var/lib/static-php/session',
-                    '/var/lib/static-php/wsdlcache',
-                    '/var/lib/static-php/opcache',
-                ]
-            ]
+            ],
+            'empty_directories' => [
+                '/etc/static-php/php-fpm.d/',
+                '/var/lib/static-php/session',
+                '/var/lib/static-php/wsdlcache',
+                '/var/lib/static-php/opcache',
+            ],
         ];
-
     }
 }

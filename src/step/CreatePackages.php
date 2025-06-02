@@ -48,8 +48,8 @@ class CreatePackages
         }
 
         // Get the list of shared extensions
-        if (isset(self::$craftConfig['build-options']['build-shared'])) {
-            $sharedExtensions = self::$craftConfig['build-options']['build-shared'];
+        if (isset(self::$craftConfig['shared-extensions'])) {
+            $sharedExtensions = self::$craftConfig['shared-extensions'];
             if (is_string($sharedExtensions)) {
                 $sharedExtensions = explode(',', $sharedExtensions);
             }
@@ -71,7 +71,7 @@ class CreatePackages
         echo "- Shared Extensions: " . implode(', ', self::$sharedExtensions) . "\n";
     }
 
-    private static function createSapiPackages()
+    private static function createSapiPackages(): void
     {
         echo "Creating packages for SAPIs...\n";
 
@@ -90,15 +90,12 @@ class CreatePackages
             $package = new $packageClass();
             $config = $package->getFpmConfig();
 
-            // Create RPM package
-            self::createRpmPackage($sapi, $config);
-
-            // Create DEB package
-            self::createDebPackage($sapi, $config);
+            // Create packages using FPM with "php-" prefix
+            self::createPackageWithFpm("php-{$sapi}", $config);
         }
     }
 
-    private static function createExtensionPackages()
+    private static function createExtensionPackages(): void
     {
         echo "Creating packages for extensions...\n";
 
@@ -110,220 +107,280 @@ class CreatePackages
             echo "Creating package for extension: {$extension}...\n";
 
             // Create a package for this extension
-            $package = new \staticphp\extension();
+            $package = new \staticphp\extension($extension);
             $config = $package->getFpmConfig();
 
-            // Create RPM package
-            self::createRpmPackage("ext-{$extension}", $config);
-
-            // Create DEB package
-            self::createDebPackage("ext-{$extension}", $config);
+            // Create packages using FPM with php- prefix
+            self::createPackageWithFpm("php-{$extension}", $config);
         }
     }
 
-    private static function createRpmPackage($name, $config)
+    private static function createPackageWithFpm($name, $config): void
+    {
+        echo "Creating packages for {$name} using FPM...\n";
+
+        // Extract PHP version and architecture
+        [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
+
+        // Determine the next available iteration
+        $iteration = self::getNextIteration($name, $phpVersion, $architecture);
+
+        // Create RPM package
+        self::createRpmPackage($name, $config, $phpVersion, $architecture, $iteration);
+
+        // Create DEB package
+        self::createDebPackage($name, $config, $phpVersion, $architecture, $iteration);
+    }
+
+    private static function createRpmPackage($name, $config, $phpVersion, $architecture, $iteration): void
     {
         echo "Creating RPM package for {$name}...\n";
 
-        // Create a temporary directory for the package
-        $tempDir = sys_get_temp_dir() . "/spc-package-{$name}-" . uniqid();
-        mkdir($tempDir, 0755, true);
+        // Prepare FPM arguments
+        $fpmArgs = [
+            'fpm',
+            '-s', 'dir',
+            '-t', 'rpm',
+            '-p', DIST_RPM_PATH,
+            '--name', $name,
+            '--version', $phpVersion,
+            '--architecture', $architecture,
+            '--iteration', $iteration,
+            '--description', "Static PHP Package for {$name}",
+            '--license', 'MIT',
+            '--maintainer', 'Static PHP <info@static-php.dev>'
+        ];
 
-        try {
-            // Create the package structure
-            self::createPackageStructure($tempDir, $config);
-
-            // Create the RPM spec file
-            $specFile = self::createRpmSpecFile($tempDir, $name, $config);
-
-            // Build the RPM package
-            $rpmProcess = new Process([
-                'rpmbuild',
-                '-bb',
-                $specFile,
-                '--define', "_topdir {$tempDir}",
-                '--define', "buildroot {$tempDir}/BUILDROOT"
-            ]);
-            $rpmProcess->setTimeout(null);
-            $rpmProcess->run(function ($type, $buffer) {
-                echo $buffer;
-            });
-
-            // Copy the RPM package to the dist directory
-            $rpmFile = glob("{$tempDir}/RPMS/*/{$name}*.rpm")[0] ?? null;
-            if ($rpmFile && file_exists($rpmFile)) {
-                $destFile = DIST_RPM_PATH . '/' . basename($rpmFile);
-                copy($rpmFile, $destFile);
-                echo "RPM package created: {$destFile}\n";
-            } else {
-                echo "Warning: RPM package not found\n";
+        // Add provides
+        if (isset($config['provides']) && is_array($config['provides'])) {
+            foreach ($config['provides'] as $provide) {
+                $fpmArgs[] = '--provides';
+                $fpmArgs[] = $provide;
             }
-        } finally {
-            // Clean up the temporary directory
-            self::removeDirectory($tempDir);
         }
-    }
 
-    private static function createDebPackage($name, $config)
-    {
-        echo "Creating DEB package for {$name}...\n";
-
-        // Create a temporary directory for the package
-        $tempDir = sys_get_temp_dir() . "/spc-package-{$name}-" . uniqid();
-        mkdir($tempDir, 0755, true);
-
-        try {
-            // Create the package structure
-            self::createPackageStructure($tempDir, $config);
-
-            // Create the Debian control file
-            $controlDir = "{$tempDir}/DEBIAN";
-            mkdir($controlDir, 0755, true);
-
-            $controlFile = "{$controlDir}/control";
-            $controlContent = self::createDebControlFile($name, $config);
-            file_put_contents($controlFile, $controlContent);
-
-            // Build the DEB package
-            $debProcess = new Process([
-                'dpkg-deb',
-                '--build',
-                $tempDir,
-                DIST_DEB_PATH . "/{$name}.deb"
-            ]);
-            $debProcess->setTimeout(null);
-            $debProcess->run(function ($type, $buffer) {
-                echo $buffer;
-            });
-
-            echo "DEB package created: " . DIST_DEB_PATH . "/{$name}.deb\n";
-        } finally {
-            // Clean up the temporary directory
-            self::removeDirectory($tempDir);
+        // Add dependencies
+        if (isset($config['depends']) && is_array($config['depends'])) {
+            foreach ($config['depends'] as $depend) {
+                $fpmArgs[] = '--depends';
+                $fpmArgs[] = $depend;
+            }
         }
-    }
 
-    private static function createPackageStructure($tempDir, $config)
-    {
-        // Create directories
-        mkdir("{$tempDir}/SPECS", 0755, true);
-        mkdir("{$tempDir}/SOURCES", 0755, true);
-        mkdir("{$tempDir}/BUILD", 0755, true);
-        mkdir("{$tempDir}/BUILDROOT", 0755, true);
-        mkdir("{$tempDir}/RPMS", 0755, true);
-        mkdir("{$tempDir}/SRPMS", 0755, true);
+        if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
+            foreach ($config['empty_directories'] as $dir) {
+                // Add the directory to the package
+                $fpmArgs[] = '--directories';
+                $fpmArgs[] = $dir;
+            }
+        }
 
-        // Copy files
+        // Add config files
+        if (isset($config['config-files']) && is_array($config['config-files'])) {
+            foreach ($config['config-files'] as $configFile) {
+                $fpmArgs[] = '--config-files';
+                $fpmArgs[] = $configFile;
+            }
+        }
+
+        // Add files to package
         if (isset($config['files']) && is_array($config['files'])) {
             foreach ($config['files'] as $source => $dest) {
-                $destPath = "{$tempDir}/BUILDROOT{$dest}";
-                $destDir = dirname($destPath);
-
-                if (!file_exists($destDir)) {
-                    mkdir($destDir, 0755, true);
-                }
-
                 if (file_exists($source)) {
-                    copy($source, $destPath);
-                    echo "Copied {$source} to {$destPath}\n";
+                    $fpmArgs[] = $source . '=' . $dest;
                 } else {
                     echo "Warning: Source file not found: {$source}\n";
                 }
             }
         }
+
+        // Add empty directories
+        if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
+            $emptyDir = sys_get_temp_dir() . '/__spp_empty';
+            if (!file_exists($emptyDir)) {
+                mkdir($emptyDir, recursive: true);
+            }
+            if (is_dir($emptyDir)) {
+                exec('rm -rf ' . escapeshellarg($emptyDir . '/*'));
+            }
+            foreach ($config['empty_directories'] as $dir) {
+                // Create a temporary empty directory
+
+                // Also add it as a file to ensure it's created
+                $fpmArgs[] = $emptyDir . '=' . $dir;
+            }
+        }
+
+        // Build the RPM package
+        $rpmProcess = new Process($fpmArgs);
+        $rpmProcess->setTimeout(null);
+        $rpmProcess->run(function ($type, $buffer) {
+            echo $buffer;
+        });
+
+        echo "RPM package created: " . DIST_RPM_PATH . "/{$name}-{$phpVersion}-{$iteration}.{$architecture}.rpm\n";
     }
 
-    private static function createRpmSpecFile($tempDir, $name, $config)
+    private static function createDebPackage($name, $config, $phpVersion, $architecture, $iteration)
     {
-        $specFile = "{$tempDir}/SPECS/{$name}.spec";
+        echo "Creating DEB package for {$name}...\n";
 
-        $provides = isset($config['provides']) ? implode(', ', $config['provides']) : '';
-        $depends = isset($config['depends']) ? implode(', ', $config['depends']) : '';
-        $configFiles = isset($config['config-files']) ? implode(' ', $config['config-files']) : '';
+        // Prepare FPM arguments
+        $fpmArgs = [
+            'fpm',
+            '-s', 'dir',
+            '-t', 'deb',
+            '-p', DIST_DEB_PATH,
+            '--name', $name,
+            '--version', $phpVersion,
+            '--architecture', $architecture,
+            '--iteration', $iteration,
+            '--description', "Static PHP Package for {$name}",
+            '--license', 'MIT',
+            '--maintainer', 'Static PHP <info@static-php.dev>'
+        ];
 
-        $specContent = <<<EOT
-Name: {$name}
-Version: 1.0.0
-Release: 1
-Summary: Static PHP Package for {$name}
-License: MIT
-BuildArch: x86_64
-
-EOT;
-
-        if (!empty($provides)) {
-            $specContent .= "Provides: {$provides}\n";
+        // Add provides
+        if (isset($config['provides']) && is_array($config['provides'])) {
+            foreach ($config['provides'] as $provide) {
+                $fpmArgs[] = '--provides';
+                $fpmArgs[] = $provide;
+            }
         }
 
-        if (!empty($depends)) {
-            $specContent .= "Requires: {$depends}\n";
+        // Add dependencies
+        if (isset($config['depends']) && is_array($config['depends'])) {
+            foreach ($config['depends'] as $depend) {
+                $fpmArgs[] = '--depends';
+                $fpmArgs[] = $depend;
+            }
         }
 
-        $specContent .= <<<EOT
-
-%description
-Static PHP Package for {$name}
-
-%files
-EOT;
-
-        if (!empty($configFiles)) {
-            $specContent .= "\n%config {$configFiles}";
+        // Add config files
+        if (isset($config['config-files']) && is_array($config['config-files'])) {
+            foreach ($config['config-files'] as $configFile) {
+                $fpmArgs[] = '--config-files';
+                $fpmArgs[] = $configFile;
+            }
         }
 
+        // Add files to package
         if (isset($config['files']) && is_array($config['files'])) {
             foreach ($config['files'] as $source => $dest) {
-                $specContent .= "\n{$dest}";
+                if (file_exists($source)) {
+                    $fpmArgs[] = $source . '=' . $dest;
+                } else {
+                    echo "Warning: Source file not found: {$source}\n";
+                }
             }
         }
 
-        file_put_contents($specFile, $specContent);
-        return $specFile;
-    }
+        // Add empty directories
+        if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
+            foreach ($config['empty_directories'] as $dir) {
+                // Create a temporary empty directory
+                $tempDir = BASE_PATH . '/temp_empty_dir_' . md5($dir);
+                if (!file_exists($tempDir)) {
+                    mkdir($tempDir, 0755, true);
+                }
 
-    private static function createDebControlFile($name, $config)
-    {
-        $provides = isset($config['provides']) ? implode(', ', $config['provides']) : '';
-        $depends = isset($config['depends']) ? implode(', ', $config['depends']) : '';
+                // Add the directory to the package
+                $fpmArgs[] = '--directories';
+                $fpmArgs[] = $dir;
 
-        $controlContent = <<<EOT
-Package: {$name}
-Version: 1.0.0-1
-Section: web
-Priority: optional
-Architecture: amd64
-Maintainer: Static PHP <info@static-php.dev>
-EOT;
-
-        if (!empty($depends)) {
-            $controlContent .= "\nDepends: {$depends}";
-        }
-
-        if (!empty($provides)) {
-            $controlContent .= "\nProvides: {$provides}";
-        }
-
-        $controlContent .= "\nDescription: Static PHP Package for {$name}";
-
-        return $controlContent;
-    }
-
-    private static function removeDirectory($dir)
-    {
-        if (!file_exists($dir)) {
-            return;
-        }
-
-        $files = array_diff(scandir($dir), ['.', '..']);
-        foreach ($files as $file) {
-            $path = "{$dir}/{$file}";
-            if (is_dir($path)) {
-                self::removeDirectory($path);
-            } else {
-                unlink($path);
+                // Also add it as a file to ensure it's created
+                $fpmArgs[] = $tempDir . '=' . $dir;
             }
         }
 
-        rmdir($dir);
+        // Build the DEB package
+        $debProcess = new Process($fpmArgs);
+        $debProcess->setTimeout(null);
+        $debProcess->run(function ($type, $buffer) {
+            echo $buffer;
+        });
+
+        echo "DEB package created: " . DIST_DEB_PATH . "/{$name}_{$phpVersion}-{$iteration}_{$architecture}.deb\n";
     }
+
+    private static function getPhpVersionAndArchitecture()
+    {
+        // Extract PHP version and architecture from the binary
+        $phpBinary = BUILD_BIN_PATH . '/php';
+        if (!file_exists($phpBinary)) {
+            echo "Warning: PHP binary not found at {$phpBinary}\n";
+            return ['1.0.0', 'x86_64']; // Fallback values
+        }
+
+        // Get PHP version
+        $versionProcess = new Process([$phpBinary, '-r', 'echo PHP_VERSION;']);
+        $versionProcess->run();
+        $phpVersion = trim($versionProcess->getOutput());
+
+        if (empty($phpVersion)) {
+            echo "Warning: Could not determine PHP version\n";
+            $phpVersion = '1.0.0'; // Fallback version
+        }
+
+        // Get architecture
+        $archProcess = new Process(['uname', '-m']);
+        $archProcess->run();
+        $architecture = trim($archProcess->getOutput());
+
+        if (empty($architecture)) {
+            // Try alternative method
+            $archProcess = new Process(['arch']);
+            $archProcess->run();
+            $architecture = trim($archProcess->getOutput());
+
+            if (empty($architecture)) {
+                echo "Warning: Could not determine architecture, using x86_64 as fallback\n";
+                $architecture = 'x86_64';
+            }
+        }
+
+        echo "Detected PHP version: {$phpVersion}\n";
+        echo "Detected architecture: {$architecture}\n";
+
+        return [$phpVersion, $architecture];
+    }
+
+    /**
+     * Determine the next available iteration for a package
+     *
+     * @param string $name Package name
+     * @param string $phpVersion PHP version
+     * @param string $architecture Package architecture
+     * @return int Next available iteration
+     */
+    private static function getNextIteration($name, $phpVersion, $architecture)
+    {
+        $maxIteration = 0;
+
+        // Check RPM packages
+        $rpmPattern = DIST_RPM_PATH . "/{$name}-{$phpVersion}-*.{$architecture}.rpm";
+        $rpmFiles = glob($rpmPattern);
+
+        foreach ($rpmFiles as $file) {
+            if (preg_match("/{$name}-{$phpVersion}-(\d+)\.{$architecture}\.rpm$/", $file, $matches)) {
+                $iteration = (int)$matches[1];
+                $maxIteration = max($maxIteration, $iteration);
+            }
+        }
+
+        // Check DEB packages
+        $debPattern = DIST_DEB_PATH . "/{$name}_{$phpVersion}-*_{$architecture}.deb";
+        $debFiles = glob($debPattern);
+
+        foreach ($debFiles as $file) {
+            if (preg_match("/{$name}_{$phpVersion}-(\d+)_{$architecture}\.deb$/", $file, $matches)) {
+                $iteration = (int)$matches[1];
+                $maxIteration = max($maxIteration, $iteration);
+            }
+        }
+
+        // Return the next iteration
+        return $maxIteration + 1;
+    }
+
 }
