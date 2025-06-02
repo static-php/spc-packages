@@ -110,6 +110,11 @@ class CreatePackages
             $package = new \staticphp\extension($extension);
             $config = $package->getFpmConfig();
 
+            if (!file_exists(INI_PATH . '/extension/' . $extension . '.ini')) {
+                echo "Warning: INI file for extension {$extension} not found, skipping package creation.\n";
+                continue;
+            }
+
             // Create packages using FPM with php- prefix
             self::createPackageWithFpm("php-{$extension}", $config);
         }
