@@ -47,7 +47,7 @@ class RunSPC
     private static function copyBuiltFiles()
     {
         // Copy the built PHP binaries to our build directory
-        $sourceDir = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/build/output';
+        $sourceDir = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/buildroot';
 
         // Find and copy PHP binaries
         self::copyBinaries($sourceDir, BUILD_BIN_PATH);
@@ -87,7 +87,7 @@ class RunSPC
     private static function copyLibraries($sourceDir, $destDir)
     {
         // Copy PHP libraries (.so files)
-        $libraries = glob($sourceDir . '/lib/libphp*.so');
+        $libraries = glob($sourceDir . '/lib/libphp.so');
         foreach ($libraries as $library) {
             $filename = basename($library);
             copy($library, $destDir . '/' . $filename);
