@@ -3,11 +3,10 @@
 namespace staticphp\step;
 
 use Symfony\Component\Process\Process;
-use Symfony\Component\Yaml\Yaml;
+use staticphp\CraftConfig;
 
 class CreatePackages
 {
-    private static $craftConfig;
     private static $extensions = [];
     private static $sharedExtensions = [];
     private static $sapis = [];
@@ -32,38 +31,13 @@ class CreatePackages
         $craftYmlPath = BASE_PATH . '/config/craft.yml';
         echo "Loading configuration from {$craftYmlPath}...\n";
 
-        if (!file_exists($craftYmlPath)) {
-            throw new \RuntimeException("Configuration file not found: {$craftYmlPath}");
-        }
+        // Use the CraftConfig component to load the configuration
+        $craftConfig = CraftConfig::getInstance();
 
-        self::$craftConfig = Yaml::parseFile($craftYmlPath);
-
-        // Get the list of extensions
-        if (isset(self::$craftConfig['extensions'])) {
-            $extensions = self::$craftConfig['extensions'];
-            if (is_string($extensions)) {
-                $extensions = explode(',', $extensions);
-            }
-            self::$extensions = array_map('trim', $extensions);
-        }
-
-        // Get the list of shared extensions
-        if (isset(self::$craftConfig['shared-extensions'])) {
-            $sharedExtensions = self::$craftConfig['shared-extensions'];
-            if (is_string($sharedExtensions)) {
-                $sharedExtensions = explode(',', $sharedExtensions);
-            }
-            self::$sharedExtensions = array_map('trim', $sharedExtensions);
-        }
-
-        // Get the list of SAPIs
-        if (isset(self::$craftConfig['sapi'])) {
-            $sapis = self::$craftConfig['sapi'];
-            if (is_string($sapis)) {
-                $sapis = explode(',', $sapis);
-            }
-            self::$sapis = array_map('trim', $sapis);
-        }
+        // Get the configuration from the CraftConfig component
+        self::$extensions = $craftConfig->getStaticExtensions();
+        self::$sharedExtensions = $craftConfig->getSharedExtensions();
+        self::$sapis = $craftConfig->getSapis();
 
         echo "Loaded configuration:\n";
         echo "- SAPIs: " . implode(', ', self::$sapis) . "\n";
