@@ -17,7 +17,7 @@ class spx extends extension
             ],
             'files' => [
                 BUILD_MODULES_PATH . '/spx.so' => '/usr/lib/static-php/modules/spx.so',
-                INI_PATH . '/extension/spx.ini' => '/etc/static-php/php.d/spx.ini',
+                $this->getIniPath() => '/etc/static-php/php.d/spx.ini',
                 BUILD_ROOT_PATH . '/share/misc/php-spx/assets/web-ui' => '/usr/share/static-php/misc/php-spx/assets/web-ui',
             ]
         ];

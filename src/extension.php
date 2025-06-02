@@ -23,32 +23,6 @@ class extension implements package
             $depends[] = 'php-' . $dep;
         }
 
-        // Get the original ini file path
-        $originalIniPath = INI_PATH . '/extension/' . $this->name . '.ini';
-        $iniPath = $originalIniPath;
-
-        // Check if this is a shared extension
-        $craftConfig = CraftConfig::getInstance();
-        $sharedExtensions = $craftConfig->getSharedExtensions();
-
-        // If this is a shared extension, create a temporary file with uncommented extension line
-        if (in_array($this->name, $sharedExtensions)) {
-            // Create a temporary file
-            $tempIniPath = TEMP_DIR . '/' . $this->name . '.ini';
-
-            // Read the original ini file
-            $iniContent = file_get_contents($originalIniPath);
-
-            // Replace the commented extension line with uncommented one
-            $iniContent = preg_replace('/^;extension=' . $this->name . '$/m', 'extension=' . $this->name, $iniContent);
-
-            // Write to the temporary file
-            file_put_contents($tempIniPath, $iniContent);
-
-            // Use the temporary file instead of the original
-            $iniPath = $tempIniPath;
-        }
-
         return [
             'config-files' => [
                 '/etc/static-php/php.d/'. $this->name . '.ini',
@@ -59,8 +33,29 @@ class extension implements package
             'depends' => $depends,
             'files' => [
                 BUILD_MODULES_PATH . '/' . $this->name . '.so' => '/usr/lib/static-php/modules/' . $this->name . '.so',
-                $iniPath => '/etc/static-php/php.d/' . $this->name . '.ini',
+                $this->getIniPath() => '/etc/static-php/php.d/' . $this->name . '.ini',
             ]
         ];
+    }
+
+    protected function getIniPath(): string
+    {
+        $craftConfig = CraftConfig::getInstance();
+        $sharedExtensions = $craftConfig->getSharedExtensions();
+
+        $iniPath = INI_PATH . '/extension/' . $this->name . '.ini';
+        // If this is a shared extension, create a temporary file with uncommented extension line
+        if (!in_array($this->name, $sharedExtensions)) {
+            return $iniPath;
+        }
+        $tempIniPath = TEMP_DIR . '/' . $this->name . '.ini';
+
+        $iniContent = file_get_contents($iniPath);
+
+        $iniContent = str_replace(';extension=' . $this->name, 'extension=' . $this->name, $iniContent);
+
+        file_put_contents($tempIniPath, $iniContent);
+
+        return $tempIniPath;
     }
 }

@@ -22,6 +22,9 @@ class CreatePackages
         // Create packages for each extension
         self::createExtensionPackages();
 
+        // Create the php meta-package
+        self::createPhpPackage();
+
         echo "Package creation completed.\n";
         return true;
     }
@@ -92,6 +95,18 @@ class CreatePackages
             // Create packages using FPM with php- prefix
             self::createPackageWithFpm("php-{$extension}", $config);
         }
+    }
+
+    private static function createPhpPackage(): void
+    {
+        echo "Creating php meta-package...\n";
+
+        // Create the php package
+        $package = new \staticphp\package\php();
+        $config = $package->getFpmConfig();
+
+        // Create packages using FPM
+        self::createPackageWithFpm("php", $config);
     }
 
     private static function createPackageWithFpm($name, $config): void
