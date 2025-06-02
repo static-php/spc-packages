@@ -2,13 +2,14 @@
 
 namespace staticphp\package;
 
+use staticphp\CraftConfig;
 use staticphp\package;
 
 class embed implements package
 {
     public function getFpmConfig(): array
     {
-        $craftConfig = \staticphp\CraftConfig::getInstance();
+        $craftConfig = CraftConfig::getInstance();
 
         return [
             'config-files' => [
@@ -20,9 +21,12 @@ class embed implements package
                 'libphp.so',
                 ...array_map(fn ($ext) => 'php-' . $ext, $craftConfig->getStaticExtensions())
             ],
+            'directories' => [
+                '/usr/lib/static-php',
+            ],
             'files' => [
                 INI_PATH . '/php.ini' => '/etc/static-php/php.ini',
-                BUILD_LIB_PATH . '/libphp.so' => '/usr/static-php/libphp.so',
+                BUILD_LIB_PATH . '/libphp.so' => '/usr/lib/static-php/libphp.so',
             ]
         ];
     }

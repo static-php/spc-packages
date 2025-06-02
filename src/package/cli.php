@@ -23,7 +23,7 @@ class cli implements package
             ],
             'files' => [
                 INI_PATH . '/php.ini' => '/etc/static-php/php.ini',
-                BUILD_BIN_PATH . '/php' => '/usr/static-php/php'
+                BUILD_BIN_PATH . '/php' => '/usr/static-php/bin/php'
             ]
         ];
     }

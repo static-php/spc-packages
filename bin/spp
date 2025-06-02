@@ -14,6 +14,7 @@ const BUILD_MODULES_PATH = BUILD_ROOT_PATH . '/modules';
 const DIST_PATH = BASE_PATH . '/dist';
 const DIST_RPM_PATH = DIST_PATH . '/rpm';
 const DIST_DEB_PATH = DIST_PATH . '/deb';
+define('TEMP_DIR', sys_get_temp_dir() . '/spc-packages');
 
 // Ensure autoloading is set up
 require_once BASE_PATH . '/vendor/autoload.php';
@@ -56,6 +57,14 @@ if (!file_exists(DIST_DEB_PATH)) {
     mkdir(DIST_DEB_PATH, 0755, true);
 }
 
+// Create temporary directory
+if (file_exists(TEMP_DIR)) {
+    // Clean up any existing files
+    exec('rm -rf ' . escapeshellarg(TEMP_DIR . '/*'));
+} else {
+    mkdir(TEMP_DIR, 0755, true);
+}
+
 // Execute the requested action
 switch ($action) {
     case 'build':
@@ -90,4 +99,10 @@ switch ($action) {
         echo "  --command=<cmd> - Specify which command to use (default: spc, alternatives: spc-gnu-docker, spc-alpine-docker)\n";
         echo "  --debug         - Print debug messages\n";
         break;
+}
+
+// Clean up temporary directory after execution
+if (file_exists(TEMP_DIR)) {
+    echo "Cleaning up temporary directory...\n";
+    exec('rm -rf ' . escapeshellarg(TEMP_DIR));
 }

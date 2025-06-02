@@ -11,7 +11,7 @@ class CreatePackages
     private static $sharedExtensions = [];
     private static $sapis = [];
 
-    public static function run()
+    public static function run(): true
     {
         // Load the craft.yml configuration
         self::loadConfig();
@@ -26,7 +26,7 @@ class CreatePackages
         return true;
     }
 
-    private static function loadConfig()
+    private static function loadConfig(): void
     {
         $craftYmlPath = BASE_PATH . '/config/craft.yml';
         echo "Loading configuration from {$craftYmlPath}...\n";
@@ -146,8 +146,8 @@ class CreatePackages
             }
         }
 
-        if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
-            foreach ($config['empty_directories'] as $dir) {
+        if (isset($config['directories']) && is_array($config['directories'])) {
+            foreach ($config['directories'] as $dir) {
                 // Add the directory to the package
                 $fpmArgs[] = '--directories';
                 $fpmArgs[] = $dir;
@@ -175,7 +175,7 @@ class CreatePackages
 
         // Add empty directories
         if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
-            $emptyDir = sys_get_temp_dir() . '/__spp_empty';
+            $emptyDir = TEMP_DIR . '/__spp_empty';
             if (!file_exists($emptyDir)) {
                 mkdir($emptyDir, recursive: true);
             }
@@ -183,9 +183,6 @@ class CreatePackages
                 exec('rm -rf ' . escapeshellarg($emptyDir . '/*'));
             }
             foreach ($config['empty_directories'] as $dir) {
-                // Create a temporary empty directory
-
-                // Also add it as a file to ensure it's created
                 $fpmArgs[] = $emptyDir . '=' . $dir;
             }
         }
@@ -200,7 +197,7 @@ class CreatePackages
         echo "RPM package created: " . DIST_RPM_PATH . "/{$name}-{$phpVersion}-{$iteration}.{$architecture}.rpm\n";
     }
 
-    private static function createDebPackage($name, $config, $phpVersion, $architecture, $iteration)
+    private static function createDebPackage($name, $config, $phpVersion, $architecture, $iteration): void
     {
         echo "Creating DEB package for {$name}...\n";
 
@@ -235,6 +232,14 @@ class CreatePackages
             }
         }
 
+        if (isset($config['directories']) && is_array($config['directories'])) {
+            foreach ($config['directories'] as $dir) {
+                // Add the directory to the package
+                $fpmArgs[] = '--directories';
+                $fpmArgs[] = $dir;
+            }
+        }
+
         // Add config files
         if (isset($config['config-files']) && is_array($config['config-files'])) {
             foreach ($config['config-files'] as $configFile) {
@@ -242,6 +247,7 @@ class CreatePackages
                 $fpmArgs[] = $configFile;
             }
         }
+        $fpmArgs[] = '--deb-no-default-config-files'; // disable useless warning
 
         // Add files to package
         if (isset($config['files']) && is_array($config['files'])) {
@@ -256,19 +262,15 @@ class CreatePackages
 
         // Add empty directories
         if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
+            $emptyDir = TEMP_DIR . '/__spp_empty';
+            if (!file_exists($emptyDir)) {
+                mkdir($emptyDir, recursive: true);
+            }
+            if (is_dir($emptyDir)) {
+                exec('rm -rf ' . escapeshellarg($emptyDir . '/*'));
+            }
             foreach ($config['empty_directories'] as $dir) {
-                // Create a temporary empty directory
-                $tempDir = BASE_PATH . '/temp_empty_dir_' . md5($dir);
-                if (!file_exists($tempDir)) {
-                    mkdir($tempDir, 0755, true);
-                }
-
-                // Add the directory to the package
-                $fpmArgs[] = '--directories';
-                $fpmArgs[] = $dir;
-
-                // Also add it as a file to ensure it's created
-                $fpmArgs[] = $tempDir . '=' . $dir;
+                $fpmArgs[] = $emptyDir . '=' . $dir;
             }
         }
 
@@ -282,7 +284,7 @@ class CreatePackages
         echo "DEB package created: " . DIST_DEB_PATH . "/{$name}_{$phpVersion}-{$iteration}_{$architecture}.deb\n";
     }
 
-    private static function getPhpVersionAndArchitecture()
+    private static function getPhpVersionAndArchitecture(): array
     {
         // Extract PHP version and architecture from the binary
         $phpBinary = BUILD_BIN_PATH . '/php';
@@ -332,7 +334,7 @@ class CreatePackages
      * @param string $architecture Package architecture
      * @return int Next available iteration
      */
-    private static function getNextIteration($name, $phpVersion, $architecture)
+    private static function getNextIteration($name, $phpVersion, $architecture): int
     {
         $maxIteration = 0;
 
