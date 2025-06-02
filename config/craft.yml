@@ -2,6 +2,8 @@
 php-version: 8.4
 # [REQUIRED] Static PHP extensions to build (list or comma-separated are both accepted)
 extensions: apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib
+# [OPTIONAL] Shared PHP extensions to build (list or comma-separated are both accepted)
+shared-extensions: [amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,memcache,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite3,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd]
 # Extra libraries to build (list or comma-separated are both accepted)
 libs: [libacl]
 # [REQUIRED] Build SAPIs (list or comma-separated are both accepted)
@@ -18,8 +20,6 @@ build-options:
     with-suggested-libs: true
     # Build with all suggested extensions (default: false)
     with-suggested-exts: false
-    # Build extra shared extensions (list or comma-separated are both accepted)
-    build-shared: [amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,memcache,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd]
     # Build without stripping the binary (default: false)
     no-strip: false
     # Disable Opcache JIT (default: false)
@@ -55,6 +55,8 @@ download-options:
     prefer-pre-built: false
     # Do not download from alternative sources (default: false)
     no-alt: false
+    # Ignore cache sources, format: "{source-name}" (e.g. "php-src")
+    ignore-cache-sources: ''
 
 craft-options:
     doctor: true

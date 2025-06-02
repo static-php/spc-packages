@@ -1,0 +1,88 @@
+#!/usr/bin/env php
+<?php
+
+// Main entrypoint for SPC Packages
+// Delegates to either RunSPC or CreatePackages
+
+// Define constants
+define('BASE_PATH', dirname(__DIR__));
+const BUILD_ROOT_PATH = BASE_PATH . '/build';
+const BUILD_BIN_PATH = BUILD_ROOT_PATH . '/bin';
+const BUILD_LIB_PATH = BUILD_ROOT_PATH . '/lib';
+const BUILD_MODULES_PATH = BUILD_ROOT_PATH . '/modules';
+const DIST_PATH = BASE_PATH . '/dist';
+const DIST_RPM_PATH = DIST_PATH . '/rpm';
+const DIST_DEB_PATH = DIST_PATH . '/deb';
+
+// Ensure autoloading is set up
+require_once BASE_PATH . '/vendor/autoload.php';
+
+// Parse command line arguments
+$action = $argv[1] ?? 'help';
+
+// Check if --docker flag is present
+$useDocker = false;
+foreach ($argv as $arg) {
+    if ($arg === '--docker') {
+        $useDocker = true;
+        break;
+    }
+}
+
+// Create necessary directories
+if (!file_exists(BUILD_ROOT_PATH)) {
+    mkdir(BUILD_ROOT_PATH, 0755, true);
+}
+if (!file_exists(BUILD_BIN_PATH)) {
+    mkdir(BUILD_BIN_PATH, 0755, true);
+}
+if (!file_exists(BUILD_MODULES_PATH)) {
+    mkdir(BUILD_MODULES_PATH, 0755, true);
+}
+if (!file_exists(BUILD_LIB_PATH)) {
+    mkdir(BUILD_LIB_PATH, 0755, true);
+}
+if (!file_exists(DIST_PATH)) {
+    mkdir(DIST_PATH, 0755, true);
+}
+if (!file_exists(DIST_RPM_PATH)) {
+    mkdir(DIST_RPM_PATH, 0755, true);
+}
+if (!file_exists(DIST_DEB_PATH)) {
+    mkdir(DIST_DEB_PATH, 0755, true);
+}
+
+// Execute the requested action
+switch ($action) {
+    case 'build':
+        // Run SPC to build PHP with all extensions
+        echo "Building PHP with extensions using static-php-cli...\n";
+        staticphp\step\RunSPC::run();
+        break;
+
+    case 'package':
+        // Create packages for all extensions
+        echo "Creating packages for all extensions...\n";
+        staticphp\step\CreatePackages::run();
+        break;
+
+    case 'all':
+        // Run both build and package steps
+        echo "Building PHP with extensions using static-php-cli...\n";
+        staticphp\step\RunSPC::run();
+
+        echo "Creating packages for all extensions...\n";
+        staticphp\step\CreatePackages::run();
+        break;
+
+    case 'help':
+    default:
+        echo "Usage: php bin/spp [action] [options]\n";
+        echo "Available actions:\n";
+        echo "  build   - Build PHP with extensions using static-php-cli\n";
+        echo "  package - Create packages for all extensions\n";
+        echo "  all     - Run both build and package steps\n";
+        echo "Options:\n";
+        echo "  --docker - Use Docker container for building (bin/spc-gnu-docker)\n";
+        break;
+}
