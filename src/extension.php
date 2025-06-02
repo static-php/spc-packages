@@ -18,7 +18,7 @@ class extension implements package
         if (!$config) {
             throw new \Exception("Extension configuration for '{$this->name}' not found.");
         }
-        $depends = ['static-php'];
+        $depends = ['php-cli'];
         foreach ($config['ext-depends'] ?? [] as $dep) {
             $depends[] = 'php-' . $dep;
         }
@@ -32,18 +32,28 @@ class extension implements package
             ],
             'depends' => $depends,
             'files' => [
-                BUILD_MODULES_PATH . '/' . $this->name . '.so' => '/usr/lib/static-php/modules/' . $this->name . '.so',
-                $this->getIniPath() => '/etc/static-php/php.d/' . $this->name . '.ini',
+                ...($this->getIniPath() ?
+                    [$this->getIniPath() => '/etc/static-php/php.d/' . $this->name . '.ini']
+                    : []
+                ),
+                ...($this->isSharedExtension() ?
+                    [BUILD_MODULES_PATH . '/' . $this->name . '.so' => '/usr/lib/static-php/modules/' . $this->name . '.so']
+                    : []
+                ),
             ]
         ];
     }
 
-    protected function getIniPath(): string
+    protected function getIniPath(): ?string
     {
         $craftConfig = CraftConfig::getInstance();
         $sharedExtensions = $craftConfig->getSharedExtensions();
 
         $iniPath = INI_PATH . '/extension/' . $this->name . '.ini';
+        if (!file_exists($iniPath)) {
+            return null;
+        }
+
         // If this is a shared extension, create a temporary file with uncommented extension line
         if (!in_array($this->name, $sharedExtensions)) {
             return $iniPath;
@@ -57,5 +67,11 @@ class extension implements package
         file_put_contents($tempIniPath, $iniContent);
 
         return $tempIniPath;
+    }
+
+    protected function isSharedExtension(): bool
+    {
+        $craftConfig = CraftConfig::getInstance();
+        return in_array($this->name, $craftConfig->getSharedExtensions()) && !in_array($this->name, $craftConfig->getStaticExtensions());
     }
 }

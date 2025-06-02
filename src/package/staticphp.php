@@ -2,24 +2,27 @@
 
 namespace staticphp\package;
 
+use staticphp\CraftConfig;
 use staticphp\package;
 
-class php implements package
+class staticphp implements package
 {
     public function getFpmConfig(): array
     {
+        $craftConfig = CraftConfig::getInstance();
+
         return [
             'provides' => [
                 'static-php',
-                'php',
             ],
             'depends' => [
                 'php-cli',
                 'php-fpm',
                 'php-embed',
+                ...array_map(fn ($ext) => 'php-' . $ext, $craftConfig->getStaticExtensions())
             ],
             'files' => [
-                INI_PATH . '/static-php.sh' => '/etc/profile.d/static-php.sh',
+                INI_PATH . '/php.ini' => '/dev/null'
             ]
         ];
     }

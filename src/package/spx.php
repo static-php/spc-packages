@@ -13,7 +13,7 @@ class spx extends extension
                 '/etc/static-php/php.d/spx.ini',
             ],
             'depends' => [
-                'static-php'
+                'php-cli'
             ],
             'files' => [
                 BUILD_MODULES_PATH . '/spx.so' => '/usr/lib/static-php/modules/spx.so',

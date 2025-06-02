@@ -2,6 +2,7 @@
 
 namespace staticphp\step;
 
+use staticphp\package\staticphp;
 use Symfony\Component\Process\Process;
 use staticphp\CraftConfig;
 
@@ -23,7 +24,7 @@ class CreatePackages
         self::createExtensionPackages();
 
         // Create the php meta-package
-        self::createPhpPackage();
+        self::createStaticPhpPackage();
 
         echo "Package creation completed.\n";
         return true;
@@ -97,16 +98,16 @@ class CreatePackages
         }
     }
 
-    private static function createPhpPackage(): void
+    private static function createStaticPhpPackage(): void
     {
         echo "Creating php meta-package...\n";
 
         // Create the php package
-        $package = new \staticphp\package\php();
+        $package = new staticphp();
         $config = $package->getFpmConfig();
 
         // Create packages using FPM
-        self::createPackageWithFpm("php", $config);
+        self::createPackageWithFpm("static-php", $config);
     }
 
     private static function createPackageWithFpm($name, $config): void
