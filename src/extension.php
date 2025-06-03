@@ -20,7 +20,7 @@ class extension implements package
         }
         $depends = ['static-php-cli'];
         foreach ($config['ext-depends'] ?? [] as $dep) {
-            $depends[] = 'php-' . $dep;
+            $depends[] = 'static-php-' . $dep;
         }
 
         return [
@@ -28,7 +28,7 @@ class extension implements package
                 '/etc/static-php/php.d/'. $this->name . '.ini',
             ],
             'provides' => [
-                'php-' . $this->name,
+                'static-php-' . $this->name,
             ],
             'depends' => $depends,
             'files' => [

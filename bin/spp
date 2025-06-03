@@ -25,12 +25,18 @@ $action = $argv[1] ?? 'help';
 // Check for command line flags
 $command = 'spc-gnu-docker';
 $debug = false;
+$packageNames = null;
+$packageTypes = 'rpm,deb'; // Default package types
 
 foreach ($argv as $i => $arg) {
     if (str_starts_with($arg, '--command=')) {
-        $command = substr($arg, 10);
+        $command = substr($arg, strlen('--command='));
     } elseif ($arg === '--debug') {
         $debug = true;
+    } elseif (str_starts_with($arg, '--type=')) {
+        $packageTypes = substr($arg, strlen('--type='));
+    } elseif (str_starts_with($arg, '--packages=')) {
+        $packageNames = substr($arg, strlen('--packages='));
     }
 }
 
@@ -74,9 +80,18 @@ switch ($action) {
         break;
 
     case 'package':
-        // Create packages for all extensions
-        echo "Creating packages for all extensions...\n";
-        staticphp\step\CreatePackages::run();
+        // Get optional package names (can be comma-separated)
+        $packageInput = $packageNames;
+
+        if ($packageInput) {
+            // Split by comma to support multiple packages
+            $packageNames = explode(',', $packageInput);
+            echo "Creating packages for: " . implode(', ', $packageNames) . "...\n";
+        } else {
+            echo "Creating packages for all extensions...\n";
+        }
+
+        staticphp\step\CreatePackages::run($packageNames, $packageTypes);
         break;
 
     case 'all':
@@ -84,20 +99,33 @@ switch ($action) {
         echo "Building PHP with extensions using static-php-cli...\n";
         staticphp\step\RunSPC::run($command, $debug);
 
-        echo "Creating packages for all extensions...\n";
-        staticphp\step\CreatePackages::run();
+        // Get optional package names (can be comma-separated)
+        $packageInput = $argv[2] ?? null;
+        $packageNames = null;
+
+        if ($packageInput) {
+            // Split by comma to support multiple packages
+            $packageNames = explode(',', $packageInput);
+            echo "Creating packages for: " . implode(', ', $packageNames) . "...\n";
+        } else {
+            echo "Creating packages for all extensions...\n";
+        }
+
+        staticphp\step\CreatePackages::run($packageNames, $packageTypes);
         break;
 
     case 'help':
     default:
-        echo "Usage: php bin/spp [action] [options]\n";
+        echo "Usage: php bin/spp [action] [package_names] [options]\n";
         echo "Available actions:\n";
         echo "  build   - Build PHP with extensions using static-php-cli\n";
-        echo "  package - Create packages for all extensions\n";
+        echo "  package - Create packages for all extensions or specific packages\n";
         echo "  all     - Run both build and package steps\n";
         echo "Options:\n";
         echo "  --command=<cmd> - Specify which command to use (default: spc, alternatives: spc-gnu-docker, spc-alpine-docker)\n";
         echo "  --debug         - Print debug messages\n";
+        echo "  --type=<types>  - Specify which package types to build (default: rpm,deb, alternatives: rpm, deb)\n";
+        echo "  --package=<names> - Specify which packages to build (default: all)\n";
         break;
 }
 

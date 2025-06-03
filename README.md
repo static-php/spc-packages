@@ -53,10 +53,18 @@ To create RPM and DEB packages for the built PHP binaries and extensions:
 php bin/spp package
 ```
 
+You can specify which package types to build (RPM, DEB, or both) using the `--package` parameter:
+
+```
+php bin/spp package --package=rpm     # Build only RPM packages
+php bin/spp package --package=deb     # Build only DEB packages
+php bin/spp package --package=rpm,deb # Build both RPM and DEB packages (default)
+```
+
 This will:
 1. Create packages for each SAPI (cli, fpm, embed)
 2. Create packages for each extension
-3. Store the packages in the `dist/rpm` and `dist/deb` directories
+3. Store the packages in the `dist/rpm` and/or `dist/deb` directories, depending on the package types specified
 
 ### Build repository
 
@@ -72,6 +80,14 @@ To run both steps in one command:
 
 ```
 php bin/spp all
+```
+
+You can use the same `--package` parameter with the `all` command to specify which package types to build:
+
+```
+php bin/spp all --package=rpm     # Build only RPM packages
+php bin/spp all --package=deb     # Build only DEB packages
+php bin/spp all --package=rpm,deb # Build both RPM and DEB packages (default)
 ```
 
 ### Using Docker

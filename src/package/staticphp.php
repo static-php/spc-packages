@@ -18,7 +18,7 @@ class staticphp implements package
                 'static-php-embed',
             ],
             'files' => [
-                INI_PATH . '/php.ini' => '/dev/null'
+                INI_PATH . '/php.ini' => '/etc/static-php/php.ini',
             ]
         ];
     }

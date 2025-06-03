@@ -12,6 +12,9 @@ class embed implements package
             'config-files' => [
                 '/etc/static-php/php.ini',
             ],
+            'depends' => [
+                'static-php-cli',
+            ],
             'provides' => [
                 'libphp.so'
             ],

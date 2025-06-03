@@ -13,8 +13,9 @@ class CreatePackages
     private static $sharedExtensions = [];
     private static $sapis = [];
     private static $binaryDependencies = [];
+    private static $packageTypes = ['rpm', 'deb'];
 
-    public static function run(): true
+    public static function run($packageNames = null, string $packageTypes = 'rpm,deb'): true
     {
         // Load the craft.yml configuration
         self::loadConfig();
@@ -23,14 +24,44 @@ class CreatePackages
         $phpBinary = BUILD_BIN_PATH . '/php';
         self::$binaryDependencies = self::getBinaryDependencies($phpBinary);
 
-        // Create packages for each SAPI (cli, fpm, embed)
-        self::createSapiPackages();
+        // Parse package types
+        self::$packageTypes = explode(',', strtolower($packageTypes));
 
-        // Create packages for each extension
-        self::createExtensionPackages();
+        if ($packageNames !== null) {
+            // Convert single string to array for backward compatibility
+            if (is_string($packageNames)) {
+                $packageNames = [$packageNames];
+            }
 
-        // Create the php meta-package
-        self::createStaticPhpPackage();
+            foreach ($packageNames as $packageName) {
+                echo "Building package: {$packageName}\n";
+
+                // Check if it's a SAPI package
+                if (in_array($packageName, self::$sapis)) {
+                    self::createSapiPackage($packageName);
+                }
+                // Check if it's an extension package
+                elseif (in_array($packageName, self::$sharedExtensions)) {
+                    self::createExtensionPackage($packageName);
+                }
+                // Check if it's the meta-package
+                elseif ($packageName === 'static-php') {
+                    self::createStaticPhpPackage();
+                }
+                else {
+                    echo "Warning: Package {$packageName} not found in configuration.\n";
+                }
+            }
+        } else {
+            // Create packages for each SAPI (cli, fpm, embed)
+            self::createSapiPackages();
+
+            // Create packages for each extension
+            self::createExtensionPackages();
+
+            // Create the php meta-package
+            self::createStaticPhpPackage();
+        }
 
         echo "Package creation completed.\n";
         return true;
@@ -60,29 +91,34 @@ class CreatePackages
         echo "Creating packages for SAPIs...\n";
 
         foreach (self::$sapis as $sapi) {
-            echo "Creating package for SAPI: {$sapi}...\n";
-
-            // Determine the package class based on SAPI
-            $packageClass = "\\staticphp\\package\\{$sapi}";
-
-            if (!class_exists($packageClass)) {
-                echo "Warning: Package class not found for SAPI: {$sapi}\n";
-                continue;
-            }
-
-            // Extract PHP version and architecture
-            [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
-
-            // Determine the next available iteration
-            $iteration = self::getNextIteration("static-php-{$sapi}", $phpVersion, $architecture);
-
-            // Create the package
-            $package = new $packageClass();
-            $config = $package->getFpmConfig($phpVersion, $iteration);
-
-            // Create packages using FPM with "php-" prefix
-            self::createPackageWithFpm("static-php-{$sapi}", $config, $phpVersion, $architecture, $iteration);
+            self::createSapiPackage($sapi);
         }
+    }
+
+    private static function createSapiPackage(string $sapi): void
+    {
+        echo "Creating package for SAPI: {$sapi}...\n";
+
+        // Determine the package class based on SAPI
+        $packageClass = "\\staticphp\\package\\{$sapi}";
+
+        if (!class_exists($packageClass)) {
+            echo "Warning: Package class not found for SAPI: {$sapi}\n";
+            return;
+        }
+
+        // Extract PHP version and architecture
+        [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
+
+        // Determine the next available iteration
+        $iteration = self::getNextIteration("static-php-{$sapi}", $phpVersion, $architecture);
+
+        // Create the package
+        $package = new $packageClass();
+        $config = $package->getFpmConfig($phpVersion, $iteration);
+
+        // Create packages using FPM with "php-" prefix
+        self::createPackageWithFpm("static-php-{$sapi}", $config, $phpVersion, $architecture, $iteration);
     }
 
     private static function createExtensionPackages(): void
@@ -91,26 +127,31 @@ class CreatePackages
 
         // Only create packages for shared extensions, not static ones
         foreach (self::$sharedExtensions as $extension) {
-            echo "Creating package for extension: {$extension}...\n";
-
-            // Extract PHP version and architecture
-            [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
-
-            // Determine the next available iteration
-            $iteration = self::getNextIteration("static-php-{$extension}", $phpVersion, $architecture);
-
-            // Create a package for this extension
-            $package = new extension($extension);
-            $config = $package->getFpmConfig();
-
-            if (!file_exists(INI_PATH . '/extension/' . $extension . '.ini')) {
-                echo "Warning: INI file for extension {$extension} not found, skipping package creation.\n";
-                continue;
-            }
-
-            // Create packages using FPM with php- prefix
-            self::createPackageWithFpm("static-php-{$extension}", $config, $phpVersion, $architecture, $iteration);
+            self::createExtensionPackage($extension);
         }
+    }
+
+    private static function createExtensionPackage(string $extension): void
+    {
+        echo "Creating package for extension: {$extension}...\n";
+
+        // Extract PHP version and architecture
+        [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
+
+        // Determine the next available iteration
+        $iteration = self::getNextIteration("static-php-{$extension}", $phpVersion, $architecture);
+
+        // Create a package for this extension
+        $package = new extension($extension);
+        $config = $package->getFpmConfig();
+
+        if (!file_exists(INI_PATH . '/extension/' . $extension . '.ini')) {
+            echo "Warning: INI file for extension {$extension} not found, skipping package creation.\n";
+            return;
+        }
+
+        // Create packages using FPM with php- prefix
+        self::createPackageWithFpm("static-php-{$extension}", $config, $phpVersion, $architecture, $iteration);
     }
 
     private static function createStaticPhpPackage(): void
@@ -135,11 +176,15 @@ class CreatePackages
     {
         echo "Creating packages for {$name} using FPM...\n";
 
-        // Create RPM package
-        self::createRpmPackage($name, $config, $phpVersion, $architecture, $iteration);
+        // Create RPM package if requested
+        if (in_array('rpm', self::$packageTypes)) {
+            self::createRpmPackage($name, $config, $phpVersion, $architecture, $iteration);
+        }
 
-        // Create DEB package
-        self::createDebPackage($name, $config, $phpVersion, $architecture, $iteration);
+        // Create DEB package if requested
+        if (in_array('deb', self::$packageTypes)) {
+            self::createDebPackage($name, $config, $phpVersion, $architecture, $iteration);
+        }
     }
 
     private static function createRpmPackage($name, $config, $phpVersion, $architecture, $iteration): void
