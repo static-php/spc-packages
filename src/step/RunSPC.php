@@ -6,14 +6,21 @@ use Symfony\Component\Process\Process;
 
 class RunSPC
 {
-    public static function run(string $command = 'spc', bool $debug = false)
+    public static function run(string $command = 'spc', bool $debug = false, string $phpVersion = '8.4')
     {
         // Ensure the craft.yml file is copied to the static-php-cli vendor directory
         $craftYmlSource = BASE_PATH . '/config/craft.yml';
         $craftYmlDest = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/craft.yml';
 
-        if (!copy($craftYmlSource, $craftYmlDest)) {
-            echo "Failed to copy craft.yml to static-php-cli vendor directory.\n";
+        // Read the craft.yml file
+        $craftYml = file_get_contents($craftYmlSource);
+
+        // Update the PHP version in the craft.yml content
+        $craftYml = str_replace('majorminor', $phpVersion, $craftYml);
+
+        // Write the updated craft.yml to the destination
+        if (!file_put_contents($craftYmlDest, $craftYml)) {
+            echo "Failed to write updated craft.yml to static-php-cli vendor directory.\n";
             return false;
         }
 

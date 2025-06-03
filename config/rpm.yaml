@@ -1,0 +1,45 @@
+document: modulemd
+version: 2
+data:
+    name: static-php
+    stream: majorminor
+    version: 20250603
+    context: local
+    summary: Static PHP majorminor packages
+    description: Static PHP majorminor built from local RPMs
+    license:
+        module:
+            - MIT
+    dependencies:
+        - buildrequires:
+              platform:
+                  - el7
+                  - el8
+                  - el9
+                  - el10
+          requires:
+              platform:
+                  - el7
+                  - el8
+                  - el9
+                  - el10
+    components:
+        rpms:
+            static-php:
+                rationale: Main package
+                ref: majorminorpatch
+            static-php-cli:
+                rationale: CLI
+                ref: majorminorpatch
+            static-php-fpm:
+                rationale: FPM
+                ref: majorminorpatch
+            static-php-embed:
+                rationale: Embed
+                ref: majorminorpatch
+    artifacts:
+        rpms:
+            - static-php-0:majorminorpatch-iteration.architecture
+            - static-php-cli-0:majorminorpatch-iteration.architecture
+            - static-php-fpm-0:majorminorpatch-iteration.architecture
+            - static-php-embed-0:majorminorpatch-iteration.architecture
