@@ -12,11 +12,16 @@ class CreatePackages
     private static $extensions = [];
     private static $sharedExtensions = [];
     private static $sapis = [];
+    private static $binaryDependencies = [];
 
     public static function run(): true
     {
         // Load the craft.yml configuration
         self::loadConfig();
+
+        // Get binary dependencies once at the start
+        $phpBinary = BUILD_BIN_PATH . '/php';
+        self::$binaryDependencies = self::getBinaryDependencies($phpBinary);
 
         // Create packages for each SAPI (cli, fpm, embed)
         self::createSapiPackages();
@@ -126,7 +131,7 @@ class CreatePackages
         self::createPackageWithFpm("static-php", $config, $phpVersion, $architecture, $iteration);
     }
 
-    private static function createPackageWithFpm($name, $config, $phpVersion, $architecture, $iteration): void
+    private static function createPackageWithFpm(string $name, array $config, string $phpVersion, string $architecture, string $iteration): void
     {
         echo "Creating packages for {$name} using FPM...\n";
 
@@ -141,7 +146,6 @@ class CreatePackages
     {
         echo "Creating RPM package for {$name}...\n";
 
-        // Prepare FPM arguments
         $fpmArgs = [
             'fpm',
             '-s', 'dir',
@@ -156,7 +160,6 @@ class CreatePackages
             '--maintainer', 'Static PHP <info@static-php.dev>'
         ];
 
-        // Add provides
         if (isset($config['provides']) && is_array($config['provides'])) {
             foreach ($config['provides'] as $provide) {
                 $fpmArgs[] = '--provides';
@@ -164,7 +167,7 @@ class CreatePackages
             }
         }
 
-        // Add obsoletes (rpm) or replaces (deb)
+        // Add obsoletes
         if (isset($config['replaces']) && is_array($config['replaces'])) {
             foreach ($config['replaces'] as $obsolete) {
                 $fpmArgs[] = '--replaces';
@@ -172,7 +175,10 @@ class CreatePackages
             }
         }
 
-        // Add dependencies
+        foreach (self::$binaryDependencies as $lib => $version) {
+            $fpmArgs[] = '--depends';
+            $fpmArgs[] = "{$lib}{$version}(64bit)";
+        }
         if (isset($config['depends']) && is_array($config['depends'])) {
             foreach ($config['depends'] as $depend) {
                 $fpmArgs[] = '--depends';
@@ -182,13 +188,11 @@ class CreatePackages
 
         if (isset($config['directories']) && is_array($config['directories'])) {
             foreach ($config['directories'] as $dir) {
-                // Add the directory to the package
                 $fpmArgs[] = '--directories';
                 $fpmArgs[] = $dir;
             }
         }
 
-        // Add config files
         if (isset($config['config-files']) && is_array($config['config-files'])) {
             foreach ($config['config-files'] as $configFile) {
                 $fpmArgs[] = '--config-files';
@@ -196,7 +200,6 @@ class CreatePackages
             }
         }
 
-        // Add files to package
         if (isset($config['files']) && is_array($config['files'])) {
             foreach ($config['files'] as $source => $dest) {
                 if (file_exists($source)) {
@@ -207,7 +210,6 @@ class CreatePackages
             }
         }
 
-        // Add empty directories
         if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
             $emptyDir = TEMP_DIR . '/__spp_empty';
             if (!file_exists($emptyDir)) {
@@ -235,7 +237,6 @@ class CreatePackages
     {
         echo "Creating DEB package for {$name}...\n";
 
-        // Prepare FPM arguments
         $fpmArgs = [
             'fpm',
             '-s', 'dir',
@@ -250,7 +251,6 @@ class CreatePackages
             '--maintainer', 'Static PHP <info@static-php.dev>'
         ];
 
-        // Add provides
         if (isset($config['provides']) && is_array($config['provides'])) {
             foreach ($config['provides'] as $provide) {
                 $fpmArgs[] = '--provides';
@@ -258,7 +258,7 @@ class CreatePackages
             }
         }
 
-        // Add obsoletes
+        // Add replaces
         if (isset($config['replaces']) && is_array($config['replaces'])) {
             foreach ($config['replaces'] as $obsolete) {
                 $fpmArgs[] = '--obsoletes';
@@ -266,7 +266,12 @@ class CreatePackages
             }
         }
 
-        // Add dependencies
+        foreach (self::$binaryDependencies as $lib => $version) {
+            $lib = str_replace('.so.', '', $lib); // remove .so. for deb compatibility
+            $numericVersion = preg_replace('/[^0-9.]/', '',  $version);
+            $fpmArgs[] = '--depends';
+            $fpmArgs[] = "$lib (>= {$numericVersion})";
+        }
         if (isset($config['depends']) && is_array($config['depends'])) {
             foreach ($config['depends'] as $depend) {
                 $fpmArgs[] = '--depends';
@@ -276,13 +281,11 @@ class CreatePackages
 
         if (isset($config['directories']) && is_array($config['directories'])) {
             foreach ($config['directories'] as $dir) {
-                // Add the directory to the package
                 $fpmArgs[] = '--directories';
                 $fpmArgs[] = $dir;
             }
         }
 
-        // Add config files
         if (isset($config['config-files']) && is_array($config['config-files'])) {
             foreach ($config['config-files'] as $configFile) {
                 $fpmArgs[] = '--config-files';
@@ -291,7 +294,6 @@ class CreatePackages
         }
         $fpmArgs[] = '--deb-no-default-config-files'; // disable useless warning
 
-        // Add files to package
         if (isset($config['files']) && is_array($config['files'])) {
             foreach ($config['files'] as $source => $dest) {
                 if (file_exists($source)) {
@@ -302,7 +304,6 @@ class CreatePackages
             }
         }
 
-        // Add empty directories
         if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
             $emptyDir = TEMP_DIR . '/__spp_empty';
             if (!file_exists($emptyDir)) {
@@ -364,6 +365,58 @@ class CreatePackages
         echo "Detected architecture: {$architecture}\n";
 
         return [$phpVersion, $architecture];
+    }
+
+    /**
+     * Get dependencies
+     *
+     * @param string $phpBinary Path to the PHP binary
+     * @return array Array containing GLIBC and CXXABI versions
+     */
+    private static function getBinaryDependencies(string $binaryPath): array
+    {
+        $process = new Process(['ldd', '-v', $binaryPath]);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            throw new \RuntimeException("ldd failed: " . $process->getErrorOutput());
+        }
+
+        $output = $process->getOutput();
+
+        // Discard everything before "$binaryPath:"
+        $output = preg_replace('/.*?' . preg_quote($binaryPath, '/') . ':\s*\n/s', '', $output, 1);
+
+        // Discard everything after the next path-based section header like "/lib64/libstdc++.so.6:"
+        $output = preg_replace('/\n\s*\/.*?:.*/s', '', $output, 1);
+
+        $lines = explode("\n", $output);
+        $dependencies = [];
+
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+
+            if ($trimmed === '') {
+                continue;
+            }
+
+            if (preg_match('#^([\w.\-+]+)\s+\(([^)]+)\)\s+=>\s+(/[^\s]+)$#', $trimmed, $m)) {
+                $lib = $m[1];
+                $version = $m[2];
+
+                // Ignore non-numeric versions like GLIBC_PRIVATE
+                if (!preg_match('/\d+(\.\d+)+/', $version)) {
+                    continue;
+                }
+
+                // Store highest version only
+                if (!isset($dependencies[$lib]) || version_compare($version, $dependencies[$lib], '>')) {
+                    $dependencies[$lib] = $version;
+                }
+            }
+        }
+
+        return $dependencies;
     }
 
     /**
