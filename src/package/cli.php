@@ -3,23 +3,42 @@
 namespace staticphp\package;
 
 use staticphp\package;
+use staticphp\CraftConfig;
 
 class cli implements package
 {
-    public function getFpmConfig(): array
+    public function getFpmConfig(string $version, string $iteration): array
     {
+        $config = CraftConfig::getInstance();
+        $staticExtensions = $config->getStaticExtensions();
+
+        $provides = ['php'];
+        $replaces = [];
+        $configFiles = ['/etc/static-php/php.ini'];
+        $files = [
+            INI_PATH . '/php.ini' => '/etc/static-php/php.ini',
+            BUILD_BIN_PATH . '/php' => '/usr/static-php/bin/php',
+            INI_PATH . '/static-php.sh' => '/etc/profile.d/static-php.sh',
+        ];
+
+        foreach ($staticExtensions as $ext) {
+            $versionRelease = !empty($version) && !empty($iteration) ? "{$version}-{$iteration}" : "%{version}-%{release}";
+            $provides[] = "php-{$ext} = {$versionRelease}";
+            $replaces[] = "php-{$ext} < {$versionRelease}";
+
+            // Add .ini files for statically compiled extensions
+            $iniFile = INI_PATH . "/extension/{$ext}.ini";
+            if (file_exists($iniFile)) {
+                $files[$iniFile] = "/etc/static-php/php.d/{$ext}.ini";
+                $configFiles[] = "/etc/static-php/php.d/{$ext}.ini";
+            }
+        }
+
         return [
-            'config-files' => [
-                '/etc/static-php/php.ini',
-            ],
-            'provides' => [
-                'php',
-            ],
-            'files' => [
-                INI_PATH . '/php.ini' => '/etc/static-php/php.ini',
-                BUILD_BIN_PATH . '/php' => '/usr/static-php/bin/php',
-                INI_PATH . '/static-php.sh' => '/etc/profile.d/static-php.sh',
-            ]
+            'config_files' => $configFiles,
+            'provides' => $provides,
+            'replaces' => $replaces,
+            'files' => $files
         ];
     }
 }

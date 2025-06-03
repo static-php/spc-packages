@@ -4,5 +4,5 @@ namespace staticphp;
 
 interface package
 {
-    public function getFpmConfig(): array;
+    public function getFpmConfig(string $version, string $iteration): array;
 }

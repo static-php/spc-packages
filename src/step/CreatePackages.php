@@ -2,6 +2,7 @@
 
 namespace staticphp\step;
 
+use staticphp\extension;
 use staticphp\package\staticphp;
 use Symfony\Component\Process\Process;
 use staticphp\CraftConfig;
@@ -64,12 +65,18 @@ class CreatePackages
                 continue;
             }
 
+            // Extract PHP version and architecture
+            [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
+
+            // Determine the next available iteration
+            $iteration = self::getNextIteration("php-{$sapi}", $phpVersion, $architecture);
+
             // Create the package
             $package = new $packageClass();
-            $config = $package->getFpmConfig();
+            $config = $package->getFpmConfig($phpVersion, $iteration);
 
             // Create packages using FPM with "php-" prefix
-            self::createPackageWithFpm("php-{$sapi}", $config);
+            self::createPackageWithFpm("php-{$sapi}", $config, $phpVersion, $architecture, $iteration);
         }
     }
 
@@ -77,16 +84,19 @@ class CreatePackages
     {
         echo "Creating packages for extensions...\n";
 
-        // Combine both extension lists
-        $allExtensions = array_merge(self::$extensions, self::$sharedExtensions);
-        $allExtensions = array_unique($allExtensions);
-
-        foreach ($allExtensions as $extension) {
+        // Only create packages for shared extensions, not static ones
+        foreach (self::$sharedExtensions as $extension) {
             echo "Creating package for extension: {$extension}...\n";
 
+            // Extract PHP version and architecture
+            [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
+
+            // Determine the next available iteration
+            $iteration = self::getNextIteration("php-{$extension}", $phpVersion, $architecture);
+
             // Create a package for this extension
-            $package = new \staticphp\extension($extension);
-            $config = $package->getFpmConfig();
+            $package = new extension($extension);
+            $config = $package->getFpmConfig($phpVersion, $iteration);
 
             if (!file_exists(INI_PATH . '/extension/' . $extension . '.ini')) {
                 echo "Warning: INI file for extension {$extension} not found, skipping package creation.\n";
@@ -94,7 +104,7 @@ class CreatePackages
             }
 
             // Create packages using FPM with php- prefix
-            self::createPackageWithFpm("php-{$extension}", $config);
+            self::createPackageWithFpm("php-{$extension}", $config, $phpVersion, $architecture, $iteration);
         }
     }
 
@@ -102,23 +112,23 @@ class CreatePackages
     {
         echo "Creating php meta-package...\n";
 
-        // Create the php package
-        $package = new staticphp();
-        $config = $package->getFpmConfig();
-
-        // Create packages using FPM
-        self::createPackageWithFpm("static-php", $config);
-    }
-
-    private static function createPackageWithFpm($name, $config): void
-    {
-        echo "Creating packages for {$name} using FPM...\n";
-
         // Extract PHP version and architecture
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
 
         // Determine the next available iteration
-        $iteration = self::getNextIteration($name, $phpVersion, $architecture);
+        $iteration = self::getNextIteration("static-php", $phpVersion, $architecture);
+
+        // Create the php package
+        $package = new staticphp();
+        $config = $package->getFpmConfig($phpVersion, $iteration);
+
+        // Create packages using FPM
+        self::createPackageWithFpm("static-php", $config, $phpVersion, $architecture, $iteration);
+    }
+
+    private static function createPackageWithFpm($name, $config, $phpVersion, $architecture, $iteration): void
+    {
+        echo "Creating packages for {$name} using FPM...\n";
 
         // Create RPM package
         self::createRpmPackage($name, $config, $phpVersion, $architecture, $iteration);
@@ -151,6 +161,14 @@ class CreatePackages
             foreach ($config['provides'] as $provide) {
                 $fpmArgs[] = '--provides';
                 $fpmArgs[] = $provide;
+            }
+        }
+
+        // Add obsoletes (rpm) or replaces (deb)
+        if (isset($config['replaces']) && is_array($config['replaces'])) {
+            foreach ($config['replaces'] as $obsolete) {
+                $fpmArgs[] = '--replaces';
+                $fpmArgs[] = $obsolete;
             }
         }
 
@@ -240,6 +258,14 @@ class CreatePackages
             }
         }
 
+        // Add obsoletes
+        if (isset($config['replaces']) && is_array($config['replaces'])) {
+            foreach ($config['replaces'] as $obsolete) {
+                $fpmArgs[] = '--obsoletes';
+                $fpmArgs[] = $obsolete;
+            }
+        }
+
         // Add dependencies
         if (isset($config['depends']) && is_array($config['depends'])) {
             foreach ($config['depends'] as $depend) {
@@ -305,8 +331,7 @@ class CreatePackages
         // Extract PHP version and architecture from the binary
         $phpBinary = BUILD_BIN_PATH . '/php';
         if (!file_exists($phpBinary)) {
-            echo "Warning: PHP binary not found at {$phpBinary}\n";
-            return ['1.0.0', 'x86_64']; // Fallback values
+            throw new \Exception("Warning: PHP binary not found at {$phpBinary}\n");
         }
 
         // Get PHP version
@@ -315,8 +340,7 @@ class CreatePackages
         $phpVersion = trim($versionProcess->getOutput());
 
         if (empty($phpVersion)) {
-            echo "Warning: Could not determine PHP version\n";
-            $phpVersion = '1.0.0'; // Fallback version
+            throw new \Exception("Warning: Could not determine PHP version\n");
         }
 
         // Get architecture
@@ -350,7 +374,7 @@ class CreatePackages
      * @param string $architecture Package architecture
      * @return int Next available iteration
      */
-    private static function getNextIteration($name, $phpVersion, $architecture): int
+    private static function getNextIteration(string $name, string $phpVersion, string $architecture): int
     {
         $maxIteration = 0;
 

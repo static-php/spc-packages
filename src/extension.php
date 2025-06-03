@@ -12,7 +12,7 @@ class extension implements package
 
     }
 
-    public function getFpmConfig(): array
+    public function getFpmConfig(string $version, string $iteration): array
     {
         $config = Config::getExt($this->name);
         if (!$config) {
