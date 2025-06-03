@@ -18,7 +18,7 @@ class extension implements package
         if (!$config) {
             throw new \Exception("Extension configuration for '{$this->name}' not found.");
         }
-        $depends = ['php-cli'];
+        $depends = ['static-php-cli'];
         foreach ($config['ext-depends'] ?? [] as $dep) {
             $depends[] = 'php-' . $dep;
         }

@@ -22,8 +22,8 @@ class cli implements package
         ];
 
         foreach ($staticExtensions as $ext) {
-            $provides[] = "php-{$ext}";
-            $replaces[] = "php-{$ext}";
+            $provides[] = "static-php-{$ext}";
+            $replaces[] = "static-php-{$ext}";
 
             // Add .ini files for statically compiled extensions
             $iniFile = INI_PATH . "/extension/{$ext}.ini";

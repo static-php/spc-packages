@@ -74,14 +74,14 @@ class CreatePackages
             [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
 
             // Determine the next available iteration
-            $iteration = self::getNextIteration("php-{$sapi}", $phpVersion, $architecture);
+            $iteration = self::getNextIteration("static-php-{$sapi}", $phpVersion, $architecture);
 
             // Create the package
             $package = new $packageClass();
             $config = $package->getFpmConfig($phpVersion, $iteration);
 
             // Create packages using FPM with "php-" prefix
-            self::createPackageWithFpm("php-{$sapi}", $config, $phpVersion, $architecture, $iteration);
+            self::createPackageWithFpm("static-php-{$sapi}", $config, $phpVersion, $architecture, $iteration);
         }
     }
 
@@ -97,11 +97,11 @@ class CreatePackages
             [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
 
             // Determine the next available iteration
-            $iteration = self::getNextIteration("php-{$extension}", $phpVersion, $architecture);
+            $iteration = self::getNextIteration("static-php-{$extension}", $phpVersion, $architecture);
 
             // Create a package for this extension
             $package = new extension($extension);
-            $config = $package->getFpmConfig($phpVersion, $iteration);
+            $config = $package->getFpmConfig();
 
             if (!file_exists(INI_PATH . '/extension/' . $extension . '.ini')) {
                 echo "Warning: INI file for extension {$extension} not found, skipping package creation.\n";
@@ -109,7 +109,7 @@ class CreatePackages
             }
 
             // Create packages using FPM with php- prefix
-            self::createPackageWithFpm("php-{$extension}", $config, $phpVersion, $architecture, $iteration);
+            self::createPackageWithFpm("static-php-{$extension}", $config, $phpVersion, $architecture, $iteration);
         }
     }
 
@@ -177,7 +177,7 @@ class CreatePackages
 
         foreach (self::$binaryDependencies as $lib => $version) {
             $fpmArgs[] = '--depends';
-            $fpmArgs[] = "{$lib}{$version}(64bit)";
+            $fpmArgs[] = "{$lib}({$version})(64bit)";
         }
         if (isset($config['depends']) && is_array($config['depends'])) {
             foreach ($config['depends'] as $depend) {

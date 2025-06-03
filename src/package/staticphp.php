@@ -13,9 +13,9 @@ class staticphp implements package
                 'static-php',
             ],
             'depends' => [
-                'php-cli',
-                'php-fpm',
-                'php-embed',
+                'static-php-cli',
+                'static-php-fpm',
+                'static-php-embed',
             ],
             'files' => [
                 INI_PATH . '/php.ini' => '/dev/null'
