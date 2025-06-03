@@ -125,7 +125,7 @@ class CreatePackages
 
         // Create the php package
         $package = new staticphp();
-        $config = $package->getFpmConfig($phpVersion, $iteration);
+        $config = $package->getFpmConfig();
 
         // Create packages using FPM
         self::createPackageWithFpm("static-php", $config, $phpVersion, $architecture, $iteration);
@@ -163,15 +163,15 @@ class CreatePackages
         if (isset($config['provides']) && is_array($config['provides'])) {
             foreach ($config['provides'] as $provide) {
                 $fpmArgs[] = '--provides';
-                $fpmArgs[] = $provide;
+                $fpmArgs[] = "$provide = $phpVersion-$iteration";
             }
         }
 
         // Add obsoletes
         if (isset($config['replaces']) && is_array($config['replaces'])) {
-            foreach ($config['replaces'] as $obsolete) {
+            foreach ($config['replaces'] as $replace) {
                 $fpmArgs[] = '--replaces';
-                $fpmArgs[] = $obsolete;
+                $fpmArgs[] = "$replace < {$phpVersion}-{$iteration}";
             }
         }
 
@@ -251,23 +251,25 @@ class CreatePackages
             '--maintainer', 'Static PHP <info@static-php.dev>'
         ];
 
+
         if (isset($config['provides']) && is_array($config['provides'])) {
             foreach ($config['provides'] as $provide) {
                 $fpmArgs[] = '--provides';
-                $fpmArgs[] = $provide;
+                $fpmArgs[] = "$provide (= $phpVersion)";
             }
         }
 
-        // Add replaces
+        // Add obsoletes
         if (isset($config['replaces']) && is_array($config['replaces'])) {
-            foreach ($config['replaces'] as $obsolete) {
-                $fpmArgs[] = '--obsoletes';
-                $fpmArgs[] = $obsolete;
+            foreach ($config['replaces'] as $replace) {
+                $fpmArgs[] = '--replaces';
+                $fpmArgs[] = "$replace < {$phpVersion}-{$iteration})";
             }
         }
 
         foreach (self::$binaryDependencies as $lib => $version) {
             $lib = str_replace('.so.', '', $lib); // remove .so. for deb compatibility
+            $lib = preg_replace('/_\D+/', '', $lib);
             $numericVersion = preg_replace('/[^0-9.]/', '',  $version);
             $fpmArgs[] = '--depends';
             $fpmArgs[] = "$lib (>= {$numericVersion})";
@@ -400,7 +402,7 @@ class CreatePackages
                 continue;
             }
 
-            if (preg_match('#^([\w.\-+]+)\s+\(([^)]+)\)\s+=>\s+(/[^\s]+)$#', $trimmed, $m)) {
+            if (preg_match('#^([\w.\-+]+)\s+\(([^)]+)\)\s+=>\s+(/\S+)$#', $trimmed, $m)) {
                 $lib = $m[1];
                 $version = $m[2];
 

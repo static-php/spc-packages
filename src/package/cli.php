@@ -7,7 +7,7 @@ use staticphp\CraftConfig;
 
 class cli implements package
 {
-    public function getFpmConfig(string $version, string $iteration): array
+    public function getFpmConfig(): array
     {
         $config = CraftConfig::getInstance();
         $staticExtensions = $config->getStaticExtensions();
@@ -22,9 +22,8 @@ class cli implements package
         ];
 
         foreach ($staticExtensions as $ext) {
-            $versionRelease = !empty($version) && !empty($iteration) ? "{$version}-{$iteration}" : "%{version}-%{release}";
-            $provides[] = "php-{$ext} = {$versionRelease}";
-            $replaces[] = "php-{$ext} < {$versionRelease}";
+            $provides[] = "php-{$ext}";
+            $replaces[] = "php-{$ext}";
 
             // Add .ini files for statically compiled extensions
             $iniFile = INI_PATH . "/extension/{$ext}.ini";

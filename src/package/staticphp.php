@@ -6,7 +6,7 @@ use staticphp\package;
 
 class staticphp implements package
 {
-    public function getFpmConfig(string $version, string $iteration): array
+    public function getFpmConfig(): array
     {
         return [
             'provides' => [

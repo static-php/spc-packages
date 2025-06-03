@@ -6,7 +6,7 @@ use staticphp\package;
 
 class fpm implements package
 {
-    public function getFpmConfig(string $version, string $iteration): array
+    public function getFpmConfig(): array
     {
         return [
             'config-files' => [
