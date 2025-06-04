@@ -148,7 +148,6 @@ class CreatePackages
         $package = new $packageClass();
         $config = $package->getFpmConfig($phpVersion, $iteration);
 
-        // Create packages using FPM with "php-" prefix
         self::createPackageWithFpm(self::getPrefix() . "-{$sapi}", $config, $phpVersion, $architecture, $iteration);
     }
 
@@ -181,20 +180,15 @@ class CreatePackages
             return;
         }
 
-        // Create packages using FPM with php- prefix
         self::createPackageWithFpm(self::getPrefix() . "-{$extension}", $config, $phpVersion, $architecture, $iteration);
     }
 
     private static function createPackageWithFpm(string $name, array $config, string $phpVersion, string $architecture, string $iteration): void
     {
-        echo "Creating packages for {$name} using FPM...\n";
-
-        // Create RPM package if requested
         if (in_array('rpm', self::$packageTypes)) {
             self::createRpmPackage($name, $config, $phpVersion, $architecture, $iteration);
         }
 
-        // Create DEB package if requested
         if (in_array('deb', self::$packageTypes)) {
             self::createDebPackage($name, $config, $phpVersion, $architecture, $iteration);
         }
