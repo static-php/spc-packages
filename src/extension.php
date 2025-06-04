@@ -146,6 +146,7 @@ class extension implements package
         $tempIniPath = TEMP_DIR . '/' . $this->prefix . $this->name . '.ini';
         $iniContent = file_get_contents($iniPath);
         $iniContent = str_replace(';extension=' . $this->name, 'extension=' . $this->name, $iniContent);
+        $iniContent = str_replace(';zend_extension=' . $this->name, 'zend_extension=' . $this->name, $iniContent);
         file_put_contents($tempIniPath, $iniContent);
 
         return $tempIniPath;
