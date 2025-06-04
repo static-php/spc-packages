@@ -3,6 +3,7 @@
 namespace staticphp\package;
 
 use staticphp\package;
+use staticphp\step\CreatePackages;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
@@ -35,6 +36,7 @@ class rpmrepo implements package
         $yamlContent = str_replace('majorminorpatch', $fullPhpVersion, $yamlContent);
         $yamlContent = str_replace('majorminor', $this->phpVersion, $yamlContent);
         $yamlContent = str_replace('iteration', '1', $yamlContent);
+        $yamlContent = str_replace('prefix', CreatePackages::getPrefix(), $yamlContent);
 
         // Get architecture
         $archProcess = new Process(['uname', '-m']);

@@ -25,21 +25,21 @@ data:
                   - el10
     components:
         rpms:
-            static-php:
+            prefix:
                 rationale: Main package
                 ref: majorminorpatch
-            static-php-cli:
+            prefix-cli:
                 rationale: CLI
                 ref: majorminorpatch
-            static-php-fpm:
+            prefix-fpm:
                 rationale: FPM
                 ref: majorminorpatch
-            static-php-embed:
+            prefix-embed:
                 rationale: Embed
                 ref: majorminorpatch
     artifacts:
         rpms:
-            - static-php-0:majorminorpatch-iteration.architecture
-            - static-php-cli-0:majorminorpatch-iteration.architecture
-            - static-php-fpm-0:majorminorpatch-iteration.architecture
-            - static-php-embed-0:majorminorpatch-iteration.architecture
+            - prefix-0:majorminorpatch-iteration.architecture
+            - prefix-cli-0:majorminorpatch-iteration.architecture
+            - prefix-fpm-0:majorminorpatch-iteration.architecture
+            - prefix-embed-0:majorminorpatch-iteration.architecture

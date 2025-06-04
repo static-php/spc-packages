@@ -14,7 +14,7 @@ class embed implements package
                 '/etc/static-php/php.ini',
             ],
             'depends' => [
-                CreatePackages::getPrefix() . 'cli',
+                CreatePackages::getPrefix() . '-cli',
             ],
             'provides' => [
                 'libphp.so'
