@@ -3,6 +3,7 @@
 namespace staticphp;
 
 use SPC\store\Config;
+use staticphp\step\CreatePackages;
 
 class extension implements package
 {
@@ -103,17 +104,14 @@ class extension implements package
         if (!$config) {
             throw new \Exception("Extension configuration for '{$this->name}' not found.");
         }
-        $depends = ['static-php-cli'];
+        $depends = [CreatePackages::getPrefix() . '-cli'];
         foreach ($config['ext-depends'] ?? [] as $dep) {
-            $depends[] = 'static-php-' . $dep;
+            $depends[] = CreatePackages::getPrefix() . '-' . $dep;
         }
 
         return [
             'config-files' => [
                 '/etc/static-php/php.d/'. $this->prefix . $this->name . '.ini',
-            ],
-            'provides' => [
-                'static-php-' . $this->name,
             ],
             'depends' => $depends,
             'files' => [

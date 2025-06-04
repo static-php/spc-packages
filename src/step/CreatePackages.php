@@ -4,7 +4,6 @@ namespace staticphp\step;
 
 use staticphp\extension;
 use staticphp\package\rpmrepo;
-use staticphp\package\staticphp;
 use Symfony\Component\Process\Process;
 use staticphp\CraftConfig;
 
@@ -83,10 +82,6 @@ class CreatePackages
                 elseif (in_array($packageName, self::$sharedExtensions)) {
                     self::createExtensionPackage($packageName);
                 }
-                // Check if it's the meta-package
-                elseif ($packageName === 'static-php') {
-                    self::createStaticPhpPackage();
-                }
                 else {
                     echo "Warning: Package {$packageName} not found in configuration.\n";
                 }
@@ -97,9 +92,6 @@ class CreatePackages
 
             // Create packages for each extension
             self::createExtensionPackages();
-
-            // Create the php meta-package
-            self::createStaticPhpPackage();
         }
 
         echo "Package creation completed.\n";
@@ -150,14 +142,14 @@ class CreatePackages
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
 
         // Determine the next available iteration
-        $iteration = self::getNextIteration("static-php-{$sapi}", $phpVersion, $architecture);
+        $iteration = self::getNextIteration(self::getPrefix() . "-{$sapi}", $phpVersion, $architecture);
 
         // Create the package
         $package = new $packageClass();
         $config = $package->getFpmConfig($phpVersion, $iteration);
 
         // Create packages using FPM with "php-" prefix
-        self::createPackageWithFpm("static-php-{$sapi}", $config, $phpVersion, $architecture, $iteration);
+        self::createPackageWithFpm(self::getPrefix() . "-{$sapi}", $config, $phpVersion, $architecture, $iteration);
     }
 
     private static function createExtensionPackages(): void
@@ -178,7 +170,7 @@ class CreatePackages
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
 
         // Determine the next available iteration
-        $iteration = self::getNextIteration("static-php-{$extension}", $phpVersion, $architecture);
+        $iteration = self::getNextIteration(self::getPrefix() . "-{$extension}", $phpVersion, $architecture);
 
         // Create a package for this extension
         $package = new extension($extension);
@@ -190,25 +182,7 @@ class CreatePackages
         }
 
         // Create packages using FPM with php- prefix
-        self::createPackageWithFpm("static-php-{$extension}", $config, $phpVersion, $architecture, $iteration);
-    }
-
-    private static function createStaticPhpPackage(): void
-    {
-        echo "Creating php meta-package...\n";
-
-        // Extract PHP version and architecture
-        [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
-
-        // Determine the next available iteration
-        $iteration = self::getNextIteration("static-php", $phpVersion, $architecture);
-
-        // Create the php package
-        $package = new staticphp();
-        $config = $package->getFpmConfig();
-
-        // Create packages using FPM
-        self::createPackageWithFpm("static-php", $config, $phpVersion, $architecture, $iteration);
+        self::createPackageWithFpm(self::getPrefix() . "-{$extension}", $config, $phpVersion, $architecture, $iteration);
     }
 
     private static function createPackageWithFpm(string $name, array $config, string $phpVersion, string $architecture, string $iteration): void
@@ -543,5 +517,8 @@ class CreatePackages
         return $maxIteration + 1;
     }
 
-
+    public static function getPrefix(): string
+    {
+        return 'php-zts';
+    }
 }

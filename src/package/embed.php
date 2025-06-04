@@ -3,6 +3,7 @@
 namespace staticphp\package;
 
 use staticphp\package;
+use staticphp\step\CreatePackages;
 
 class embed implements package
 {
@@ -13,7 +14,7 @@ class embed implements package
                 '/etc/static-php/php.ini',
             ],
             'depends' => [
-                'static-php-cli',
+                CreatePackages::getPrefix() . 'cli',
             ],
             'provides' => [
                 'libphp.so'

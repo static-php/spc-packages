@@ -110,9 +110,6 @@ class rpmrepo implements package
 
         return [
             'name' => 'static-php-repo',
-            'provides' => [
-                'static-php-repo',
-            ],
             'files' => [
                 $repoConfigFile => '/etc/yum.repos.d/static-php.repo',
             ],

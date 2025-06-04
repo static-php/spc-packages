@@ -3,6 +3,7 @@
 namespace staticphp\package;
 
 use staticphp\extension;
+use staticphp\step\CreatePackages;
 
 class spx extends extension
 {
@@ -13,7 +14,7 @@ class spx extends extension
                 '/etc/static-php/php.d/spx.ini',
             ],
             'depends' => [
-                'static-php-cli'
+                CreatePackages::getPrefix() . 'cli'
             ],
             'files' => [
                 BUILD_MODULES_PATH . '/spx.so' => '/usr/lib/static-php/modules/spx.so',

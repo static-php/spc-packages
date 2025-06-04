@@ -4,6 +4,7 @@ namespace staticphp\package;
 
 use staticphp\package;
 use staticphp\CraftConfig;
+use staticphp\step\CreatePackages;
 
 class cli implements package
 {
@@ -12,7 +13,7 @@ class cli implements package
         $config = CraftConfig::getInstance();
         $staticExtensions = $config->getStaticExtensions();
 
-        $provides = ['php'];
+        $provides = ['php', 'php-zts', 'php-cli'];
         $replaces = [];
         $configFiles = ['/etc/static-php/php.ini'];
         $files = [
@@ -22,8 +23,8 @@ class cli implements package
         ];
 
         foreach ($staticExtensions as $ext) {
-            $provides[] = "static-php-{$ext}";
-            $replaces[] = "static-php-{$ext}";
+            $provides[] = CreatePackages::getPrefix() . "-{$ext}";
+            $replaces[] = CreatePackages::getPrefix() . "-{$ext}";
 
             // Add .ini files for statically compiled extensions
             $iniFile = INI_PATH . "/extension/{$ext}.ini";
