@@ -32,8 +32,8 @@ class rpmrepo implements package
         $yamlContent = file_get_contents($this->moduleYaml);
 
         // Replace all placeholders in the YAML content
-        $yamlContent = str_replace('majorminor', $this->phpVersion, $yamlContent);
         $yamlContent = str_replace('majorminorpatch', $fullPhpVersion, $yamlContent);
+        $yamlContent = str_replace('majorminor', $this->phpVersion, $yamlContent);
         $yamlContent = str_replace('iteration', '1', $yamlContent);
 
         // Get architecture
