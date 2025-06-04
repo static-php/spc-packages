@@ -22,6 +22,11 @@ class extension implements package
      */
     private function determineExtensionPrefix(): string
     {
+        if (!$this->isSharedExtension()) {
+            // If the extension is not shared, no prefix is needed
+            return '';
+        }
+
         // Get all dependencies, including transitive dependencies
         $allDependencies = $this->getExtensionDependencies($this->name);
 
@@ -67,9 +72,14 @@ class extension implements package
 
         $allDependencies = [];
         $visited[] = $extensionName; // Mark current extension as visited
+        $craftConfig = CraftConfig::getInstance();
 
         // Add direct dependencies
         foreach ($config['ext-depends'] as $dependency) {
+            if (!in_array($dependency, $craftConfig->getSharedExtensions()) || in_array($dependency, $craftConfig->getStaticExtensions())) {
+                continue; // Skip non-shared extensions, they are always available
+            }
+
             $allDependencies[] = $dependency;
 
             // Skip already visited dependencies to prevent infinite recursion
