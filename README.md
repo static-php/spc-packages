@@ -53,18 +53,24 @@ To create RPM and DEB packages for the built PHP binaries and extensions:
 php bin/spp package
 ```
 
-You can specify which package types to build (RPM, DEB, or both) using the `--package` parameter:
+You can specify which package types to build (RPM, DEB, or both) using the `--type` parameter:
 
 ```
-php bin/spp package --package=rpm     # Build only RPM packages
-php bin/spp package --package=deb     # Build only DEB packages
-php bin/spp package --package=rpm,deb # Build both RPM and DEB packages (default)
+php bin/spp package --type=rpm     # Build only RPM packages
+php bin/spp package --type=deb     # Build only DEB packages
+php bin/spp package --type=rpm,deb # Build both RPM and DEB packages (default)
 ```
 
 This will:
 1. Create packages for each SAPI (cli, fpm, embed)
 2. Create packages for each extension
 3. Store the packages in the `dist/rpm` and/or `dist/deb` directories, depending on the package types specified
+
+Alternatively, you can specify which packages to build using the `--package` parameter:
+
+```
+php bin/spp package --package=pdo  # Build only pdo package
+```
 
 ### Build repository
 
@@ -74,28 +80,22 @@ To create a package repository from the built packages:
 php bin/spp repo
 ```
 
-### Build and Package
+### Build, Package and Repo
 
-To run both steps in one command:
+To run all steps in one command:
 
 ```
 php bin/spp all
 ```
 
-You can use the same `--package` parameter with the `all` command to specify which package types to build:
+### Using system compilation tools or musl
+
+The build defaults to using bin/spc-gnu-docker to build against glibc 2.17. If you want to use your system's compilation tools or build against musl, you can pass the `--command` option:
 
 ```
-php bin/spp all --package=rpm     # Build only RPM packages
-php bin/spp all --package=deb     # Build only DEB packages
-php bin/spp all --package=rpm,deb # Build both RPM and DEB packages (default)
-```
-
-### Using Docker
-
-You can use Docker for building by adding the `--docker` flag:
-
-```
-php bin/spp build --docker
+php bin/spp build --command=spc # build on your local system
+# or
+php bin/spp build --command="spc-alpine-docker" # build against musl, not supported yet
 ```
 
 ## Output
