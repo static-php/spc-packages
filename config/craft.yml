@@ -67,8 +67,15 @@ craft-options:
 extra-env:
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
+    SPC_LIBC: glibc
     EXTENSION_DIR: /usr/lib/static-php/modules
     SPC_CMD_VAR_PHP_EMBED_TYPE: shared
-    SPC_DEFAULT_C_FLAGS: "-fpic -O3"
-    SPC_DEFAULT_CXX_FLAGS: "-fpic -O3"
-    SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "-g -fstack-protector-strong -O3 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-ident -fpic -fpie"
+    SPC_DEFAULT_C_FLAGS: "-fpic -O3 -fcf-protection -fstack-protector-strong -fstack-clash-protection -march=x86-64-v3"
+    SPC_DEFAULT_CXX_FLAGS: "-fpic -O3 -fcf-protection -fstack-protector-strong -fstack-clash-protection -march=x86-64-v3"
+    SPC_OPT_BUILD_ARGS: "--with-config-file-path=/etc/static-php --with-config-file-scan-dir=/etc/static-php/php.d"
+    SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "-g0 -fstack-protector-strong -O3 -fno-ident -fpic -fpie"
+    SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS: "-pie -release zts-8"
+    LDFLAGS: "-Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack"
+    SPC_CMD_PREFIX_PHP_CONFIGURE: "./configure --prefix= --with-valgrind=no --disable-shared --enable-static --disable-all --disable-cgi --disable-phpdbg --disable-debug --with-pic --disable-dependency-tracking --enable-rtld-now"
+    PHP_BUILD_PROVIDER: "Static PHP repository <https://rpm.static-php.dev> #StandWithUkraine"
+    CONFIGURE_COMMAND: ""
