@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f86e5976ad1c194997ddff00208e9516",
+    "content-hash": "f644909ead28161fe2a4c9ae9ed1a12c",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -81,12 +81,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "4b0fa94b3c97d97530a691f0f393422b3f0e80e5"
+                "reference": "b6a118287622d817f2ec48716fc0b092621dfbf3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/4b0fa94b3c97d97530a691f0f393422b3f0e80e5",
-                "reference": "4b0fa94b3c97d97530a691f0f393422b3f0e80e5",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/b6a118287622d817f2ec48716fc0b092621dfbf3",
+                "reference": "b6a118287622d817f2ec48716fc0b092621dfbf3",
                 "shasum": ""
             },
             "require": {
@@ -142,7 +142,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-06-02T05:32:53+00:00"
+            "time": "2025-06-06T07:26:06+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -237,7 +237,7 @@
         },
         {
             "name": "illuminate/collections",
-            "version": "v11.45.0",
+            "version": "v11.45.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/collections.git",
@@ -293,7 +293,7 @@
         },
         {
             "name": "illuminate/conditionable",
-            "version": "v11.45.0",
+            "version": "v11.45.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/conditionable.git",
@@ -339,7 +339,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v11.45.0",
+            "version": "v11.45.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -387,7 +387,7 @@
         },
         {
             "name": "illuminate/macroable",
-            "version": "v11.45.0",
+            "version": "v11.45.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/macroable.git",
@@ -433,7 +433,7 @@
         },
         {
             "name": "illuminate/support",
-            "version": "v11.45.0",
+            "version": "v11.45.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
@@ -2191,11 +2191,12 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.3"
+        "php": ">=8.3",
+        "ext-zlib": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "platform-overrides": {
-        "php": "8.4.0"
+        "php": "8.3.0"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
