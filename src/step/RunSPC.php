@@ -16,6 +16,7 @@ class RunSPC
         $craftYml = file_get_contents($craftYmlSource);
 
         // Update the PHP version in the craft.yml content
+        $craftYml = str_replace('majorminornodot', str_replace('.', '', $phpVersion), $craftYml);
         $craftYml = str_replace('majorminor', $phpVersion, $craftYml);
 
         // Write the updated craft.yml to the destination

@@ -3,7 +3,7 @@ php-version: majorminor
 # [REQUIRED] Static PHP extensions to build (list or comma-separated are both accepted)
 extensions: apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib
 # [OPTIONAL] Shared PHP extensions to build (list or comma-separated are both accepted)
-shared-extensions: [amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite3,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd]
+shared-extensions: [amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite3,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd]
 # Extra libraries to build (list or comma-separated are both accepted)
 libs: [libacl, libavif, nghttp3, ngtcp2]
 # [REQUIRED] Build SAPIs (list or comma-separated are both accepted)
@@ -74,7 +74,7 @@ extra-env:
     SPC_DEFAULT_CXX_FLAGS: "-fpic -O3 -fcf-protection -fstack-protector-strong -fstack-clash-protection -march=x86-64-v3"
     SPC_OPT_BUILD_ARGS: "--with-config-file-path=/etc/static-php --with-config-file-scan-dir=/etc/static-php/php.d"
     SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "-g0 -fstack-protector-strong -O3 -fno-ident -fpic -fpie"
-    SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS: "-pie -release zts-8"
+    SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS: "-pie -release zts-majorminornodot"
     LDFLAGS: "-Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack"
     SPC_CMD_PREFIX_PHP_CONFIGURE: "./configure --prefix= --with-valgrind=no --disable-shared --enable-static --disable-all --disable-cgi --disable-phpdbg --disable-debug --with-pic --disable-dependency-tracking --enable-rtld-now"
     PHP_BUILD_PROVIDER: "Static PHP repository <https://rpm.static-php.dev> #StandWithUkraine"

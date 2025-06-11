@@ -85,11 +85,9 @@ switch ($action) {
 
     case 'package':
         // Get optional package names (can be comma-separated)
-        $packageInput = $packageNames;
-
-        if ($packageInput) {
+        if ($packageNames) {
             // Split by comma to support multiple packages
-            $packageNames = explode(',', $packageInput);
+            $packageNames = explode(',', $packageNames);
             echo "Creating packages for: " . implode(', ', $packageNames) . "...\n";
         } else {
             echo "Creating packages for all extensions...\n";
@@ -125,7 +123,7 @@ switch ($action) {
 
         // Get the package type (default to rpm)
         $packageType = 'rpm';
-        if (isset($packageTypes) && !empty($packageTypes)) {
+        if (!empty($packageTypes)) {
             $packageType = explode(',', $packageTypes)[0]; // Use the first type if multiple are specified
         }
 
