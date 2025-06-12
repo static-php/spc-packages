@@ -48,7 +48,7 @@ class RunSPC
             echo "Static PHP CLI build completed successfully.\n";
 
             // Copy the built files to our build directory
-            self::copyBuiltFiles();
+            self::copyBuiltFiles($phpVersion);
 
             return true;
         } catch (\Exception $e) {
@@ -57,11 +57,45 @@ class RunSPC
         }
     }
 
-    private static function copyBuiltFiles(): void
+    private static function copyBuiltFiles(string $phpVersion): void
     {
         // Copy the built PHP binaries to our build directory
         $sourceDir = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/buildroot';
         $buildDir = BUILD_ROOT_PATH;
+        $baseBuildDir = BASE_PATH . '/build';
+
+        // Check if the base build directory exists
+        if (!is_dir($baseBuildDir)) {
+            mkdir($baseBuildDir, 0755, true);
+        }
+
+        // Check for existing PHP versions in the build directory
+        $existingVersions = [];
+        if (is_dir($baseBuildDir)) {
+            $dirs = scandir($baseBuildDir);
+            foreach ($dirs as $dir) {
+                if ($dir !== '.' && $dir !== '..' && is_dir($baseBuildDir . '/' . $dir)) {
+                    // Check if this directory contains a PHP binary
+                    $versionBinary = $baseBuildDir . '/' . $dir . '/bin/php';
+                    if (file_exists($versionBinary)) {
+                        // Get the PHP version from the binary
+                        $versionProcess = new Process([$versionBinary, '-r', 'echo PHP_VERSION;']);
+                        $versionProcess->run();
+                        $detectedVersion = trim($versionProcess->getOutput());
+
+                        if (!empty($detectedVersion)) {
+                            // Extract major.minor version
+                            $parts = explode('.', $detectedVersion);
+                            if (count($parts) >= 2) {
+                                $majorMinor = $parts[0] . '.' . $parts[1];
+                                echo "Found PHP version {$detectedVersion} (major.minor: {$majorMinor}) in directory {$dir}\n";
+                                $existingVersions[$dir] = $majorMinor;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         // Ensure the build directory exists
         if (!is_dir($buildDir)) {
@@ -71,5 +105,7 @@ class RunSPC
         // Clean and copy files
         exec("rm -rf {$buildDir}/*");
         exec("cp -r {$sourceDir}/* {$buildDir}");
+
+        echo "Copied PHP {$phpVersion} files to {$buildDir}\n";
     }
 }

@@ -1,10 +1,9 @@
----
 document: modulemd
 version: 2
 data:
     name: static-php
     stream: majorminor
-    version: 20250603
+    version: YYYYMMDD
     context: local
     summary: Static PHP majorminor packages
     description: Static PHP majorminor built from local RPMs
@@ -44,4 +43,3 @@ data:
             - prefix-cli-0:majorminorpatch-iteration.architecture
             - prefix-fpm-0:majorminorpatch-iteration.architecture
             - prefix-embed-0:majorminorpatch-iteration.architecture
----

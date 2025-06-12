@@ -33,6 +33,7 @@ class rpmrepo implements package
         $yamlContent = file_get_contents($this->moduleYaml);
 
         // Replace all placeholders in the YAML content
+        $yamlContent = str_replace('YYYYMMDD', (new \DateTime())->format('Ymd'), $yamlContent);
         $yamlContent = str_replace('majorminorpatch', $fullPhpVersion, $yamlContent);
         $yamlContent = str_replace('majorminor', $this->phpVersion, $yamlContent);
         $yamlContent = str_replace('iteration', '1', $yamlContent);
@@ -80,9 +81,104 @@ class rpmrepo implements package
         $repoConfig .= "gpgcheck=0\n";
         file_put_contents($repoConfigFile, $repoConfig);
 
-        // Write the modified YAML content to the repository folder
-        $distModuleFile = DIST_RPM_PATH . '/static-php.yaml';
-        file_put_contents($distModuleFile, $yamlContent);
+        // Ensure the dist/rpm directory exists
+        if (!file_exists(DIST_RPM_PATH)) {
+            echo "Creating directory: " . DIST_RPM_PATH . "\n";
+            mkdir(DIST_RPM_PATH, 0755, true);
+        }
+
+        // Create static-php-{majorminor}.yaml instead of static-php.yaml
+        $distModuleFile = DIST_RPM_PATH . '/static-php-' . $this->phpVersion . '.yaml';
+        $existingModules = [];
+
+        if (file_exists($distModuleFile)) {
+            echo "Existing static-php-{$this->phpVersion}.yaml found, updating...\n";
+            $existingYaml = file_get_contents($distModuleFile);
+
+            try {
+                // Parse the existing YAML content
+                $existingModules = Yaml::parse($existingYaml);
+
+                // If the file is empty or contains invalid YAML, initialize as empty array
+                if ($existingModules === null) {
+                    echo "Warning: Existing static-php-{$this->phpVersion}.yaml is empty or invalid, initializing as new file\n";
+                    $existingModules = [];
+                }
+                // If it's not a multi-document YAML, convert it to an array
+                else if (!is_array($existingModules) || !isset($existingModules[0])) {
+                    $existingModules = [$existingModules];
+                }
+            } catch (\Exception $e) {
+                echo "Warning: Error parsing existing static-php-{$this->phpVersion}.yaml: " . $e->getMessage() . "\n";
+                echo "Initializing as new file\n";
+                $existingModules = [];
+            }
+        }
+
+        // Parse the new module data
+        $newModule = Yaml::parse($yamlContent);
+
+        // Check if a module with the same name and stream already exists
+        $updated = false;
+        if (!empty($existingModules)) {
+            foreach ($existingModules as $key => $module) {
+                if (isset($module['data']['name']) && isset($module['data']['stream']) &&
+                    $module['data']['name'] === $moduleData['data']['name'] &&
+                    $module['data']['stream'] === $moduleData['data']['stream']) {
+                    // Update the existing module
+                    $existingModules[$key] = $newModule;
+                    $updated = true;
+                    echo "Updated existing module: {$moduleName}:{$moduleStream}\n";
+                    break;
+                }
+            }
+        }
+
+        // If no matching module was found, append the new one
+        if (!$updated) {
+            $existingModules[] = $newModule;
+            echo "Added new module: {$moduleName}:{$moduleStream}\n";
+        }
+
+        // Convert the modules array back to YAML and write to file
+        $combinedYaml = '';
+        foreach ($existingModules as $index => $module) {
+            $moduleYaml = Yaml::dump($module, 10, 2);
+            // Add the document separator for all documents
+            // This is required for multi-document YAML files
+            $combinedYaml .= "---\n" . $moduleYaml;
+        }
+
+        file_put_contents($distModuleFile, $combinedYaml);
+
+        // Combine all static-php-*.yaml files in ascending order
+        echo "Combining all static-php-*.yaml files...\n";
+        $combinedFile = DIST_RPM_PATH . '/static-php.yaml';
+        $yamlFiles = glob(DIST_RPM_PATH . '/static-php-*.yaml');
+        sort($yamlFiles); // Sort files in ascending order
+
+        $allYamlContent = '';
+        foreach ($yamlFiles as $yamlFile) {
+            $fileContent = file_get_contents($yamlFile);
+            if (!empty($fileContent)) {
+                // Process each document in the file
+                $documents = preg_split('/^---\s*$/m', $fileContent);
+                foreach ($documents as $document) {
+                    $document = trim($document);
+                    if (empty($document)) continue;
+
+                    // Remove any existing document end markers
+                    $document = preg_replace('/\.\.\.\s*$/m', '', $document);
+
+                    // Add document start and end markers
+                    $allYamlContent .= "---\n" . $document . "\n...\n";
+                }
+            }
+        }
+
+        // Write the combined content to static-php.yaml
+        file_put_contents($combinedFile, $allYamlContent);
+        echo "Combined YAML file created at: $combinedFile\n";
 
         // Step 1: Run createrepo_c command to create repository metadata
         echo "Creating initial metadata with createrepo_c...\n";
@@ -92,9 +188,9 @@ class rpmrepo implements package
             echo $buffer;
         });
 
-        // Step 2: Gzip the module YAML file
+        // Step 2: Gzip the combined module YAML file
         echo "Adding module metadata...\n";
-        $moduleContent = file_get_contents($distModuleFile);
+        $moduleContent = file_get_contents($combinedFile);
         $gzippedContent = gzencode($moduleContent);
         file_put_contents(DIST_RPM_PATH . '/repodata/modules.yaml.gz', $gzippedContent);
 
