@@ -40,6 +40,3 @@ data:
     artifacts:
         rpms:
             - prefix-0:majorminorpatch-iteration.architecture
-            - prefix-cli-0:majorminorpatch-iteration.architecture
-            - prefix-fpm-0:majorminorpatch-iteration.architecture
-            - prefix-embed-0:majorminorpatch-iteration.architecture

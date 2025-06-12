@@ -61,6 +61,33 @@ class rpmrepo implements package
         // Parse the updated YAML content
         $moduleData = Yaml::parse($yamlContent);
 
+        // Append all available artifacts from dist/rpm with a matching version
+        if (isset($moduleData['data']['artifacts']['rpms']) && is_array($moduleData['data']['artifacts']['rpms'])) {
+            $rpmPattern = DIST_RPM_PATH . '/' . CreatePackages::getPrefix() . '*' . $fullPhpVersion . '*.rpm';
+            $rpmFiles = glob($rpmPattern);
+
+            echo "Scanning for RPM artifacts in: " . DIST_RPM_PATH . "\n";
+            echo "Found " . count($rpmFiles) . " RPM files\n";
+
+            foreach ($rpmFiles as $rpmFile) {
+                $filename = basename($rpmFile);
+
+                // Convert filename to artifact format (remove .rpm extension and path)
+                $artifact = str_replace('.rpm', '', $filename);
+                $artifact = str_replace('-' . $fullPhpVersion . '-', '-0:' . $fullPhpVersion . '-', $artifact);
+
+                // Add to the artifact list if not already present
+                if (!in_array($artifact, $moduleData['data']['artifacts']['rpms'])) {
+                    $moduleData['data']['artifacts']['rpms'][] = $artifact;
+                }
+            }
+
+            // Update the YAML content with the modified artifacts list
+            $yamlContent = Yaml::dump($moduleData, 10, 2);
+        } else {
+            echo "Warning: artifacts.rpms section not found in YAML or is not an array\n";
+        }
+
         // Extract module information
         $moduleName = $moduleData['data']['name'] ?? 'static-php';
         $moduleStream = $moduleData['data']['stream'] ?? $this->phpVersion;
@@ -74,7 +101,7 @@ class rpmrepo implements package
         // Create a simple repository configuration file
         $repoConfigFile = $repoDir . '/static-php.repo';
         $repoConfig = "[static-php]\n";
-        $repoConfig .= "name=Static PHP Repository\n";
+        $repoConfig .= "name=Static PHP repository\n";
         $repoConfig .= "baseurl=file://" . DIST_RPM_PATH . "\n";
         $repoConfig .= "enabled=1\n";
         $repoConfig .= "gpgcheck=0\n";

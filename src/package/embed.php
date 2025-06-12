@@ -9,6 +9,9 @@ class embed implements package
 {
     public function getFpmConfig(): array
     {
+        $phpVersion = SPP_PHP_VERSION;
+        $phpVersion = str_replace('.', '', $phpVersion);
+        $name = '/lib' . CreatePackages::getPrefix() . "-$phpVersion.so";
         return [
             'config-files' => [
                 '/etc/static-php/php.ini',
@@ -20,11 +23,11 @@ class embed implements package
                 'libphp.so'
             ],
             'directories' => [
-                '/usr/lib/static-php',
+                '/usr/lib64/php-zts',
             ],
             'files' => [
-                INI_PATH . '/php.ini' => '/etc/static-php/php.ini',
-                BUILD_LIB_PATH . '/libphp.so' => '/usr/lib/static-php/libphp.so',
+                INI_PATH . '/php.ini' => '/etc/php-zts.ini',
+                BUILD_LIB_PATH . $name => '/usr/lib64/' . $name,
             ]
         ];
     }

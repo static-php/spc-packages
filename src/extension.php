@@ -121,16 +121,16 @@ class extension implements package
 
         return [
             'config-files' => [
-                '/etc/static-php/php.d/'. $this->prefix . $this->name . '.ini',
+                '/etc/php-zts.d/'. $this->prefix . $this->name . '.ini',
             ],
             'depends' => $depends,
             'files' => [
                 ...($this->getIniPath() ?
-                    [$this->getIniPath() => '/etc/static-php/php.d/' . $this->prefix . $this->name . '.ini']
+                    [$this->getIniPath() => '/etc/php-zts.d/' . $this->prefix . $this->name . '.ini']
                     : []
                 ),
                 ...($this->isSharedExtension() ?
-                    [BUILD_MODULES_PATH . '/' . $this->name . '.so' => '/usr/lib/static-php/modules/' .  $this->name . '.so']
+                    [BUILD_MODULES_PATH . '/' . $this->name . '.so' => '/usr/lib64/php-zts/modules/' .  $this->name . '.so']
                     : []
                 ),
             ]

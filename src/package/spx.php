@@ -11,15 +11,15 @@ class spx extends extension
     {
         return [
             'config-files' => [
-                '/etc/static-php/php.d/spx.ini',
+                '/etc/php-zts.d/spx.ini',
             ],
             'depends' => [
                 CreatePackages::getPrefix() . '-cli'
             ],
             'files' => [
-                BUILD_MODULES_PATH . '/spx.so' => '/usr/lib/static-php/modules/spx.so',
-                $this->getIniPath() => '/etc/static-php/php.d/spx.ini',
-                BUILD_ROOT_PATH . '/share/misc/php-spx/assets/web-ui' => '/usr/share/static-php/misc/php-spx/assets/web-ui',
+                BUILD_MODULES_PATH . '/spx.so' => '/usr/lib64/php-zts/modules/spx.so',
+                $this->getIniPath() => '/etc/php-zts.d/spx.ini',
+                BUILD_ROOT_PATH . '/share/misc/php-spx/assets/web-ui' => '/usr/share/php-zts/misc/php-spx/assets/web-ui',
             ]
         ];
     }

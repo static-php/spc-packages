@@ -13,13 +13,12 @@ class cli implements package
         $config = CraftConfig::getInstance();
         $staticExtensions = $config->getStaticExtensions();
 
-        $provides = ['php', 'php-zts', 'php-cli'];
+        $provides = ['php-zts', 'php-zts-cli'];
         $replaces = [];
         $configFiles = ['/etc/static-php/php.ini'];
         $files = [
-            INI_PATH . '/php.ini' => '/etc/static-php/php.ini',
-            BUILD_BIN_PATH . '/php' => '/usr/static-php/bin/php',
-            INI_PATH . '/static-php.sh' => '/etc/profile.d/static-php.sh',
+            INI_PATH . '/php.ini' => '/etc/php-zts.ini',
+            BUILD_BIN_PATH . '/php' => '/usr/bin/php-zts',
         ];
 
         foreach ($staticExtensions as $ext) {
