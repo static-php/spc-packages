@@ -1,8 +1,8 @@
 document: modulemd
 version: 2
 data:
-    name: static-php
-    stream: majorminor
+    name: prefix
+    stream: static-majorminor
     version: YYYYMMDD
     context: local
     summary: Static PHP majorminor packages

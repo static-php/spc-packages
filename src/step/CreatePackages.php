@@ -40,14 +40,14 @@ class CreatePackages
         }
         $config = $repoPackage->getFpmConfig();
 
-        // Extract PHP version and architecture
-        [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
-
-        // Determine the next available iteration
-        $iteration = self::getNextIteration("static-php-repo", $phpVersion, $architecture);
+        // For the repository package, we use a fixed version and iteration
+        $packageName = 'static-php';
+        $version = '1';
+        $iteration = self::getNextIteration($packageName, $version, 'noarch');
+        $architecture = "noarch";
 
         // Create the package
-        self::createPackageWithFpm("static-php-repo", $config, $phpVersion, $architecture, $iteration);
+        self::createRpmPackage($packageName, $config, $version, $architecture, $iteration, hasDependencies: false);
 
         echo "Repository package creation completed.\n";
         return true;
@@ -194,7 +194,7 @@ class CreatePackages
         }
     }
 
-    private static function createRpmPackage($name, $config, $phpVersion, $architecture, $iteration): void
+    private static function createRpmPackage(string $name, array $config, string $phpVersion, string $architecture, string $iteration, bool $hasDependencies = true): void
     {
         echo "Creating RPM package for {$name}...\n";
 
@@ -205,8 +205,8 @@ class CreatePackages
             '-p', DIST_RPM_PATH,
             '--name', $name,
             '--version', $phpVersion,
-            '--architecture', $architecture,
             '--iteration', $iteration,
+            '--architecture', $architecture,
             '--description', "Static PHP Package for {$name}",
             '--license', 'MIT',
             '--maintainer', 'Static PHP <info@static-php.dev>'
@@ -227,15 +227,20 @@ class CreatePackages
             }
         }
 
-        foreach (self::$binaryDependencies as $lib => $version) {
-            $fpmArgs[] = '--depends';
-            $fpmArgs[] = "{$lib}({$version})(64bit)";
-        }
-        if (isset($config['depends']) && is_array($config['depends'])) {
-            foreach ($config['depends'] as $depend) {
+        if ($hasDependencies) {
+            foreach (self::$binaryDependencies as $lib => $version) {
                 $fpmArgs[] = '--depends';
-                $fpmArgs[] = $depend;
+                $fpmArgs[] = "{$lib}({$version})(64bit)";
             }
+            if (isset($config['depends']) && is_array($config['depends'])) {
+                foreach ($config['depends'] as $depend) {
+                    $fpmArgs[] = '--depends';
+                    $fpmArgs[] = $depend;
+                }
+            }
+        }
+        else {
+            $fpmArgs[] = '--no-depends';
         }
 
         if (isset($config['directories']) && is_array($config['directories'])) {
@@ -285,7 +290,7 @@ class CreatePackages
         echo "RPM package created: " . DIST_RPM_PATH . "/{$name}-{$phpVersion}-{$iteration}.{$architecture}.rpm\n";
     }
 
-    private static function createDebPackage($name, $config, $phpVersion, $architecture, $iteration): void
+    private static function createDebPackage(string $name, array $config, string $phpVersion, string $architecture, string $iteration, bool $hasDependencies = true): void
     {
         echo "Creating DEB package for {$name}...\n";
 
@@ -303,7 +308,6 @@ class CreatePackages
             '--maintainer', 'Static PHP <info@static-php.dev>'
         ];
 
-
         if (isset($config['provides']) && is_array($config['provides'])) {
             foreach ($config['provides'] as $provide) {
                 $fpmArgs[] = '--provides';
@@ -319,18 +323,23 @@ class CreatePackages
             }
         }
 
-        foreach (self::$binaryDependencies as $lib => $version) {
-            $lib = str_replace('.so.', '', $lib); // remove .so. for deb compatibility
-            $lib = preg_replace('/_\D+/', '', $lib);
-            $numericVersion = preg_replace('/[^0-9.]/', '',  $version);
-            $fpmArgs[] = '--depends';
-            $fpmArgs[] = "$lib (>= {$numericVersion})";
-        }
-        if (isset($config['depends']) && is_array($config['depends'])) {
-            foreach ($config['depends'] as $depend) {
+        if ($hasDependencies) {
+            foreach (self::$binaryDependencies as $lib => $version) {
+                $lib = str_replace('.so.', '', $lib); // remove .so. for deb compatibility
+                $lib = preg_replace('/_\D+/', '', $lib);
+                $numericVersion = preg_replace('/[^0-9.]/', '',  $version);
                 $fpmArgs[] = '--depends';
-                $fpmArgs[] = $depend;
+                $fpmArgs[] = "$lib (>= {$numericVersion})";
             }
+            if (isset($config['depends']) && is_array($config['depends'])) {
+                foreach ($config['depends'] as $depend) {
+                    $fpmArgs[] = '--depends';
+                    $fpmArgs[] = $depend;
+                }
+            }
+        }
+        else {
+            $fpmArgs[] = '--no-depends';
         }
 
         if (isset($config['directories']) && is_array($config['directories'])) {

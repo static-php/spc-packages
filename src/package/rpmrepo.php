@@ -64,7 +64,6 @@ class rpmrepo implements package
         // Extract module information
         $moduleName = $moduleData['data']['name'] ?? 'static-php';
         $moduleStream = $moduleData['data']['stream'] ?? $this->phpVersion;
-        $moduleVersion = $moduleData['data']['version'] ?? '20250603';
 
         // Create the repository directory structure
         $moduleDir = $repoDir . '/modules/' . $moduleName;
@@ -207,7 +206,7 @@ class rpmrepo implements package
         });
 
         return [
-            'name' => 'static-php-repo',
+            'name' => 'static-php',
             'files' => [
                 $repoConfigFile => '/etc/yum.repos.d/static-php.repo',
             ],

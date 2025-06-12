@@ -77,5 +77,5 @@ extra-env:
     SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS: "-pie -release zts-majorminornodot"
     LDFLAGS: "-Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack"
     SPC_CMD_PREFIX_PHP_CONFIGURE: "./configure --prefix= --with-valgrind=no --disable-shared --enable-static --disable-all --disable-cgi --disable-phpdbg --disable-debug --with-pic --disable-dependency-tracking --enable-rtld-now"
-    PHP_BUILD_PROVIDER: "Static PHP repository <https://rpm.static-php.dev> #StandWithUkraine"
-    CONFIGURE_COMMAND: ""
+    PHP_BUILD_PROVIDER: "Static PHP <https://static-php.dev> #StandWithUkraine"
+    NO_CONFIGURE_COMMAND: true
