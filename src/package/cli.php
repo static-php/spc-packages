@@ -13,7 +13,7 @@ class cli implements package
         $config = CraftConfig::getInstance();
         $staticExtensions = $config->getStaticExtensions();
 
-        $provides = ['php-zts', 'php-zts-cli'];
+        $provides = ['php-zts'];
         $replaces = [];
         $configFiles = ['/etc/php-zts.ini'];
         $files = [

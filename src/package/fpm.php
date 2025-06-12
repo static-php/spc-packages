@@ -10,12 +10,12 @@ class fpm implements package
     {
         return [
             'provides' => [
-                'php-fpm',
+                'php-zts-fpm',
             ],
             'files' => [
                 INI_PATH . '/php-fpm.conf' => '/etc/php-zts-fpm.conf',
                 INI_PATH . '/www.conf' => '/etc/php-zts-fpm.d/conf',
-                BUILD_BIN_PATH . '/php-fpm' => '/usr/bin/php-zts-fpm',
+                BUILD_BIN_PATH . '/php-fpm' => '/usr/sbin/php-zts-fpm',
             ],
             'empty_directories' => [
                 '/etc/php-zts-fpm.d/',

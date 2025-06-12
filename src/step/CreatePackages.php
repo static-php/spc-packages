@@ -43,8 +43,10 @@ class CreatePackages
         // For the repository package, we use a fixed version and iteration
         $packageName = 'static-php';
         $version = '1';
-        $iteration = self::getNextIteration($packageName, $version, 'noarch');
+        $iteration = '0';
         $architecture = "noarch";
+
+        unlink(DIST_RPM_PATH . "/{$packageName}-{$version}-{$iteration}.{$architecture}.rpm");
 
         // Create the package
         self::createRpmPackage($packageName, $config, $version, $architecture, $iteration, hasDependencies: false);
@@ -173,6 +175,10 @@ class CreatePackages
 
         // Create a package for this extension
         $package = new extension($extension);
+        $packageClass = "\\staticphp\\package\\{$extension}";
+        if (class_exists($packageClass)) {
+            $package = new $packageClass($extension);
+        }
         $config = $package->getFpmConfig();
 
         if (!file_exists(INI_PATH . '/extension/' . $extension . '.ini')) {
