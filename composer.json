@@ -29,7 +29,7 @@
   "prefer-stable": true,
   "require": {
     "php": ">=8.3",
-    "crazywhalecc/static-php-cli": "dev-fix/icurel",
+    "crazywhalecc/static-php-cli": "dev-main",
     "laravel/helpers": "^1.7",
       "ext-zlib": "*"
   },
