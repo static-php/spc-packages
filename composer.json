@@ -1,5 +1,6 @@
 {
   "name": "static-php/spc-packages",
+  "version": "1.0.0",
   "description": "Build packages using static-php-cli",
   "type": "application",
   "homepage": "https://static-php.dev",
