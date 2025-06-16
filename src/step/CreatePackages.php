@@ -584,9 +584,9 @@ class CreatePackages
         ]);
         $gitTagProcess->run();
         $latestTag = trim($gitTagProcess->getOutput());
-        $version = ltrim($latestTag, 'v');
+        $version = ltrim($latestTag, 'v') . '_' . $phpVersion;
 
-        $name = "frankenphp" . $phpVersion;
+        $name = "frankenphp";
 
         $iteration = self::getNextIteration($name, $version, $architecture);
 
@@ -598,7 +598,6 @@ class CreatePackages
             '-n', $name,
             '-v', $version,
             '--config-files', '/etc/frankenphp/Caddyfile',
-            '--provides', "frankenphp",
         ];
 
         foreach (self::$binaryDependencies as $lib => $version) {
