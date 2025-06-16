@@ -130,12 +130,15 @@ class BuildFrankenPHP
             echo "Error: FrankenPHP binary not found at {$frankenPhpBinary} after compilation\n";
             return false;
         }
+        chmod($frankenPhpBinary, '+x');
 
         // Copy the binary
         if (!copy($frankenPhpBinary, BUILD_BIN_PATH . '/frankenphp')) {
             echo "Error copying FrankenPHP binary to build directory\n";
             return false;
         }
+        $perms = fileperms($frankenPhpBinary) & 0777;
+        chmod(BUILD_BIN_PATH . '/frankenphp', $perms);
 
         echo 'FrankenPHP successfully built and copied to ' . BUILD_BIN_PATH . "/frankenphp\n";
         return true;
