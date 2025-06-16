@@ -2,11 +2,50 @@
 
 namespace staticphp\step;
 
+use ArrayIterator;
+use Exception;
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
 use Symfony\Component\Process\Process;
 
 class RunSPC
 {
-    public static function run(string $command = 'spc', bool $debug = false, string $phpVersion = '8.4')
+    private static function replaceInFiles(string $dir, string $builtDir, string $movedDir): void {
+        if (is_dir($dir)) {
+            $files = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS)
+            );
+        }
+        else {
+            $files = new ArrayIterator([new SplFileInfo($dir)]);
+        }
+
+        foreach ($files as $file) {
+            if (!$file->isFile()) {
+                continue;
+            }
+
+            $path = $file->getPathname();
+            $contents = file_get_contents($path);
+
+            if ($contents === false) {
+                continue;
+            }
+            if (!str_contains($contents, $builtDir)) {
+                continue;
+            }
+
+            $newContents = str_replace($builtDir, $movedDir, $contents);
+
+            if ($newContents !== $contents) {
+                file_put_contents($path, $newContents);
+            }
+        }
+    }
+
+    public static function run(string $command = 'spc', bool $debug = false, string $phpVersion = '8.4'): bool
     {
         // Ensure the craft.yml file is copied to the static-php-cli vendor directory
         $craftYmlSource = BASE_PATH . '/config/craft.yml';
@@ -51,16 +90,13 @@ class RunSPC
             self::copyBuiltFiles($phpVersion);
 
             // Fix the prefix
-            $builtDir = ROOT_DIR . '/vendor/crazywhalecc/static-php-cli/buildroot';
+            $builtDir = ROOT_DIR . '/buildroot';
             $movedDir = BUILD_ROOT_PATH;
-            $cwd = getcwd();
-            chdir(BUILD_BIN_PATH);
-            exec("find . -type f -exec sed -i 's|$builtDir|$movedDir|g' {} +");
-            echo "Replaced paths successfully.\n";
-            chdir($cwd);
+            self::replaceInFiles(BUILD_BIN_PATH . '/php-config', $builtDir, $movedDir);
+            self::replaceInFiles(BUILD_LIB_PATH . '/pkgconfig', $builtDir, $movedDir);
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             echo "Error running static-php-cli with: " . $e->getMessage() . "\n";
             return false;
         }

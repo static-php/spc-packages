@@ -3,12 +3,16 @@
 namespace staticphp\package;
 
 use staticphp\package;
+use staticphp\step\CreatePackages;
 
 class fpm implements package
 {
     public function getFpmConfig(): array
     {
         return [
+            'depends' => [
+                CreatePackages::getPrefix() . '-cli',
+            ],
             'provides' => [
                 'php-zts-fpm',
             ],
