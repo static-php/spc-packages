@@ -100,10 +100,14 @@ switch ($action) {
         break;
 
     case 'all':
-        // Run both build and package steps
+        // Run all steps: build PHP, build FrankenPHP, create packages, and create repository
         echo "Building PHP with extensions using static-php-cli...\n";
         echo "Using PHP version: {$phpVersion}\n";
         staticphp\step\RunSPC::run($command, $debug, $phpVersion);
+
+        // Build FrankenPHP
+        echo "Building FrankenPHP linked against PHP {$phpVersion}...\n";
+        staticphp\step\BuildFrankenPHP::run($phpVersion);
 
         if ($packageNames) {
             // Split by comma to support multiple packages
@@ -133,14 +137,21 @@ switch ($action) {
         staticphp\step\CreatePackages::createRepo($packageType, $phpVersion);
         break;
 
+    case 'frankenphp':
+        // Build FrankenPHP linked against the static PHP library
+        echo "Building FrankenPHP linked against PHP {$phpVersion}...\n";
+        staticphp\step\BuildFrankenPHP::run($phpVersion);
+        break;
+
     case 'help':
     default:
         echo "Usage: php bin/spp [action] [package_names] [options]\n";
         echo "Available actions:\n";
-        echo "  build   - Build PHP with extensions using static-php-cli\n";
-        echo "  package - Create packages for all extensions or specific packages\n";
-        echo "  all     - Run both build and package steps\n";
-        echo "  repo    - Create a repository package for module installation\n";
+        echo "  build      - Build PHP with extensions using static-php-cli\n";
+        echo "  package    - Create packages for all extensions or specific packages\n";
+        echo "  all        - Run both build and package steps\n";
+        echo "  repo       - Create a repository package for module installation\n";
+        echo "  frankenphp - Build FrankenPHP linked against the static PHP library\n";
         echo "Options:\n";
         echo "  --command=<cmd> - Specify which command to use (default: spc, alternatives: spc-gnu-docker, spc-alpine-docker)\n";
         echo "  --debug         - Print debug messages\n";

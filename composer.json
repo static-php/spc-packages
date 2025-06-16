@@ -8,13 +8,11 @@
   "authors": [
     {
       "name": "Marc Henderkes",
-      "email": "m@pyc.ac",
-      "role": "lead"
+      "email": "m@pyc.ac"
     },
     {
       "name": "Jerry Ma",
-      "email": "admin@zhamao.me",
-      "role": "lead"
+      "email": "admin@zhamao.me"
     }
   ],
   "support": {

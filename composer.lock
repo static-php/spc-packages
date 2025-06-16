@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4b0d68e73aaccc84208c1a7663939ea4",
+    "content-hash": "33be5392ffd5d023d2d46f693e787090",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -81,12 +81,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "b265d6dd5625665a0477047f367e7a20673e313a"
+                "reference": "3efabee1533f4a38729ad4d7a94e2c4542f4b847"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/b265d6dd5625665a0477047f367e7a20673e313a",
-                "reference": "b265d6dd5625665a0477047f367e7a20673e313a",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/3efabee1533f4a38729ad4d7a94e2c4542f4b847",
+                "reference": "3efabee1533f4a38729ad4d7a94e2c4542f4b847",
                 "shasum": ""
             },
             "require": {
@@ -142,7 +142,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-06-13T09:25:31+00:00"
+            "time": "2025-06-13T17:13:33+00:00"
         },
         {
             "name": "doctrine/inflector",

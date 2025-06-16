@@ -66,15 +66,19 @@ class rpmrepo implements package
             $rpmPattern = DIST_RPM_PATH . '/' . CreatePackages::getPrefix() . '*' . $fullPhpVersion . '*.rpm';
             $rpmFiles = glob($rpmPattern);
 
+            $phpVersion = str_replace('.', '', SPP_PHP_VERSION);
+            $frankenFiles = glob(DIST_RPM_PATH . "/frankenphp{$phpVersion}*.rpm");
+
             echo "Scanning for RPM artifacts in: " . DIST_RPM_PATH . "\n";
             echo "Found " . count($rpmFiles) . " RPM files\n";
 
-            foreach ($rpmFiles as $rpmFile) {
+            foreach ([...$rpmFiles, ...$frankenFiles] as $rpmFile) {
                 $filename = basename($rpmFile);
 
                 // Convert filename to artifact format (remove .rpm extension and path)
                 $artifact = str_replace('.rpm', '', $filename);
                 $artifact = str_replace('-' . $fullPhpVersion . '-', '-0:' . $fullPhpVersion . '-', $artifact);
+                $artifact = str_replace("frankenphp{$phpVersion}-", "frankenphp{$phpVersion}-0:", $artifact);
 
                 // Add to the artifact list if not already present
                 if (!in_array($artifact, $moduleData['data']['artifacts']['rpms'])) {

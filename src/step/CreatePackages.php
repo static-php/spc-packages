@@ -80,6 +80,9 @@ class CreatePackages
                 if (in_array($packageName, self::$sapis)) {
                     self::createSapiPackage($packageName);
                 }
+                elseif ($packageName === 'frankenphp') {
+                    self::createFrankenPhpPackage();
+                }
                 // Check if it's an extension package
                 elseif (in_array($packageName, self::$sharedExtensions)) {
                     self::createExtensionPackage($packageName);
@@ -88,9 +91,12 @@ class CreatePackages
                     echo "Warning: Package {$packageName} not found in configuration.\n";
                 }
             }
-        } else {
+        }
+        else {
             // Create packages for each SAPI (cli, fpm, embed)
             self::createSapiPackages();
+
+            self::createFrankenPhpPackage();
 
             // Create packages for each extension
             self::createExtensionPackages();
@@ -222,6 +228,11 @@ class CreatePackages
             foreach ($config['provides'] as $provide) {
                 $fpmArgs[] = '--provides';
                 $fpmArgs[] = "$provide = $phpVersion-$iteration";
+                if (str_ends_with($provide, '.so')) {
+                    $provide = str_replace('.so', '.so()(64bit)', $provide);
+                    $fpmArgs[] = '--provides';
+                    $fpmArgs[] = "$provide = $phpVersion-$iteration";
+                }
             }
         }
 
@@ -241,6 +252,9 @@ class CreatePackages
             if (isset($config['depends']) && is_array($config['depends'])) {
                 foreach ($config['depends'] as $depend) {
                     $fpmArgs[] = '--depends';
+                    if (str_ends_with($depend, '.so')) {
+                        $depend = str_replace('.so', '.so()(64bit)', $depend);
+                    }
                     $fpmArgs[] = $depend;
                 }
             }
@@ -267,7 +281,8 @@ class CreatePackages
             foreach ($config['files'] as $source => $dest) {
                 if (file_exists($source)) {
                     $fpmArgs[] = $source . '=' . $dest;
-                } else {
+                }
+                else {
                     echo "Warning: Source file not found: {$source}\n";
                 }
             }
@@ -333,7 +348,7 @@ class CreatePackages
             foreach (self::$binaryDependencies as $lib => $version) {
                 $lib = str_replace('.so.', '', $lib); // remove .so. for deb compatibility
                 $lib = preg_replace('/_\D+/', '', $lib);
-                $numericVersion = preg_replace('/[^0-9.]/', '',  $version);
+                $numericVersion = preg_replace('/[^0-9.]/', '', $version);
                 $fpmArgs[] = '--depends';
                 $fpmArgs[] = "$lib (>= {$numericVersion})";
             }
@@ -367,7 +382,8 @@ class CreatePackages
             foreach ($config['files'] as $source => $dest) {
                 if (file_exists($source)) {
                     $fpmArgs[] = $source . '=' . $dest;
-                } else {
+                }
+                else {
                     echo "Warning: Source file not found: {$source}\n";
                 }
             }
@@ -529,5 +545,97 @@ class CreatePackages
     public static function getPrefix(): string
     {
         return 'php-zts';
+    }
+
+    private static function createFrankenPhpPackage()
+    {
+        echo "Creating FrankenPHP package\n";
+
+        $packageClass = "\\staticphp\\package\\frankenphp";
+
+        if (!class_exists($packageClass)) {
+            echo "Warning: Package class not found for SAPI: frankenphp\n";
+            return;
+        }
+
+        // Extract PHP version and architecture
+        [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
+
+        if (in_array('rpm', self::$packageTypes)) {
+            self::createRpmFrankenPhpPackage($architecture);
+        }
+        if (in_array('deb', self::$packageTypes)) {
+            self::createDebFrankenPhpPackage($architecture);
+        }
+    }
+
+    private static function createRpmFrankenPhpPackage(mixed $architecture)
+    {
+        echo "Creating RPM package for FrankenPHP...\n";
+
+        $packageFolder = DIST_PATH . '/frankenphp/package';
+
+        $phpVersion = str_replace('.', '', SPP_PHP_VERSION);
+        $phpEmbedName = 'lib' . self::getPrefix() . '-' . $phpVersion . '.so';
+
+        $gitTagProcess = new Process([
+            'bash', '-c',
+            "git ls-remote --tags https://github.com/php/frankenphp.git | grep -o 'refs/tags/[^{}]*$' | sed 's#refs/tags/##' | sort -V | tail -n1"
+        ]);
+        $gitTagProcess->run();
+        $latestTag = trim($gitTagProcess->getOutput());
+        $version = ltrim($latestTag, 'v');
+
+        $name = "frankenphp" . $phpVersion;
+
+        $iteration = self::getNextIteration($name, $version, $architecture);
+
+        $fpmArgs = [
+            'fpm',
+            '-s', 'dir',
+            '-t', 'rpm',
+            '-p', DIST_RPM_PATH,
+            '-n', $name,
+            '-v', $version,
+            '--config-files', '/etc/frankenphp/Caddyfile',
+            '--provides', "frankenphp",
+        ];
+
+        foreach (self::$binaryDependencies as $lib => $version) {
+            $fpmArgs[] = '--depends';
+            $fpmArgs[] = "$lib({$version})(64bit)";
+        }
+
+        mkdir("{$packageFolder}/empty/", recursive: true);
+
+        $fpmArgs = [...$fpmArgs, ...[
+            '--depends', "$phpEmbedName",
+            '--before-install', "{$packageFolder}/rhel/preinstall.sh",
+            '--after-install', "{$packageFolder}/rhel/postinstall.sh",
+            '--before-remove', "{$packageFolder}/rhel/preuninstall.sh",
+            '--after-remove', "{$packageFolder}/rhel/postuninstall.sh",
+            '--iteration', $iteration,
+            '--rpm-user', 'frankenphp',
+            '--rpm-group', 'frankenphp',
+            BUILD_BIN_PATH . '/frankenphp=/usr/bin/frankenphp',
+            "{$packageFolder}/rhel/frankenphp.service=/usr/lib/systemd/system/frankenphp.service",
+            "{$packageFolder}/Caddyfile=/etc/frankenphp/Caddyfile",
+            "{$packageFolder}/content/=/usr/share/frankenphp",
+            "{$packageFolder}/empty/=/var/lib/frankenphp"
+        ]];
+
+        // Build the RPM package
+        $rpmProcess = new Process($fpmArgs);
+        $rpmProcess->setTimeout(null);
+        $rpmProcess->run(function ($type, $buffer) {
+            echo $buffer;
+        });
+
+        echo "RPM package created: " . DIST_RPM_PATH . "/{$name}-{$version}-{$iteration}.{$architecture}.rpm\n";
+    }
+
+    private static function createDebFrankenPhpPackage(mixed $architecture)
+    {
+
     }
 }

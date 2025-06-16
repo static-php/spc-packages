@@ -50,6 +50,15 @@ class RunSPC
             // Copy the built files to our build directory
             self::copyBuiltFiles($phpVersion);
 
+            // Fix the prefix
+            $builtDir = ROOT_DIR . '/vendor/crazywhalecc/static-php-cli/buildroot';
+            $movedDir = BUILD_ROOT_PATH;
+            $cwd = getcwd();
+            chdir(BUILD_BIN_PATH);
+            exec("find . -type f -exec sed -i 's|$builtDir|$movedDir|g' {} +");
+            echo "Replaced paths successfully.\n";
+            chdir($cwd);
+
             return true;
         } catch (\Exception $e) {
             echo "Error running static-php-cli with: " . $e->getMessage() . "\n";
