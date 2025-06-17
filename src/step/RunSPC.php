@@ -33,11 +33,12 @@ class RunSPC
             if ($contents === false) {
                 continue;
             }
-            if (!str_contains($contents, $builtDir)) {
+            if (!str_contains($contents, $builtDir) && !str_contains($contents, '/app/buildroot')) {
                 continue;
             }
 
             $newContents = str_replace($builtDir, $movedDir, $contents);
+            $newContents = str_replace('/app/buildroot', $movedDir, $newContents);
 
             if ($newContents !== $contents) {
                 file_put_contents($path, $newContents);
