@@ -551,15 +551,8 @@ class CreatePackages
     {
         echo "Creating FrankenPHP package\n";
 
-        $packageClass = "\\staticphp\\package\\frankenphp";
-
-        if (!class_exists($packageClass)) {
-            echo "Warning: Package class not found for SAPI: frankenphp\n";
-            return;
-        }
-
         // Extract PHP version and architecture
-        [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
+        [, $architecture] = self::getPhpVersionAndArchitecture();
 
         if (in_array('rpm', self::$packageTypes)) {
             self::createRpmFrankenPhpPackage($architecture);
