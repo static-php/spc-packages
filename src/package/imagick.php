@@ -15,7 +15,7 @@ class imagick extends extension
             ],
             'depends' => [
                 CreatePackages::getPrefix() . '-cli',
-                'libgomp.so.1()(64bit)'
+                'libgomp.so.1'
             ],
             'files' => [
                 BUILD_MODULES_PATH . '/imagick.so' => '/usr/lib64/php-zts/modules/imagick.so',

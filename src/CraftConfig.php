@@ -27,7 +27,9 @@ class CraftConfig
 
     private function loadConfig()
     {
-        $craftYmlPath = BASE_PATH . '/config/craft.yml';
+        $arch = str_contains(php_uname('m'), 'x86_64') ? 'x86_64' : 'aarch64';
+        $command = SPP_COMMAND;
+        $craftYmlPath = BASE_PATH . "/config/{$arch}-{$command}-craft.yml";
 
         if (!file_exists($craftYmlPath)) {
             throw new \RuntimeException("Configuration file not found: {$craftYmlPath}");

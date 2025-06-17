@@ -104,11 +104,14 @@ class rpmrepo implements package
 
         // Create a simple repository configuration file
         $repoConfigFile = $repoDir . '/static-php.repo';
-        $repoConfig = "[static-php]\n";
+        $repoConfig  = "[static-php]\n";
         $repoConfig .= "name=Static PHP repository\n";
-        $repoConfig .= "baseurl=file://" . DIST_RPM_PATH . "\n";
+        $repoConfig .= "baseurl=https://rpm.henderkes.com/\$basearch/el\$releasever\n";
         $repoConfig .= "enabled=1\n";
         $repoConfig .= "gpgcheck=0\n";
+
+        file_put_contents($repoConfigFile, $repoConfig);
+
         file_put_contents($repoConfigFile, $repoConfig);
 
         // Ensure the dist/rpm directory exists
