@@ -33,12 +33,11 @@ class RunSPC
             if ($contents === false) {
                 continue;
             }
-            if (!str_contains($contents, $builtDir) && !str_contains($contents, '/app/buildroot')) {
+            if (!str_contains($contents, $builtDir)) {
                 continue;
             }
 
             $newContents = str_replace($builtDir, $movedDir, $contents);
-            $newContents = str_replace('/app/buildroot', $movedDir, $newContents);
 
             if ($newContents !== $contents) {
                 file_put_contents($path, $newContents);
@@ -96,7 +95,9 @@ class RunSPC
             $builtDir = ROOT_DIR . '/buildroot';
             $movedDir = BUILD_ROOT_PATH;
             self::replaceInFiles(BUILD_BIN_PATH . '/php-config', $builtDir, $movedDir);
+            self::replaceInFiles(BUILD_BIN_PATH . '/php-config', '/app/buildroot', $movedDir);
             self::replaceInFiles(BUILD_LIB_PATH . '/pkgconfig', $builtDir, $movedDir);
+            self::replaceInFiles(BUILD_LIB_PATH . '/pkgconfig', '/app/buildroot', $movedDir);
 
             return true;
         } catch (Exception $e) {
