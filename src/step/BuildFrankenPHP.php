@@ -18,7 +18,6 @@ class BuildFrankenPHP
 
         // Define paths
         $phpConfigPath = BUILD_BIN_PATH . '/php-config';
-        $frankenPhpDir = DIST_PATH . '/frankenphp';
 
         // Check if php-config exists
         if (!file_exists($phpConfigPath)) {
@@ -41,35 +40,6 @@ class BuildFrankenPHP
         ]);
         $gitTagProcess->run();
         $latestTag = trim($gitTagProcess->getOutput());
-
-        if (!is_dir($frankenPhpDir)) {
-            echo "Cloning FrankenPHP repository...\n";
-            $cloneProcess = new Process(['git', 'clone', 'https://github.com/php/frankenphp.git', $frankenPhpDir]);
-            $cloneProcess->setTimeout(null);
-            $cloneProcess->run(function ($type, $buffer) {
-                echo $buffer;
-            });
-
-            if (!$cloneProcess->isSuccessful()) {
-                echo "Error cloning FrankenPHP repository: " . $cloneProcess->getErrorOutput() . "\n";
-                return false;
-            }
-        }
-
-        $checkoutProcess = new Process(['git', 'checkout', "tags/{$latestTag}"], $frankenPhpDir);
-        $checkoutProcess->run();
-
-        if (!$checkoutProcess->isSuccessful()) {
-            echo "Error checking out tag {$latestTag}: " . $checkoutProcess->getErrorOutput() . "\n";
-            return false;
-        }
-
-        // Navigate to the FrankenPHP directory
-        $frankenPhpCaddyDir = $frankenPhpDir . '/caddy/frankenphp';
-        if (!is_dir($frankenPhpCaddyDir)) {
-            echo "Error: FrankenPHP caddy directory not found at {$frankenPhpCaddyDir}\n";
-            return false;
-        }
 
         // Execute php-config commands to get the values
         $includesProcess = new Process([$phpConfigPath, '--includes']);
@@ -111,7 +81,7 @@ class BuildFrankenPHP
                 '--with', 'github.com/baldinof/caddy-supervisor',
                 '--with', 'github.com/caddyserver/cache-handler',
             ],
-            $frankenPhpCaddyDir,
+            BUILD_BIN_PATH,
             $env
         );
         $buildProcess->setTimeout(null);
@@ -125,23 +95,13 @@ class BuildFrankenPHP
         }
 
         // Check if the binary was created
-        $frankenPhpBinary = $frankenPhpCaddyDir . '/frankenphp';
+        $frankenPhpBinary = BUILD_BIN_PATH . '/frankenphp';
         if (!file_exists($frankenPhpBinary)) {
             echo "Error: FrankenPHP binary not found at {$frankenPhpBinary} after compilation\n";
             return false;
         }
-        $perms = fileperms($frankenPhpBinary) & 0777;
-        $perms |= 0110;
-        chmod($frankenPhpBinary, $perms);
 
-        // Copy the binary
-        if (!copy($frankenPhpBinary, BUILD_BIN_PATH . '/frankenphp')) {
-            echo "Error copying FrankenPHP binary to build directory\n";
-            return false;
-        }
-        chmod($frankenPhpBinary, $perms);
-
-        echo 'FrankenPHP successfully built and copied to ' . BUILD_BIN_PATH . "/frankenphp\n";
+        echo 'FrankenPHP successfully built at ' . BUILD_BIN_PATH . "/frankenphp\n";
         return true;
     }
 }
