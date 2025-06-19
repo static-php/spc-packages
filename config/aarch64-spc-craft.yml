@@ -7,7 +7,7 @@ shared-extensions: [amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl
 # Extra libraries to build (list or comma-separated are both accepted)
 libs: [libacl, libavif, nghttp3, ngtcp2, watcher]
 # [REQUIRED] Build SAPIs (list or comma-separated are both accepted)
-sapi: cli,embed,fpm
+sapi: cli,embed,fpm,frankenphp
 # Show full console output (default: false)
 debug: false
 # Build options (same as `build` command options, all options are optional)

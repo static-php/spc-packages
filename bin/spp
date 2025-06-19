@@ -106,8 +106,6 @@ switch ($action) {
         echo "Using PHP version: {$phpVersion}\n";
         staticphp\step\RunSPC::run($command, $debug, $phpVersion);
 
-        staticphp\step\BuildFrankenPHP::run($phpVersion);
-
         if ($packageNames) {
             // Split by comma to support multiple packages
             $packageNames = explode(',', $packageNames);
@@ -136,11 +134,6 @@ switch ($action) {
         staticphp\step\CreatePackages::createRepo($packageType, $phpVersion);
         break;
 
-    case 'frankenphp':
-        // Build FrankenPHP linked against the static PHP library
-        staticphp\step\BuildFrankenPHP::run($phpVersion);
-        break;
-
     case 'help':
     default:
         echo "Usage: php bin/spp [action] [package_names] [options]\n";
@@ -149,7 +142,6 @@ switch ($action) {
         echo "  package    - Create packages for all extensions or specific packages\n";
         echo "  all        - Run both build and package steps\n";
         echo "  repo       - Create a repository package for module installation\n";
-        echo "  frankenphp - Build FrankenPHP linked against the static PHP library\n";
         echo "Options:\n";
         echo "  --command=<cmd> - Specify which command to use (default: spc, alternatives: spc-gnu-docker, spc-alpine-docker)\n";
         echo "  --debug         - Print debug messages\n";
