@@ -77,7 +77,7 @@ class CreatePackages
                 echo "Building package: {$packageName}\n";
 
                 // Check if it's a SAPI package
-                if (in_array($packageName, self::$sapis)) {
+                if (in_array($packageName, self::$sapis) && $packageName !== 'frankenphp') {
                     self::createSapiPackage($packageName);
                 }
                 elseif ($packageName === 'frankenphp') {
