@@ -254,8 +254,8 @@ class CreatePackages
             if (isset($config['depends']) && is_array($config['depends'])) {
                 foreach ($config['depends'] as $depend) {
                     $fpmArgs[] = '--depends';
-                    if (str_ends_with($depend, '.so')) {
-                        $depend = str_replace('.so', '.so()(64bit)', $depend);
+                    if (preg_match('/\.so(\.\d+)*$/', $depend)) {
+                        $depend .= '()(64bit)';
                     }
                     $fpmArgs[] = $depend;
                 }
