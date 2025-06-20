@@ -1,40 +1,39 @@
 {
-  "name": "static-php/spc-packages",
-  "version": "1.0.0",
-  "description": "Build packages using static-php-cli",
-  "type": "application",
-  "homepage": "https://static-php.dev",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Marc Henderkes",
-      "email": "m@pyc.ac"
+    "name": "static-php/spc-packages",
+    "version": "1.0.0",
+    "description": "Build packages using static-php-cli",
+    "type": "application",
+    "homepage": "https://static-php.dev",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marc Henderkes",
+            "email": "m@pyc.ac"
+        },
+        {
+            "name": "Jerry Ma",
+            "email": "admin@zhamao.me"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/static-php/spc-packages/issues"
     },
-    {
-      "name": "Jerry Ma",
-      "email": "admin@zhamao.me"
+    "config": {
+        "platform": {
+            "php": "8.3.0"
+        },
+        "sort-packages": true
+    },
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.3",
+        "crazywhalecc/static-php-cli": "dev-main",
+        "laravel/helpers": "^1.7",
+        "ext-zlib": "*"
+    },
+    "autoload": {
+        "classmap": [
+            "src/"
+        ]
     }
-  ],
-  "support": {
-    "issues": "https://github.com/static-php/spc-packages/issues"
-  },
-  "config": {
-    "platform": {
-      "php": "8.3.0"
-    },
-    "optimize-autoloader": true,
-    "sort-packages": true
-  },
-  "prefer-stable": true,
-  "require": {
-    "php": ">=8.3",
-    "crazywhalecc/static-php-cli": "dev-docs",
-    "laravel/helpers": "^1.7",
-      "ext-zlib": "*"
-  },
-  "autoload": {
-    "classmap": [
-      "src/"
-    ]
-  }
 }
