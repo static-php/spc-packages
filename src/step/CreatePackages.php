@@ -594,7 +594,9 @@ class CreatePackages
             $fpmArgs[] = "$lib({$version})(64bit)";
         }
 
-        mkdir("{$packageFolder}/empty/", recursive: true);
+        if (!is_dir("{$packageFolder}/empty/")) {
+            mkdir("{$packageFolder}/empty/", recursive: true);
+        }
 
         $fpmArgs = [...$fpmArgs, ...[
             '--depends', "$phpEmbedName",
