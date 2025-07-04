@@ -23,14 +23,14 @@ def parse_rpm_info(filename):
         return name, version, release, arch, stream
 
     # Match frankenphp RPMs: frankenphp-1.8.0_82-1.x86_64.rpm
-    match_franken = re.match(r'(frankenphp)-1\.8\.0_(8\d)-(?P<release>\d+)\.(?P<arch>[^.]+)\.rpm', basename)
+    match_franken = re.match(r'(frankenphp)-(?P<version>\d+\.\d+\.\d+_\d+)-(?P<release>\d+)\.(?P<arch>[^.]+)\.rpm', basename)
     if match_franken:
         name = match_franken.group(1)
-        patch = match_franken.group(2)
+        version = match_franken.group("version")
         release = match_franken.group("release")
         arch = match_franken.group("arch")
-        stream = f"8.{patch[-1]}"  # e.g., 82 -> 8.2, 83 -> 8.3
-        version = f"1.8.0_{patch}"
+        php_patch = version.split('_')[-1]
+        stream = f"8.{php_patch[-1]}"
         return name, version, release, arch, stream
 
     return None
