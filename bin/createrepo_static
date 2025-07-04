@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+
+import os
+import re
+import glob
+import yaml
+from datetime import datetime
+from collections import defaultdict
+
+yaml.Dumper.ignore_aliases = lambda *args: True
+
+def parse_rpm_info(filename):
+    basename = os.path.basename(filename)
+
+    # Match standard php-zts RPMs
+    match_php = re.match(r'(?P<name>php-zts-[^-]+)-(?P<version>\d+\.\d+\.\d+)-(?P<release>[^.]+)\.(?P<arch>[^.]+)\.rpm', basename)
+    if match_php:
+        name = match_php.group("name")
+        version = match_php.group("version")
+        release = match_php.group("release")
+        arch = match_php.group("arch")
+        stream = '.'.join(version.split('.')[:2])
+        return name, version, release, arch, stream
+
+    # Match frankenphp RPMs: frankenphp-1.8.0_82-1.x86_64.rpm
+    match_franken = re.match(r'(frankenphp)-1\.8\.0_(8\d)-(?P<release>\d+)\.(?P<arch>[^.]+)\.rpm', basename)
+    if match_franken:
+        name = match_franken.group(1)
+        patch = match_franken.group(2)
+        release = match_franken.group("release")
+        arch = match_franken.group("arch")
+        stream = f"8.{patch[-1]}"  # e.g., 82 -> 8.2, 83 -> 8.3
+        version = f"1.8.0_{patch}"
+        return name, version, release, arch, stream
+
+    return None
+
+def build_module_structure(rpm_map):
+    documents = []
+    timestamp = int(datetime.utcnow().strftime('%Y%m%d'))
+    platforms = ['el7', 'el8', 'el9', 'el10']
+
+    for stream, pkg_list in sorted(rpm_map.items()):
+        components = {}
+        artifacts = []
+        name_ref_map = {}
+
+        for pkg in sorted(pkg_list):
+            info = parse_rpm_info(pkg)
+            if not info:
+                continue
+            name, version, release, arch, _ = info
+            artifacts.append(f"{name}-0:{version}-{release}.{arch}")
+            name_ref_map[name] = version
+
+        for comp in ['php-zts', 'php-zts-cli', 'php-zts-fpm', 'php-zts-embed']:
+            if comp in name_ref_map:
+                rationale = 'Main package' if comp == 'php-zts' else comp.split('-')[-1].upper()
+                components[comp] = {
+                    'rationale': rationale,
+                    'ref': name_ref_map[comp]
+                }
+
+        if 'frankenphp' in name_ref_map:
+            components['frankenphp'] = {
+                'rationale': 'Embedded web server',
+                'ref': name_ref_map['frankenphp']
+            }
+
+        doc = {
+            'document': 'modulemd',
+            'version': 2,
+            'data': {
+                'name': 'php-zts',
+                'stream': f'static-{stream}',
+                'version': timestamp,
+                'context': 'local',
+                'summary': f'Static PHP {stream} packages',
+                'description': f'Static PHP {stream} built from local RPMs',
+                'license': {
+                    'module': ['MIT']
+                },
+                'dependencies': [{
+                    'buildrequires': {
+                        'platform': list(platforms)
+                    },
+                    'requires': {
+                        'platform': list(platforms)
+                    }
+                }],
+                'components': {
+                    'rpms': components
+                },
+                'artifacts': {
+                    'rpms': artifacts
+                }
+            }
+        }
+        documents.append(doc)
+    return documents
+
+rpm_files = glob.glob("*.rpm")
+rpm_map = defaultdict(list)
+
+for rpm in rpm_files:
+    info = parse_rpm_info(rpm)
+    if info:
+        _, _, _, _, stream = info
+        rpm_map[stream].append(rpm)
+
+modules_yaml = build_module_structure(rpm_map)
+
+output_path = os.path.join(os.getcwd(), "modules.yaml")
+with open(output_path, "w") as f:
+    for doc in modules_yaml:
+        f.write('---\n')
+        yaml.dump(doc, f, sort_keys=False, default_flow_style=False)
+        f.write('...\n')
+
+output_path

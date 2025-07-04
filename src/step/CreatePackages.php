@@ -3,7 +3,6 @@
 namespace staticphp\step;
 
 use staticphp\extension;
-use staticphp\package\rpmrepo;
 use Symfony\Component\Process\Process;
 use staticphp\CraftConfig;
 
@@ -15,45 +14,6 @@ class CreatePackages
     private static $binaryDependencies = [];
     private static $packageTypes = ['rpm', 'deb'];
 
-    /**
-     * Create a repository package
-     *
-     * @param string $packageType Package type (rpm, deb)
-     * @param string $phpVersion PHP version to use
-     * @return bool True on success
-     */
-    public static function createRepo(string $packageType = 'rpm', string $phpVersion = '8.4'): bool
-    {
-        echo "Creating repository package...\n";
-        echo "Using PHP version: {$phpVersion}\n";
-
-        // Get binary dependencies once at the start
-        $phpBinary = BUILD_BIN_PATH . '/php';
-        self::$binaryDependencies = self::getBinaryDependencies($phpBinary);
-
-        // Set package types
-        self::$packageTypes = [$packageType];
-
-        // Create the repository package based on package type
-        if ($packageType === 'rpm') {
-            $repoPackage = new rpmrepo($phpVersion);
-        }
-        $config = $repoPackage->getFpmConfig();
-
-        // For the repository package, we use a fixed version and iteration
-        $packageName = 'static-php';
-        $version = '1';
-        $iteration = '0';
-        $architecture = "noarch";
-
-        unlink(DIST_RPM_PATH . "/{$packageName}-{$version}-{$iteration}.{$architecture}.rpm");
-
-        // Create the package
-        self::createRpmPackage($packageName, $config, $version, $architecture, $iteration, hasDependencies: false);
-
-        echo "Repository package creation completed.\n";
-        return true;
-    }
 
     public static function run($packageNames = null, string $packageTypes = 'rpm,deb'): true
     {
