@@ -36,7 +36,6 @@ class CreatePackages
             foreach ($packageNames as $packageName) {
                 echo "Building package: {$packageName}\n";
 
-                // Check if it's a SAPI package
                 if (in_array($packageName, self::$sapis) && $packageName !== 'frankenphp') {
                     self::createSapiPackage($packageName);
                 }
@@ -46,7 +45,6 @@ class CreatePackages
                 elseif ($packageName === 'devel') {
                     self::createSapiPackage($packageName);
                 }
-                // Check if it's an extension package
                 elseif (in_array($packageName, self::$sharedExtensions)) {
                     self::createExtensionPackage($packageName);
                 }

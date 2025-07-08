@@ -15,24 +15,44 @@ class devel implements package
         $phpConfigContent = file_get_contents($phpConfigPath);
 
         $phpConfigContent = preg_replace(
-            '/^prefix=.*$/m',
-            'prefix="/usr"',
+            [
+                '/^prefix=.*$/m',
+                '/^ldflags=.*$/m',
+                '/^libs=.*$/m',
+                '/^program_prefix=.*$/m',
+                '/^php_cli_binary=.*$/m',
+            ],
+            [
+                'prefix="/usr"',
+                'ldflags="-lpthread"',
+                'libs=""',
+                'program_prefix=""',
+                'php_cli_binary="php-zts"',
+            ],
             $phpConfigContent
         );
 
         file_put_contents($modifiedPhpConfigPath, $phpConfigContent);
+        chmod($modifiedPhpConfigPath, 0755);
 
         $phpizePath = BUILD_BIN_PATH . '/phpize';
         $modifiedPhpizePath = TEMP_DIR . '/phpize';
 
         $phpizeContent = file_get_contents($phpizePath);
         $phpizeContent = preg_replace(
-            '/^prefix=.*$/m',
-            'prefix="/usr"',
+            [
+                '/^prefix=.*$/m',
+                '/^datarootdir=.*$/m',
+            ],
+            [
+                'prefix="/usr"',
+                'datarootdir="/php-zts"',
+            ],
             $phpizeContent
         );
 
         file_put_contents($modifiedPhpizePath, $phpizeContent);
+        chmod($modifiedPhpizePath, 0755);
 
         return [
             'files' => [
