@@ -24,4 +24,9 @@ class embed implements package
             ]
         ];
     }
+
+    public function getFpmExtraArgs(): array
+    {
+        return [];
+    }
 }

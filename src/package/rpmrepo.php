@@ -277,4 +277,9 @@ class rpmrepo implements package
         echo "Detected full PHP version: {$fullPhpVersion}\n";
         return $fullPhpVersion;
     }
+
+    public function getFpmExtraArgs(): array
+    {
+        return [];
+    }
 }

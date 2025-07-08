@@ -165,4 +165,9 @@ class extension implements package
         $craftConfig = CraftConfig::getInstance();
         return in_array($this->name, $craftConfig->getSharedExtensions()) && !in_array($this->name, $craftConfig->getStaticExtensions());
     }
+
+    public function getFpmExtraArgs(): array
+    {
+        return [];
+    }
 }

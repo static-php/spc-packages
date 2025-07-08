@@ -35,4 +35,9 @@ class fpm implements package
             ],
         ];
     }
+
+    public function getFpmExtraArgs(): array
+    {
+        return [];
+    }
 }

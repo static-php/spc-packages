@@ -40,4 +40,9 @@ class cli implements package
             'files' => $files
         ];
     }
+
+    public function getFpmExtraArgs(): array
+    {
+        return [];
+    }
 }

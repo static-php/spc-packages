@@ -43,6 +43,9 @@ class CreatePackages
                 elseif ($packageName === 'frankenphp') {
                     self::createFrankenPhpPackage();
                 }
+                elseif ($packageName === 'devel') {
+                    self::createSapiPackage($packageName);
+                }
                 // Check if it's an extension package
                 elseif (in_array($packageName, self::$sharedExtensions)) {
                     self::createExtensionPackage($packageName);
@@ -154,25 +157,25 @@ class CreatePackages
             return;
         }
 
-        self::createPackageWithFpm(self::getPrefix() . "-{$extension}", $config, $phpVersion, $architecture, $iteration);
+        self::createPackageWithFpm(self::getPrefix() . "-{$extension}", $config, $phpVersion, $architecture, $iteration, $package->getFpmExtraArgs());;
     }
 
-    private static function createPackageWithFpm(string $name, array $config, string $phpVersion, string $architecture, string $iteration): void
+    private static function createPackageWithFpm(string $name, array $config, string $phpVersion, string $architecture, string $iteration, array $extraArgs = []): void
     {
         if (in_array('rpm', self::$packageTypes)) {
-            self::createRpmPackage($name, $config, $phpVersion, $architecture, $iteration);
+            self::createRpmPackage($name, $config, $phpVersion, $architecture, $iteration, $extraArgs);
         }
 
         if (in_array('deb', self::$packageTypes)) {
-            self::createDebPackage($name, $config, $phpVersion, $architecture, $iteration);
+            self::createDebPackage($name, $config, $phpVersion, $architecture, $iteration, $extraArgs);
         }
     }
 
-    private static function createRpmPackage(string $name, array $config, string $phpVersion, string $architecture, string $iteration, bool $hasDependencies = true): void
+    private static function createRpmPackage(string $name, array $config, string $phpVersion, string $architecture, string $iteration, array $extraArgs = []): void
     {
         echo "Creating RPM package for {$name}...\n";
 
-        $fpmArgs = [
+        $fpmArgs = [...[
             'fpm',
             '-s', 'dir',
             '-t', 'rpm',
@@ -184,7 +187,7 @@ class CreatePackages
             '--description', "Static PHP Package for {$name}",
             '--license', 'MIT',
             '--maintainer', 'Static PHP <info@static-php.dev>'
-        ];
+        ], ...$extraArgs];
 
         if (isset($config['provides']) && is_array($config['provides'])) {
             foreach ($config['provides'] as $provide) {
@@ -206,23 +209,18 @@ class CreatePackages
             }
         }
 
-        if ($hasDependencies) {
-            foreach (self::$binaryDependencies as $lib => $version) {
-                $fpmArgs[] = '--depends';
-                $fpmArgs[] = "{$lib}({$version})(64bit)";
-            }
-            if (isset($config['depends']) && is_array($config['depends'])) {
-                foreach ($config['depends'] as $depend) {
-                    $fpmArgs[] = '--depends';
-                    if (preg_match('/\.so(\.\d+)*$/', $depend)) {
-                        $depend .= '()(64bit)';
-                    }
-                    $fpmArgs[] = $depend;
-                }
-            }
+        foreach (self::$binaryDependencies as $lib => $version) {
+            $fpmArgs[] = '--depends';
+            $fpmArgs[] = "{$lib}({$version})(64bit)";
         }
-        else {
-            $fpmArgs[] = '--no-depends';
+        if (isset($config['depends']) && is_array($config['depends'])) {
+            foreach ($config['depends'] as $depend) {
+                $fpmArgs[] = '--depends';
+                if (preg_match('/\.so(\.\d+)*$/', $depend)) {
+                    $depend .= '()(64bit)';
+                }
+                $fpmArgs[] = $depend;
+            }
         }
 
         if (isset($config['directories']) && is_array($config['directories'])) {
@@ -273,7 +271,7 @@ class CreatePackages
         echo "RPM package created: " . DIST_RPM_PATH . "/{$name}-{$phpVersion}-{$iteration}.{$architecture}.rpm\n";
     }
 
-    private static function createDebPackage(string $name, array $config, string $phpVersion, string $architecture, string $iteration, bool $hasDependencies = true): void
+    private static function createDebPackage(string $name, array $config, string $phpVersion, string $architecture, string $iteration, array $extraArgs = []): void
     {
         echo "Creating DEB package for {$name}...\n";
 
@@ -306,23 +304,18 @@ class CreatePackages
             }
         }
 
-        if ($hasDependencies) {
-            foreach (self::$binaryDependencies as $lib => $version) {
-                $lib = str_replace('.so.', '', $lib); // remove .so. for deb compatibility
-                $lib = preg_replace('/_\D+/', '', $lib);
-                $numericVersion = preg_replace('/[^0-9.]/', '', $version);
-                $fpmArgs[] = '--depends';
-                $fpmArgs[] = "$lib (>= {$numericVersion})";
-            }
-            if (isset($config['depends']) && is_array($config['depends'])) {
-                foreach ($config['depends'] as $depend) {
-                    $fpmArgs[] = '--depends';
-                    $fpmArgs[] = $depend;
-                }
-            }
+        foreach (self::$binaryDependencies as $lib => $version) {
+            $lib = str_replace('.so.', '', $lib); // remove .so. for deb compatibility
+            $lib = preg_replace('/_\D+/', '', $lib);
+            $numericVersion = preg_replace('/[^0-9.]/', '', $version);
+            $fpmArgs[] = '--depends';
+            $fpmArgs[] = "$lib (>= {$numericVersion})";
         }
-        else {
-            $fpmArgs[] = '--no-depends';
+        if (isset($config['depends']) && is_array($config['depends'])) {
+            foreach ($config['depends'] as $depend) {
+                $fpmArgs[] = '--depends';
+                $fpmArgs[] = $depend;
+            }
         }
 
         if (isset($config['directories']) && is_array($config['directories'])) {
@@ -532,7 +525,11 @@ class CreatePackages
         $phpVersion = str_replace('.', '', SPP_PHP_VERSION);
         $phpEmbedName = 'lib' . self::getPrefix() . '-' . $phpVersion . '.so';
 
-        $latestTag = self::prepareFrankenPhpRepository();
+        $ldLibraryPath = 'LD_LIBRARY_PATH=' . BUILD_LIB_PATH;
+        [, $output] = shell()->execWithResult($ldLibraryPath . ' ' . BUILD_BIN_PATH . '/frankenphp --version');
+        $output = implode("\n", $output);
+        preg_match('/FrankenPHP v(\d+\.\d+\.\d+)/', $output, $matches);
+        $latestTag = $matches[1];
         $version = ltrim($latestTag, 'v') . '_' . $phpVersion;
 
         $name = "frankenphp";
@@ -587,46 +584,5 @@ class CreatePackages
     private static function createDebFrankenPhpPackage(mixed $architecture)
     {
 
-    }
-
-    private static function prepareFrankenPhpRepository(): string
-    {
-        $repoUrl = 'https://github.com/php/frankenphp.git';
-        $targetPath = DIST_PATH . '/frankenphp';
-
-        // Get latest tag
-        $tagProcess = new Process([
-            'bash', '-c',
-            "git ls-remote --tags $repoUrl | grep -o 'refs/tags/[^{}]*$' | sed 's#refs/tags/##' | sort -V | tail -n1"
-        ]);
-        $tagProcess->run();
-        if (!$tagProcess->isSuccessful()) {
-            throw new \RuntimeException("Failed to fetch tags: " . $tagProcess->getErrorOutput());
-        }
-        $latestTag = trim($tagProcess->getOutput());
-
-        if (!is_dir($targetPath . '/.git')) {
-            echo "Cloning FrankenPHP into DIST_PATH...\n";
-            $clone = new Process(['git', 'clone', $repoUrl, $targetPath]);
-            $clone->run();
-            if (!$clone->isSuccessful()) {
-                throw new \RuntimeException("Git clone failed: " . $clone->getErrorOutput());
-            }
-        } else {
-            echo "FrankenPHP already exists, fetching tags...\n";
-            $fetch = new Process(['git', 'fetch', '--tags'], cwd: $targetPath);
-            $fetch->run();
-            if (!$fetch->isSuccessful()) {
-                throw new \RuntimeException("Git fetch failed: " . $fetch->getErrorOutput());
-            }
-        }
-
-        $checkout = new Process(['git', 'checkout', $latestTag], cwd: $targetPath);
-        $checkout->run();
-        if (!$checkout->isSuccessful()) {
-            throw new \RuntimeException("Git checkout failed: " . $checkout->getErrorOutput());
-        }
-
-        return $latestTag;
     }
 }

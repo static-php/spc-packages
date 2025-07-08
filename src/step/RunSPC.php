@@ -49,7 +49,6 @@ class RunSPC
     {
         // Ensure the craft.yml file is copied to the static-php-cli vendor directory
         $arch = str_contains(php_uname('m'), 'x86_64') ? 'x86_64' : 'aarch64';
-        $command = SPP_COMMAND;
         $craftYmlSource = BASE_PATH . "/config/{$arch}-{$command}-craft.yml";
         $craftYmlDest = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/craft.yml';
 
