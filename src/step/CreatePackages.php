@@ -528,7 +528,7 @@ class CreatePackages
         $output = implode("\n", $output);
         preg_match('/FrankenPHP v(\d+\.\d+\.\d+)/', $output, $matches);
         $latestTag = $matches[1];
-        $version = ltrim($latestTag, 'v') . '_' . $phpVersion;
+        $version = $latestTag . '_' . $phpVersion;
 
         $name = "frankenphp";
 
