@@ -507,6 +507,8 @@ class CreatePackages
         // Extract PHP version and architecture
         [, $architecture] = self::getPhpVersionAndArchitecture();
 
+        self::prepareFrankenPhpRepository();
+
         if (in_array('rpm', self::$packageTypes)) {
             self::createRpmFrankenPhpPackage($architecture);
         }
@@ -544,9 +546,9 @@ class CreatePackages
             '--config-files', '/etc/frankenphp/Caddyfile',
         ];
 
-        foreach (self::$binaryDependencies as $lib => $version) {
+        foreach (self::$binaryDependencies as $lib => $dependencyVersion) {
             $fpmArgs[] = '--depends';
-            $fpmArgs[] = "$lib({$version})(64bit)";
+            $fpmArgs[] = "$lib({$dependencyVersion})(64bit)";
         }
 
         if (!is_dir("{$packageFolder}/empty/")) {
@@ -582,5 +584,46 @@ class CreatePackages
     private static function createDebFrankenPhpPackage(mixed $architecture)
     {
 
+    }
+
+    private static function prepareFrankenPhpRepository(): string
+    {
+        $repoUrl = 'https://github.com/php/frankenphp.git';
+        $targetPath = DIST_PATH . '/frankenphp';
+
+        // Get latest tag
+        $tagProcess = new Process([
+            'bash', '-c',
+            "git ls-remote --tags $repoUrl | grep -o 'refs/tags/[^{}]*$' | sed 's#refs/tags/##' | sort -V | tail -n1"
+        ]);
+        $tagProcess->run();
+        if (!$tagProcess->isSuccessful()) {
+            throw new \RuntimeException("Failed to fetch tags: " . $tagProcess->getErrorOutput());
+        }
+        $latestTag = trim($tagProcess->getOutput());
+
+        if (!is_dir($targetPath . '/.git')) {
+            echo "Cloning FrankenPHP into DIST_PATH...\n";
+            $clone = new Process(['git', 'clone', $repoUrl, $targetPath]);
+            $clone->run();
+            if (!$clone->isSuccessful()) {
+                throw new \RuntimeException("Git clone failed: " . $clone->getErrorOutput());
+            }
+        } else {
+            echo "FrankenPHP already exists, fetching tags...\n";
+            $fetch = new Process(['git', 'fetch', '--tags'], cwd: $targetPath);
+            $fetch->run();
+            if (!$fetch->isSuccessful()) {
+                throw new \RuntimeException("Git fetch failed: " . $fetch->getErrorOutput());
+            }
+        }
+
+        $checkout = new Process(['git', 'checkout', $latestTag], cwd: $targetPath);
+        $checkout->run();
+        if (!$checkout->isSuccessful()) {
+            throw new \RuntimeException("Git checkout failed: " . $checkout->getErrorOutput());
+        }
+
+        return $latestTag;
     }
 }
