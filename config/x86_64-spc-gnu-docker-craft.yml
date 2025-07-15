@@ -34,8 +34,8 @@ extra-env:
     SPC_TOOLCHAIN: SPC\toolchain\GccNativeToolchain
     EXTENSION_DIR: /usr/lib64/php-zts/modules
     SPC_CMD_VAR_PHP_EMBED_TYPE: shared
-    SPC_DEFAULT_C_FLAGS: "-fpic -O3 -fcf-protection -fstack-protector-strong -fstack-clash-protection"
-    SPC_DEFAULT_CXX_FLAGS: "-fpic -O3 -fcf-protection -fstack-protector-strong -fstack-clash-protection"
+    SPC_DEFAULT_C_FLAGS: "-fpic -O3 -fstack-protector-strong -fstack-clash-protection"
+    SPC_DEFAULT_CXX_FLAGS: "-fpic -O3 -fstack-protector-strong -fstack-clash-protection"
     SPC_OPT_BUILD_ARGS: "--with-config-file-path=/etc/php-zts.ini --with-config-file-scan-dir=/etc/php-zts.d"
     SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "-g0 -fstack-protector-strong -O3 -fno-ident -fpic -fpie"
     SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS: "-pie -release zts-majorminornodot"
