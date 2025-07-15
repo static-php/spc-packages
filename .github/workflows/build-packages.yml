@@ -1,0 +1,183 @@
+name: Build and Upload Packages
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Run daily at midnight UTC
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+
+  build-x86_64:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        php-version: [8.2, 8.3, 8.4]
+        command: [spc, spc-gnu-docker]
+    steps:
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
+
+      - name: Get PHP version
+        id: php_version
+        run: |
+          # Get current PHP version using the PHP API
+          php_version=$(curl -s "https://www.php.net/releases/index.php?json&version=${{ matrix.php-version }}" | jq -r '.version')
+          echo "Current PHP version: ${php_version}"
+
+          # Save PHP version as output
+          echo "version=${php_version}" >> $GITHUB_OUTPUT
+
+      - name: Check if package already exists
+        id: check
+        run: |
+          # Determine target directory based on command
+          if [[ "${{ matrix.command }}" == "spc" ]]; then
+            target_dir="el10"
+          else
+            target_dir="el7"
+          fi
+
+          # Check if package exists
+          ssh github@rpm.henderkes.com "test -f /home/github/rpm/x86_64/${target_dir}/php-zts-cli-${{ steps.php_version.outputs.version }}*.rpm" && exists="true" || exists="false"
+
+          # Set output
+          echo "exists=${exists}" >> $GITHUB_OUTPUT
+
+          # Print status
+          echo "x86_64 PHP ${{ matrix.php-version }} (${{ matrix.command }}) exists: ${exists}"
+
+          # Exit if package already exists
+          if [ "$exists" = "true" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            echo "Package already exists. Skipping build."
+            echo "package_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "package_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout code
+        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, json, curl, zip
+          tools: composer:v2
+
+      - name: Install dependencies
+        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby rpm build-essential
+          sudo gem install fpm
+          composer install
+
+      - name: Build PHP and packages
+        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        run: |
+          php bin/spp all --command=${{ matrix.command }} --type=rpm --version=${{ matrix.php-version }}
+
+      - name: Upload packages
+        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        run: |
+          if [[ "${{ matrix.command }}" == "spc" ]]; then
+            # Upload to el10 directory
+            scp dist/rpm/*.rpm github@rpm.henderkes.com:/home/github/rpm/x86_64/el10/
+          else
+            # Upload to el7 directory
+            scp dist/rpm/*.rpm github@rpm.henderkes.com:/home/github/rpm/x86_64/el7/
+          fi
+
+  build-arm64:
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      matrix:
+        php-version: [8.2, 8.3, 8.4]
+        command: [spc, spc-gnu-docker]
+    steps:
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
+
+      - name: Get PHP version
+        id: php_version
+        run: |
+          # Get current PHP version using the PHP API
+          php_version=$(curl -s "https://www.php.net/releases/index.php?json&version=${{ matrix.php-version }}" | jq -r '.version')
+          echo "Current PHP version: ${php_version}"
+
+          # Save PHP version as output
+          echo "version=${php_version}" >> $GITHUB_OUTPUT
+
+      - name: Check if package already exists
+        id: check
+        run: |
+          # Determine target directory based on command
+          if [[ "${{ matrix.command }}" == "spc" ]]; then
+            target_dir="el10"
+          else
+            target_dir="el7"
+          fi
+
+          # Check if package exists
+          ssh github@rpm.henderkes.com "test -f /home/github/rpm/aarch64/${target_dir}/php-zts-cli-${{ steps.php_version.outputs.version }}*.rpm" && exists="true" || exists="false"
+
+          # Set output
+          echo "exists=${exists}" >> $GITHUB_OUTPUT
+
+          # Print status
+          echo "aarch64 PHP ${{ matrix.php-version }} (${{ matrix.command }}) exists: ${exists}"
+
+          # Exit if package already exists
+          if [ "$exists" = "true" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            echo "Package already exists. Skipping build."
+            echo "package_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "package_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout code
+        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        uses: actions/checkout@v4
+
+
+      - name: Set up PHP
+        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, json, curl, zip
+          tools: composer:v2
+
+      - name: Install dependencies
+        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby rpm build-essential
+          sudo gem install fpm
+          composer install
+
+      - name: Build PHP and packages
+        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        run: |
+          # Configure for ARM64 architecture
+          cp config/aarch64-spc-craft.yml vendor/crazywhalecc/static-php-cli/config/craft.yml
+
+          # Build with specified command and PHP version
+          php bin/spp all --command=${{ matrix.command }} --type=rpm --version=${{ matrix.php-version }}
+
+      - name: Upload packages
+        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        run: |
+          if [[ "${{ matrix.command }}" == "spc" ]]; then
+            # Upload to el10 directory
+            scp dist/rpm/*.rpm github@rpm.henderkes.com:/home/github/rpm/aarch64/el10/
+          else
+            # Upload to el7 directory
+            scp dist/rpm/*.rpm github@rpm.henderkes.com:/home/github/rpm/aarch64/el7/
+          fi
