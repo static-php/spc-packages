@@ -22,6 +22,11 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
 
+      - name: Add remote host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H rpm.henderkes.com >> ~/.ssh/known_hosts
+
       - name: Get PHP version
         id: php_version
         run: |
@@ -109,6 +114,11 @@ jobs:
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
+
+      - name: Add remote host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H rpm.henderkes.com >> ~/.ssh/known_hosts
 
       - name: Get PHP version
         id: php_version
