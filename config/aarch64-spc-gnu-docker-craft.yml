@@ -30,6 +30,7 @@ craft-options:
 extra-env:
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
+    SPC_LIBC: glibc
     SPC_TOOLCHAIN: SPC\toolchain\GccNativeToolchain
     EXTENSION_DIR: /usr/lib64/php-zts/modules
     SPC_CMD_VAR_PHP_EMBED_TYPE: shared
