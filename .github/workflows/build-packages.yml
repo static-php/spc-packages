@@ -181,10 +181,6 @@ jobs:
       - name: Build PHP and packages
         if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
         run: |
-          # Configure for ARM64 architecture
-          cp config/aarch64-spc-craft.yml vendor/crazywhalecc/static-php-cli/config/craft.yml
-
-          # Build with specified command and PHP version
           php bin/spp all --command=${{ matrix.command }} --type=rpm --version=${{ matrix.php-version }}
 
       - name: Upload packages
