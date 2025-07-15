@@ -56,8 +56,11 @@ class RunSPC
         $craftYml = file_get_contents($craftYmlSource);
 
         // Update the PHP version in the craft.yml content
-        $craftYml = str_replace('majorminornodot', str_replace('.', '', $phpVersion), $craftYml);
-        $craftYml = str_replace('majorminor', $phpVersion, $craftYml);
+        $craftYml = str_replace(
+            ['majorminornodot', 'majorminor'],
+            [str_replace('.', '', $phpVersion), $phpVersion],
+            $craftYml
+        );
 
         // Write the updated craft.yml to the destination
         if (!file_put_contents($craftYmlDest, $craftYml)) {
@@ -77,7 +80,10 @@ class RunSPC
 
         $process = new Process($args, BASE_PATH . '/vendor/crazywhalecc/static-php-cli');
         $process->setTimeout(null); // No timeout
-        $process->setTty(true); // Interactive mode
+        // Only set TTY mode if it's supported
+        if (Process::isTtySupported()) {
+            $process->setTty(true); // Interactive mode
+        }
 
         // Run the process
         try {
@@ -112,9 +118,10 @@ class RunSPC
         $buildDir = BUILD_ROOT_PATH;
         $baseBuildDir = BASE_PATH . '/build';
 
-        // Check if the base build directory exists
-        if (!is_dir($baseBuildDir)) {
-            mkdir($baseBuildDir, 0755, true);
+        // Create the base build directory if it doesn't exist
+        if (!mkdir($baseBuildDir, 0755, true) && !is_dir($baseBuildDir)) {
+            echo "Failed to create directory: {$baseBuildDir}\n";
+            return;
         }
 
         // Check for existing PHP versions in the build directory
@@ -145,9 +152,10 @@ class RunSPC
             }
         }
 
-        // Ensure the build directory exists
-        if (!is_dir($buildDir)) {
-            mkdir($buildDir, 0755, true);
+        // Create the build directory if it doesn't exist
+        if (!mkdir($buildDir, 0755, true) && !is_dir($buildDir)) {
+            echo "Failed to create directory: {$buildDir}\n";
+            return;
         }
 
         // Clean and copy files
