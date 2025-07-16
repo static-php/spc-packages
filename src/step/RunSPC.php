@@ -45,11 +45,14 @@ class RunSPC
         }
     }
 
-    public static function run(string $command = 'spc', bool $debug = false, string $phpVersion = '8.4'): bool
+    public static function run(bool $debug = false, string $phpVersion = '8.4'): bool
     {
+        // Always use 'spc' as the command
+        $command = 'spc';
+
         // Ensure the craft.yml file is copied to the static-php-cli vendor directory
         $arch = str_contains(php_uname('m'), 'x86_64') ? 'x86_64' : 'aarch64';
-        $craftYmlSource = BASE_PATH . "/config/{$arch}-{$command}-craft.yml";
+        $craftYmlSource = BASE_PATH . "/config/{$arch}-craft.yml";
         $craftYmlDest = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/craft.yml';
 
         // Read the craft.yml file
@@ -57,8 +60,8 @@ class RunSPC
 
         // Update the PHP version in the craft.yml content
         $craftYml = str_replace(
-            ['majorminornodot', 'majorminor'],
-            [str_replace('.', '', $phpVersion), $phpVersion],
+            ['majorminornodot', 'majorminor', 'spctarget'],
+            [str_replace('.', '', $phpVersion), $phpVersion, SPP_TARGET],
             $craftYml
         );
 

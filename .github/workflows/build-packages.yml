@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         php-version: [8.2, 8.3, 8.4]
-        command: [spc, spc-gnu-docker]
+        target: [x86_64-linux-gnu, x86_64-linux-gnu.2.17]
         arch: [x86_64, arm64]
     steps:
       - name: Set up SSH key
@@ -45,10 +45,10 @@ jobs:
 
       - name: Set target folder
         run: |
-          if [[ "${{ matrix.command }}" == "spc" ]]; then
-            echo "TARGET_DIR=el10" >> $GITHUB_ENV
-          else
+          if [[ "${{ matrix.target }}" == *"2.17"* ]]; then
             echo "TARGET_DIR=el7" >> $GITHUB_ENV
+          else
+            echo "TARGET_DIR=el10" >> $GITHUB_ENV
           fi
 
       - name: Check if package already exists
@@ -56,7 +56,7 @@ jobs:
           # Check if package exists
           ssh github@rpm.henderkes.com "test -f /home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/php-zts-cli-${{ env.PHP_VERSION }}*.rpm" && exists="true" || exists="false"
 
-          echo "${{ env.RPM_ARCH }} PHP ${{ matrix.php-version }} (${{ matrix.command }}) exists: ${exists}"
+          echo "${{ env.RPM_ARCH }} PHP ${{ matrix.php-version }} (${{ matrix.target }}) exists: ${exists}"
 
           if [ "$exists" = "true" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
             echo "Package already exists. Skipping build."
@@ -88,7 +88,7 @@ jobs:
       - name: Build PHP and packages
         if: env.PACKAGE_EXISTS != 'true'
         run: |
-          php bin/spp all --command=${{ matrix.command }} --type=rpm --version=${{ matrix.php-version }}
+          php bin/spp all --target=${{ matrix.target }} --type=rpm --version=${{ matrix.php-version }}
 
       - name: Upload packages
         if: env.PACKAGE_EXISTS != 'true'

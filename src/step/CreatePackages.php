@@ -70,8 +70,7 @@ class CreatePackages
     private static function loadConfig(): void
     {
         $arch = str_contains(php_uname('m'), 'x86_64') ? 'x86_64' : 'aarch64';
-        $command = SPP_COMMAND;
-        $craftYmlPath = BASE_PATH . "/config/{$arch}-{$command}-craft.yml";
+        $craftYmlPath = BASE_PATH . "/config/{$arch}-craft.yml";
         echo "Loading configuration from {$craftYmlPath}...\n";
 
         // Use the CraftConfig component to load the configuration

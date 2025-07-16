@@ -5,7 +5,7 @@ A tool for building and packaging PHP and shared extensions with static-php-cli.
 ## Requirements
 
 - PHP 8.3 or higher
-- Docker (unless you pass `--command="spc"` to `bin/spp build`)
+- Docker
 - ruby
 - fpm (gem)
 - rpmbuild (for creating RPM package repository)
@@ -30,7 +30,7 @@ The build process is configured using the `config/craft.yml` file.
 
 ## Usage
 
-The main command-line tool is `bin/spp`, which provides several commands:
+The main command-line tool is `bin/spp`, which uses Symfony Console for command-line parsing and provides several commands:
 
 ### Build PHP
 
@@ -66,36 +66,30 @@ This will:
 2. Create packages for each extension
 3. Store the packages in the `dist/rpm` and/or `dist/deb` directories, depending on the package types specified
 
-Alternatively, you can specify which packages to build using the `--package` parameter:
+Alternatively, you can specify which packages to build using the `--packages` option:
 
 ```
-php bin/spp package --package=pdo  # Build only pdo package
+php bin/spp package --packages=pdo  # Build only pdo package
 ```
 
-### Build repository
+<!-- Repository command is not implemented yet -->
 
-To create a package repository from the built packages:
+### Build and Package
 
-```
-php bin/spp repo
-```
-
-### Build, Package and Repo
-
-To run all steps in one command:
+To run both build and package steps in one command:
 
 ```
 php bin/spp all
 ```
 
-### Using system compilation tools or musl
+### Specifying the target architecture
 
-The build defaults to using bin/spc-gnu-docker to build against glibc 2.17. If you want to use your system's compilation tools or build against musl, you can pass the `--command` option:
+You can specify the target architecture using the `--target` option. This option takes a target triple that Zig understands, such as `x86_64-linux-gnu` or `aarch64-linux-gnu`:
 
 ```
-php bin/spp build --command=spc # build on your local system
+php bin/spp build --target=x86_64-linux-gnu # build for x86_64 architecture
 # or
-php bin/spp build --command="spc-alpine-docker" # build against musl, not supported yet
+php bin/spp build --target=aarch64-linux-gnu # build for aarch64 architecture
 ```
 
 ## Output

@@ -2,7 +2,7 @@
 <?php
 
 // Main entrypoint for SPC Packages
-// Delegates to either RunSPC or CreatePackages
+// Uses Symfony Console for command-line parsing
 
 // Define constants
 define('BASE_PATH', dirname(__DIR__));
@@ -12,131 +12,22 @@ const DIST_RPM_PATH = DIST_PATH . '/rpm';
 const DIST_DEB_PATH = DIST_PATH . '/deb';
 define('TEMP_DIR', sys_get_temp_dir() . '/spc-packages');
 
+
 // Ensure autoloading is set up
 require_once BASE_PATH . '/vendor/autoload.php';
 
-// Parse command line arguments
-$action = $argv[1] ?? 'help';
+use Symfony\Component\Console\Application;
+use staticphp\Command\BuildCommand;
+use staticphp\Command\PackageCommand;
+use staticphp\Command\AllCommand;
 
-// Check for command line flags
-$command = 'spc-gnu-docker';
-$debug = false;
-$packageNames = null;
-$packageTypes = 'rpm,deb'; // Default package types
-$phpVersion = '8.4'; // Default PHP version
+// Create a new Symfony Console Application
+$application = new Application('SPC Packages', '1.0.0');
 
-foreach ($argv as $i => $arg) {
-    if (str_starts_with($arg, '--command=')) {
-        $command = substr($arg, strlen('--command='));
-    } elseif ($arg === '--debug') {
-        $debug = true;
-    } elseif (str_starts_with($arg, '--type=')) {
-        $packageTypes = substr($arg, strlen('--type='));
-    } elseif (str_starts_with($arg, '--packages=')) {
-        $packageNames = substr($arg, strlen('--packages='));
-    } elseif (str_starts_with($arg, '--version=')) {
-        $phpVersion = substr($arg, strlen('--version='));
-    }
-}
+// Register commands
+$application->add(new BuildCommand());
+$application->add(new PackageCommand());
+$application->add(new AllCommand());
 
-// Define build paths with PHP version
-define('BUILD_ROOT_PATH', BASE_PATH . '/build/' . $phpVersion);
-define('BUILD_BIN_PATH', BUILD_ROOT_PATH . '/bin');
-define('BUILD_LIB_PATH', BUILD_ROOT_PATH . '/lib');
-define('BUILD_INCLUDE_PATH', BUILD_ROOT_PATH . '/include');
-define('BUILD_MODULES_PATH', BUILD_ROOT_PATH . '/modules');
-define('SPP_PHP_VERSION', $phpVersion);
-define('SPP_COMMAND', $command);
-
-// Create necessary directories
-if (!file_exists(BUILD_ROOT_PATH)) {
-    mkdir(BUILD_ROOT_PATH, 0755, true);
-}
-if (!file_exists(BUILD_BIN_PATH)) {
-    mkdir(BUILD_BIN_PATH, 0755, true);
-}
-if (!file_exists(BUILD_MODULES_PATH)) {
-    mkdir(BUILD_MODULES_PATH, 0755, true);
-}
-if (!file_exists(BUILD_LIB_PATH)) {
-    mkdir(BUILD_LIB_PATH, 0755, true);
-}
-if (!file_exists(DIST_PATH)) {
-    mkdir(DIST_PATH, 0755, true);
-}
-if (!file_exists(DIST_RPM_PATH)) {
-    mkdir(DIST_RPM_PATH, 0755, true);
-}
-if (!file_exists(DIST_DEB_PATH)) {
-    mkdir(DIST_DEB_PATH, 0755, true);
-}
-
-// Create temporary directory
-if (file_exists(TEMP_DIR)) {
-    // Clean up any existing files
-    exec('rm -rf ' . escapeshellarg(TEMP_DIR . '/*'));
-} else {
-    mkdir(TEMP_DIR, 0755, true);
-}
-
-// Execute the requested action
-switch ($action) {
-    case 'build':
-        // Run SPC to build PHP with all extensions
-        echo "Building PHP with extensions using static-php-cli...\n";
-        echo "Using PHP version: {$phpVersion}\n";
-        staticphp\step\RunSPC::run($command, $debug, $phpVersion);
-        break;
-
-    case 'package':
-        // Get optional package names (can be comma-separated)
-        if ($packageNames) {
-            // Split by comma to support multiple packages
-            $packageNames = explode(',', $packageNames);
-            echo "Creating packages for: " . implode(', ', $packageNames) . "...\n";
-        } else {
-            echo "Creating packages for all extensions...\n";
-        }
-
-        staticphp\step\CreatePackages::run($packageNames, $packageTypes, $phpVersion);
-        break;
-
-    case 'all':
-        // Run all steps: build PHP, build FrankenPHP, and create packages
-        echo "Building PHP with extensions using static-php-cli...\n";
-        echo "Using PHP version: {$phpVersion}\n";
-        staticphp\step\RunSPC::run($command, $debug, $phpVersion);
-
-        if ($packageNames) {
-            // Split by comma to support multiple packages
-            $packageNames = explode(',', $packageNames);
-            echo "Creating packages for: " . implode(', ', $packageNames) . "...\n";
-        } else {
-            echo "Creating packages for all extensions...\n";
-        }
-
-        staticphp\step\CreatePackages::run($packageNames, $packageTypes, $phpVersion);
-        break;
-
-
-    case 'help':
-    default:
-        echo "Usage: php bin/spp [action] [package_names] [options]\n";
-        echo "Available actions:\n";
-        echo "  build      - Build PHP with extensions using static-php-cli\n";
-        echo "  package    - Create packages for all extensions or specific packages\n";
-        echo "  all        - Run both build and package steps\n";
-        echo "Options:\n";
-        echo "  --command=<cmd> - Specify which command to use (default: spc, alternatives: spc-gnu-docker, spc-alpine-docker)\n";
-        echo "  --debug         - Print debug messages\n";
-        echo "  --type=<types>  - Specify which package types to build (default: rpm,deb, alternatives: rpm, deb)\n";
-        echo "  --packages=<names> - Specify which packages to build (default: all)\n";
-        echo "  --version=<version> - Specify PHP version to build (default: 8.4)\n";
-        break;
-}
-
-// Clean up temporary directory after execution
-if (file_exists(TEMP_DIR)) {
-    echo "Cleaning up temporary directory...\n";
-    exec('rm -rf ' . escapeshellarg(TEMP_DIR));
-}
+// Run the application
+$application->run();

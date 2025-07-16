@@ -28,14 +28,19 @@ class CraftConfig
     private function loadConfig()
     {
         $arch = str_contains(php_uname('m'), 'x86_64') ? 'x86_64' : 'aarch64';
-        $command = SPP_COMMAND;
-        $craftYmlPath = BASE_PATH . "/config/{$arch}-{$command}-craft.yml";
+        $craftYmlPath = BASE_PATH . "/config/{$arch}-craft.yml";
 
         if (!file_exists($craftYmlPath)) {
             throw new \RuntimeException("Configuration file not found: {$craftYmlPath}");
         }
 
+        // Parse the YAML file
         $this->craftConfig = Yaml::parseFile($craftYmlPath);
+
+        // Replace the target placeholder with the actual target
+        if (isset($this->craftConfig['extra-env']) && isset($this->craftConfig['extra-env']['SPC_TARGET'])) {
+            $this->craftConfig['extra-env']['SPC_TARGET'] = SPP_TARGET;
+        }
 
         // Get the list of extensions
         if (isset($this->craftConfig['extensions'])) {
