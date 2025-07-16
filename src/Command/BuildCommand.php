@@ -18,14 +18,32 @@ class BuildCommand extends BaseCommand
     {
         $this
             ->addOption('debug', null, InputOption::VALUE_NONE, 'Print debug messages')
-            ->addOption('version', null, InputOption::VALUE_REQUIRED, 'Specify PHP version to build', '8.4')
-            ->addOption('target', null, InputOption::VALUE_REQUIRED, 'Specify the target triple for Zig (e.g., x86_64-linux-gnu, aarch64-linux-gnu)', 'native-native');
+            ->addOption('phpv', null, InputOption::VALUE_REQUIRED, 'Specify PHP version to build', '8.4')
+            ->addOption('target', null, InputOption::VALUE_REQUIRED, 'Specify the target triple for Zig (e.g., x86_64-linux-gnu, aarch64-linux-gnu)', 'native-native')
+            ->addOption('type', null, InputOption::VALUE_REQUIRED, 'Specify which package types to build (rpm,deb)', 'rpm');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        echo "BuildCommand::execute() called\n";
+
         $debug = $input->getOption('debug');
-        $phpVersion = $input->getOption('version');
+        $phpVersion = $input->getOption('phpv');
+        $target = $input->getOption('target');
+        $type = $input->getOption('type');
+
+        $output->writeln("BuildCommand::execute() called");
+        $output->writeln("Command options:");
+        $output->writeln("  debug: " . ($debug ? 'true' : 'false'));
+        $output->writeln("  version: {$phpVersion}");
+        $output->writeln("  target: {$target}");
+        $output->writeln("  type: {$type}");
+
+        // Check if constants are defined
+        echo "Constants check in execute():\n";
+        echo "  SPP_PHP_VERSION defined: " . (defined('SPP_PHP_VERSION') ? 'yes' : 'no') . "\n";
+        echo "  SPP_TARGET defined: " . (defined('SPP_TARGET') ? 'yes' : 'no') . "\n";
+        echo "  BUILD_ROOT_PATH defined: " . (defined('BUILD_ROOT_PATH') ? 'yes' : 'no') . "\n";
 
         $output->writeln("Building PHP with extensions using static-php-cli...");
         $output->writeln("Using PHP version: {$phpVersion}");
@@ -36,10 +54,10 @@ class BuildCommand extends BaseCommand
             $output->writeln("Build completed successfully.");
             $this->cleanupTempDir($output);
             return self::SUCCESS;
-        } else {
-            $output->writeln("Build failed.");
-            $this->cleanupTempDir($output);
-            return self::FAILURE;
         }
+
+        $output->writeln("Build failed.");
+        $this->cleanupTempDir($output);
+        return self::FAILURE;
     }
 }

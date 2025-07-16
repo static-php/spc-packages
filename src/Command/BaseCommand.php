@@ -10,9 +10,22 @@ abstract class BaseCommand extends Command
 {
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
+        echo "BaseCommand::initialize() called for " . get_class($this) . "\n";
+        echo "Command arguments: " . implode(' ', array_slice($_SERVER['argv'], 1)) . "\n";
+
         // Define build paths with PHP version
-        $phpVersion = $input->getOption('version') ?? '8.4';
+        $phpVersion = $input->getOption('phpv') ?? '8.4';
         $target = $input->getOption('target') ?? 'native-native';
+
+        echo "BaseCommand options:\n";
+        echo "  version: {$phpVersion}\n";
+        echo "  target: {$target}\n";
+
+        // Check if constants are already defined
+        if (defined('SPP_PHP_VERSION')) {
+            echo "Constants already defined. SPP_PHP_VERSION=" . SPP_PHP_VERSION . "\n";
+            return;
+        }
 
         // Define constants
         define('SPP_PHP_VERSION', $phpVersion);

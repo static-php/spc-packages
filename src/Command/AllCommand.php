@@ -21,7 +21,7 @@ class AllCommand extends BaseCommand
             ->addOption('debug', null, InputOption::VALUE_NONE, 'Print debug messages')
             ->addOption('packages', null, InputOption::VALUE_REQUIRED, 'Specify which packages to build (comma-separated)')
             ->addOption('type', null, InputOption::VALUE_REQUIRED, 'Specify which package types to build (rpm,deb)', 'rpm,deb')
-            ->addOption('version', null, InputOption::VALUE_REQUIRED, 'Specify PHP version to build', '8.4')
+            ->addOption('phpv', null, InputOption::VALUE_REQUIRED, 'Specify PHP version to build', '8.4')
             ->addOption('target', null, InputOption::VALUE_REQUIRED, 'Specify the target triple for Zig (e.g., x86_64-linux-gnu, aarch64-linux-gnu)', 'native-native');
     }
 
@@ -30,7 +30,7 @@ class AllCommand extends BaseCommand
         $debug = $input->getOption('debug');
         $packageNames = $input->getOption('packages');
         $packageTypes = $input->getOption('type');
-        $phpVersion = $input->getOption('version');
+        $phpVersion = $input->getOption('phpv');
 
         // Run build step
         $output->writeln("Building PHP with extensions using static-php-cli...");

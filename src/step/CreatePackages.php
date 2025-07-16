@@ -15,8 +15,11 @@ class CreatePackages
     private static $packageTypes = ['rpm', 'deb'];
 
 
-    public static function run($packageNames = null, string $packageTypes = 'rpm,deb'): true
+    public static function run($packageNames = null, string $packageTypes = 'rpm,deb', string $phpVersion = '8.4'): true
     {
+        // Store the PHP version for later use
+        define('SPP_PACKAGE_PHP_VERSION', $phpVersion);
+
         // Load the craft.yml configuration
         self::loadConfig();
 
@@ -247,8 +250,8 @@ class CreatePackages
 
         if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
             $emptyDir = TEMP_DIR . '/__spp_empty';
-            if (!file_exists($emptyDir)) {
-                mkdir($emptyDir, recursive: true);
+            if (!file_exists($emptyDir) && !mkdir($emptyDir, true) && !is_dir($emptyDir)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $emptyDir));
             }
             if (is_dir($emptyDir)) {
                 exec('rm -rf ' . escapeshellarg($emptyDir . '/*'));
@@ -343,8 +346,8 @@ class CreatePackages
 
         if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
             $emptyDir = TEMP_DIR . '/__spp_empty';
-            if (!file_exists($emptyDir)) {
-                mkdir($emptyDir, recursive: true);
+            if (!file_exists($emptyDir) && !mkdir($emptyDir, true) && !is_dir($emptyDir)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $emptyDir));
             }
             if (is_dir($emptyDir)) {
                 exec('rm -rf ' . escapeshellarg($emptyDir . '/*'));
@@ -366,19 +369,13 @@ class CreatePackages
 
     private static function getPhpVersionAndArchitecture(): array
     {
-        // Extract PHP version and architecture from the binary
+        // Use the PHP version passed to the run method
+        $phpVersion = defined('SPP_PACKAGE_PHP_VERSION') ? SPP_PACKAGE_PHP_VERSION : SPP_PHP_VERSION;
+
+        // Extract architecture
         $phpBinary = BUILD_BIN_PATH . '/php';
         if (!file_exists($phpBinary)) {
-            throw new \Exception("Warning: PHP binary not found at {$phpBinary}\n");
-        }
-
-        // Get PHP version
-        $versionProcess = new Process([$phpBinary, '-r', 'echo PHP_VERSION;']);
-        $versionProcess->run();
-        $phpVersion = trim($versionProcess->getOutput());
-
-        if (empty($phpVersion)) {
-            throw new \Exception("Warning: Could not determine PHP version\n");
+            echo "Warning: PHP binary not found at {$phpBinary}, using fallback method for architecture detection\n";
         }
 
         // Get architecture
@@ -550,8 +547,8 @@ class CreatePackages
             $fpmArgs[] = "$lib({$dependencyVersion})(64bit)";
         }
 
-        if (!is_dir("{$packageFolder}/empty/")) {
-            mkdir("{$packageFolder}/empty/", recursive: true);
+        if (!is_dir("{$packageFolder}/empty/") && !mkdir("{$packageFolder}/empty/", true) && !is_dir("{$packageFolder}/empty/")) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', "{$packageFolder}/empty/"));
         }
 
         $fpmArgs = [...$fpmArgs, ...[

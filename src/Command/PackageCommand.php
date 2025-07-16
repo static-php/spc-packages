@@ -19,7 +19,7 @@ class PackageCommand extends BaseCommand
         $this
             ->addOption('packages', null, InputOption::VALUE_REQUIRED, 'Specify which packages to build (comma-separated)')
             ->addOption('type', null, InputOption::VALUE_REQUIRED, 'Specify which package types to build (rpm,deb)', 'rpm,deb')
-            ->addOption('version', null, InputOption::VALUE_REQUIRED, 'Specify PHP version to build', '8.4')
+            ->addOption('phpv', null, InputOption::VALUE_REQUIRED, 'Specify PHP version to build', '8.4')
             ->addOption('target', null, InputOption::VALUE_REQUIRED, 'Specify the target triple for Zig (e.g., x86_64-linux-gnu, aarch64-linux-gnu)', 'native-native');
     }
 
@@ -27,7 +27,7 @@ class PackageCommand extends BaseCommand
     {
         $packageNames = $input->getOption('packages');
         $packageTypes = $input->getOption('type');
-        $phpVersion = $input->getOption('version');
+        $phpVersion = $input->getOption('phpv');
 
         if ($packageNames) {
             // Split by comma to support multiple packages
@@ -43,10 +43,10 @@ class PackageCommand extends BaseCommand
             $output->writeln("Package creation completed successfully.");
             $this->cleanupTempDir($output);
             return self::SUCCESS;
-        } else {
-            $output->writeln("Package creation failed.");
-            $this->cleanupTempDir($output);
-            return self::FAILURE;
         }
+
+        $output->writeln("Package creation failed.");
+        $this->cleanupTempDir($output);
+        return self::FAILURE;
     }
 }
