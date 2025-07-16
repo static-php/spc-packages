@@ -9,6 +9,8 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 use Symfony\Component\Process\Process;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 class RunSPC
 {
@@ -49,36 +51,37 @@ class RunSPC
     {
         echo "RunSPC::run() called with debug=" . ($debug ? 'true' : 'false') . ", phpVersion={$phpVersion}\n";
 
-        // Always use 'spc' as the command
-        $command = 'spc';
-
-        // Ensure the craft.yml file is copied to the static-php-cli vendor directory
         $arch = str_contains(php_uname('m'), 'x86_64') ? 'x86_64' : 'aarch64';
-        $craftYmlSource = BASE_PATH . "/config/{$arch}-craft.yml";
         $craftYmlDest = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/craft.yml';
 
-        // Read the craft.yml file
-        $craftYml = file_get_contents($craftYmlSource);
+        // Use Twig to render the craft.yml template
+        $loader = new FilesystemLoader(BASE_PATH . '/config/templates');
+        $twig = new Environment($loader);
 
-        // Update the PHP version in the craft.yml content
-        $craftYml = str_replace(
-            ['majorminornodot', 'majorminor', 'spctarget'],
-            [str_replace('.', '', $phpVersion), $phpVersion, SPP_TARGET],
-            $craftYml
-        );
+        // Prepare template variables
+        $templateVars = [
+            'php_version' => $phpVersion,
+            'php_version_nodot' => str_replace('.', '', $phpVersion),
+            'target' => SPP_TARGET,
+            'arch' => $arch
+        ];
 
-        // Write the updated craft.yml to the destination
-        if (!file_put_contents($craftYmlDest, $craftYml)) {
-            echo "Failed to write updated craft.yml to static-php-cli vendor directory.\n";
+        // Render the template
+        try {
+            $craftYml = $twig->render('craft.yml.twig', $templateVars);
+
+            // Write the rendered craft.yml to the destination
+            if (!file_put_contents($craftYmlDest, $craftYml)) {
+                echo "Failed to write updated craft.yml to static-php-cli vendor directory.\n";
+                return false;
+            }
+        } catch (\Exception $e) {
+            echo "Error rendering craft.yml template: " . $e->getMessage() . "\n";
             return false;
         }
 
-        echo "Running static-php-cli with command: {$command}...\n";
-        $spcCommand = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/bin/' . $command;
-        passthru('chmod +x ' . $spcCommand);
-
         // Build the command arguments
-        $args = [$spcCommand, 'craft'];
+        $args = ['bin/spc', 'craft'];
         if ($debug) {
             $args[] = '--debug';
         }

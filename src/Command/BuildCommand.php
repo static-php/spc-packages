@@ -21,14 +21,12 @@ class BuildCommand extends BaseCommand
         $debug = $input->getOption('debug');
         $phpVersion = $input->getOption('phpv');
         $target = $input->getOption('target');
-        $type = $input->getOption('type');
 
         $output->writeln("BuildCommand::execute() called");
         $output->writeln("Command options:");
         $output->writeln("  debug: " . ($debug ? 'true' : 'false'));
         $output->writeln("  version: {$phpVersion}");
         $output->writeln("  target: {$target}");
-        $output->writeln("  type: {$type}");
 
         // Check if constants are defined
         echo "Constants check in execute():\n";

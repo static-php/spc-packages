@@ -29,7 +29,12 @@
         "php": ">=8.3",
         "crazywhalecc/static-php-cli": "dev-zig",
         "laravel/helpers": "^1.7",
-        "ext-zlib": "*"
+        "ext-zlib": "*",
+        "twig/twig": "^3.0"
+    }
+    ,
+    "require-dev": {
+        "roave/security-advisories": "dev-latest"
     },
     "autoload": {
         "classmap": [
