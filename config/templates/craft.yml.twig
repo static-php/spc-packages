@@ -28,16 +28,17 @@ craft-options:
     build: true
 
 extra-env:
-    {% set extra_cflags = arch == 'x86_64' ? ' -fcf-protection -march=x86_64_v3' : '' %}
+    {% set march = arch == 'x86_64' ? '-march=x86_64_v3' : '-march=x86_64_v3' %}
+    {% set cflags = '-g0 -fpic -O3 -fno-sanitize=undefined -fcf-protection -fstack-protector-strong -fstack-clash-protection ' ~ march %}
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
     SPC_TARGET: {{ target }}
     EXTENSION_DIR: /usr/lib64/php-zts/modules
     SPC_CMD_VAR_PHP_EMBED_TYPE: shared
-    SPC_DEFAULT_C_FLAGS: "-fpic -O3 -fstack-protector-strong -fstack-clash-protection{{ extra_cflags }}"
-    SPC_DEFAULT_CXX_FLAGS: "-fpic -O3 -fstack-protector-strong -fstack-clash-protection{{ extra_cflags }}"
+    SPC_DEFAULT_C_FLAGS: "{{ cflags }}"
+    SPC_DEFAULT_CXX_FLAGS: "{{ cflags }}"
     SPC_OPT_BUILD_ARGS: "--with-config-file-path=/etc/php-zts.ini --with-config-file-scan-dir=/etc/php-zts.d"
-    SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "-g0 -fstack-protector-strong -O3 -fno-ident -fpic -fpie"
+    SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "{{ cflags }} -fpie -fno-ident -Wno-date-time"
     SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS: "-pie -release zts-{{ php_version_nodot }}"
     LDFLAGS: "-Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack"
     SPC_CMD_PREFIX_PHP_CONFIGURE: "./configure --prefix= --with-valgrind=no --disable-shared --enable-static --disable-all --disable-cgi --disable-phpdbg --disable-debug --with-pic --disable-dependency-tracking --enable-rtld-now --enable-re2c-cgoto"
