@@ -87,8 +87,7 @@ class RunSPC
         }
 
         $process = new Process($args, BASE_PATH . '/vendor/crazywhalecc/static-php-cli');
-        $process->setTimeout(null); // No timeout
-        // Only set TTY mode if it's supported
+        $process->setTimeout(null);
         if (Process::isTtySupported()) {
             $process->setTty(true); // Interactive mode
         }
