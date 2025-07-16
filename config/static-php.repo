@@ -1,0 +1,5 @@
+[static-php]
+name=Static PHP repository
+baseurl=https://rpm.henderkes.com/\$basearch/el\$releasever
+enabled=1
+gpgcheck=0
