@@ -18,7 +18,7 @@ class PackageCommand extends BaseCommand
     {
         parent::configure();
         $this
-            ->addOption('type', null, InputOption::VALUE_REQUIRED, 'Specify which package types to build (rpm,deb)', 'rpm,deb')
+            ->addOption('type', null, InputOption::VALUE_REQUIRED, 'Specify which package types to build (rpm,deb)', 'rpm')
             ->addOption('packages', null, InputOption::VALUE_REQUIRED, 'Specify which packages to build (comma-separated)');
     }
 

@@ -3,6 +3,7 @@
 namespace staticphp\step;
 
 use staticphp\extension;
+use staticphp\package\composer;
 use Symfony\Component\Process\Process;
 use staticphp\CraftConfig;
 
@@ -12,7 +13,7 @@ class CreatePackages
     private static $sharedExtensions = [];
     private static $sapis = [];
     private static $binaryDependencies = [];
-    private static $packageTypes = ['rpm', 'deb'];
+    private static $packageTypes = [];
 
 
     public static function run($packageNames = null, string $packageTypes = 'rpm,deb', string $phpVersion = '8.4'): true
@@ -45,6 +46,9 @@ class CreatePackages
                 elseif ($packageName === 'frankenphp') {
                     self::createFrankenPhpPackage();
                 }
+                elseif ($packageName === 'composer') {
+                    self::createComposerPackage();
+                }
                 elseif ($packageName === 'devel') {
                     self::createSapiPackage($packageName);
                 }
@@ -59,10 +63,8 @@ class CreatePackages
         else {
             // Create packages for each SAPI (cli, fpm, embed)
             self::createSapiPackages();
-
             self::createFrankenPhpPackage();
-
-            // Create packages for each extension
+            self::createComposerPackage();
             self::createExtensionPackages();
         }
 
@@ -247,12 +249,15 @@ class CreatePackages
         }
 
         if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
-            $emptyDir = TEMP_DIR . '/__spp_empty';
-            if (!file_exists($emptyDir) && !mkdir($emptyDir, true) && !is_dir($emptyDir)) {
+            $emptyDir = TEMP_DIR . '/spp_empty';
+            if (!file_exists($emptyDir) && !mkdir($emptyDir, 0755, true) && !is_dir($emptyDir)) {
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $emptyDir));
             }
             if (is_dir($emptyDir)) {
-                exec('rm -rf ' . escapeshellarg($emptyDir . '/*'));
+                $files = array_diff(scandir($emptyDir), ['.', '..']);
+                if (!empty($files)) {
+                    exec('rm -rf ' . escapeshellarg($emptyDir . '/*'));
+                }
             }
             foreach ($config['empty_directories'] as $dir) {
                 $fpmArgs[] = $emptyDir . '=' . $dir;
@@ -343,12 +348,15 @@ class CreatePackages
         }
 
         if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
-            $emptyDir = TEMP_DIR . '/__spp_empty';
+            $emptyDir = TEMP_DIR . '/spp_empty';
             if (!file_exists($emptyDir) && !mkdir($emptyDir, true) && !is_dir($emptyDir)) {
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $emptyDir));
             }
             if (is_dir($emptyDir)) {
-                exec('rm -rf ' . escapeshellarg($emptyDir . '/*'));
+                $files = array_diff((array) scandir($emptyDir), ['.', '..']);
+                if (!empty($files)) {
+                    exec('rm -rf ' . escapeshellarg($emptyDir . '/*'));
+                }
             }
             foreach ($config['empty_directories'] as $dir) {
                 $fpmArgs[] = $emptyDir . '=' . $dir;
@@ -578,6 +586,38 @@ class CreatePackages
     private static function createDebFrankenPhpPackage(mixed $architecture)
     {
 
+    }
+
+    /**
+     * Create a package for Composer
+     */
+    private static function createComposerPackage(): void
+    {
+        echo "Creating package for Composer...\n";
+
+        // Create the Composer package
+        $package = new composer();
+        $config = $package->getFpmConfig();
+
+        // Get the latest Composer version
+        $process = new Process(['curl', '-s', 'https://api.github.com/repos/composer/composer/releases/latest']);
+        $process->run();
+        if (!$process->isSuccessful()) {
+            throw new \RuntimeException("Failed to get latest Composer version: " . $process->getErrorOutput());
+        }
+
+        $releaseInfo = json_decode($process->getOutput(), true);
+        $version = $releaseInfo['tag_name'];
+        $version = ltrim($version, 'v'); // Remove 'v' prefix if present
+
+        // Determine the next available iteration
+        $iteration = self::getNextIteration('composer', $version, 'noarch');
+        echo "Using iteration: {$iteration} for Composer package\n";
+
+        // Create the package with 'noarch' architecture
+        self::createPackageWithFpm('composer', $config, $version, 'noarch', $iteration, $package->getFpmExtraArgs());
+
+        echo "Composer package created successfully.\n";
     }
 
     private static function prepareFrankenPhpRepository(): string
