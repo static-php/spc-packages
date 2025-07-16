@@ -40,7 +40,6 @@ jobs:
       - name: Check if package already exists
         id: check
         run: |
-          # Determine target directory based on command
           if [[ "${{ matrix.command }}" == "spc" ]]; then
             target_dir="el10"
           else
@@ -50,13 +49,9 @@ jobs:
           # Check if package exists
           ssh github@rpm.henderkes.com "test -f /home/github/rpm/x86_64/${target_dir}/php-zts-cli-${{ steps.php_version.outputs.version }}*.rpm" && exists="true" || exists="false"
 
-          # Set output
           echo "exists=${exists}" >> $GITHUB_OUTPUT
-
-          # Print status
           echo "x86_64 PHP ${{ matrix.php-version }} (${{ matrix.command }}) exists: ${exists}"
 
-          # Exit if package already exists
           if [ "$exists" = "true" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
             echo "Package already exists. Skipping build."
             echo "package_exists=true" >> $GITHUB_OUTPUT
@@ -65,11 +60,11 @@ jobs:
           fi
 
       - name: Checkout code
-        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        if: steps.check.outputs.package_exists != 'true'
         uses: actions/checkout@v4
 
       - name: Set up PHP
-        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        if: steps.check.outputs.package_exists != 'true'
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
@@ -77,7 +72,7 @@ jobs:
           tools: composer:v2
 
       - name: Install dependencies
-        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        if: steps.check.outputs.package_exists != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y ruby rpm build-essential
@@ -85,12 +80,12 @@ jobs:
           composer install
 
       - name: Build PHP and packages
-        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        if: steps.check.outputs.package_exists != 'true'
         run: |
           php bin/spp all --command=${{ matrix.command }} --type=rpm --version=${{ matrix.php-version }}
 
       - name: Upload packages
-        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        if: steps.check.outputs.package_exists != 'true'
         run: |
           if [[ "${{ matrix.command }}" == "spc" ]]; then
             # Upload to el10 directory
@@ -123,17 +118,13 @@ jobs:
       - name: Get PHP version
         id: php_version
         run: |
-          # Get current PHP version using the PHP API
           php_version=$(curl -s "https://www.php.net/releases/index.php?json&version=${{ matrix.php-version }}" | jq -r '.version')
           echo "Current PHP version: ${php_version}"
-
-          # Save PHP version as output
           echo "version=${php_version}" >> $GITHUB_OUTPUT
 
       - name: Check if package already exists
         id: check
         run: |
-          # Determine target directory based on command
           if [[ "${{ matrix.command }}" == "spc" ]]; then
             target_dir="el10"
           else
@@ -143,13 +134,10 @@ jobs:
           # Check if package exists
           ssh github@rpm.henderkes.com "test -f /home/github/rpm/aarch64/${target_dir}/php-zts-cli-${{ steps.php_version.outputs.version }}*.rpm" && exists="true" || exists="false"
 
-          # Set output
           echo "exists=${exists}" >> $GITHUB_OUTPUT
 
-          # Print status
           echo "aarch64 PHP ${{ matrix.php-version }} (${{ matrix.command }}) exists: ${exists}"
 
-          # Exit if package already exists
           if [ "$exists" = "true" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
             echo "Package already exists. Skipping build."
             echo "package_exists=true" >> $GITHUB_OUTPUT
@@ -158,12 +146,12 @@ jobs:
           fi
 
       - name: Checkout code
-        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        if: steps.check.outputs.package_exists != 'true'
         uses: actions/checkout@v4
 
 
       - name: Set up PHP
-        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        if: steps.check.outputs.package_exists != 'true'
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
@@ -171,7 +159,7 @@ jobs:
           tools: composer:v2
 
       - name: Install dependencies
-        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        if: steps.check.outputs.package_exists != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y ruby rpm build-essential
@@ -179,12 +167,12 @@ jobs:
           composer install
 
       - name: Build PHP and packages
-        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        if: steps.check.outputs.package_exists != 'true'
         run: |
           php bin/spp all --command=${{ matrix.command }} --type=rpm --version=${{ matrix.php-version }}
 
       - name: Upload packages
-        if: steps.check.outcome == 'success' && steps.check.outputs.package_exists != 'true'
+        if: steps.check.outputs.package_exists != 'true'
         run: |
           if [[ "${{ matrix.command }}" == "spc" ]]; then
             # Upload to el10 directory
