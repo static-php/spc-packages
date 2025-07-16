@@ -51,36 +51,19 @@ abstract class BaseCommand extends Command
 
     protected function createDirectories(): void
     {
-        if (!mkdir(BUILD_ROOT_PATH, 0755, true) && !is_dir(BUILD_ROOT_PATH)) {
-            throw new \RuntimeException("Failed to create directory: " . BUILD_ROOT_PATH);
-        }
-        if (!mkdir(BUILD_BIN_PATH, 0755, true) && !is_dir(BUILD_BIN_PATH)) {
-            throw new \RuntimeException("Failed to create directory: " . BUILD_BIN_PATH);
-        }
-        if (!mkdir(BUILD_MODULES_PATH, 0755, true) && !is_dir(BUILD_MODULES_PATH)) {
-            throw new \RuntimeException("Failed to create directory: " . BUILD_MODULES_PATH);
-        }
-        if (!mkdir(BUILD_LIB_PATH, 0755, true) && !is_dir(BUILD_LIB_PATH)) {
-            throw new \RuntimeException("Failed to create directory: " . BUILD_LIB_PATH);
-        }
-        if (!mkdir(DIST_PATH, 0755, true) && !is_dir(DIST_PATH)) {
-            throw new \RuntimeException("Failed to create directory: " . DIST_PATH);
-        }
-        if (!mkdir(DIST_RPM_PATH, 0755, true) && !is_dir(DIST_RPM_PATH)) {
-            throw new \RuntimeException("Failed to create directory: " . DIST_RPM_PATH);
-        }
-        if (!mkdir(DIST_DEB_PATH, 0755, true) && !is_dir(DIST_DEB_PATH)) {
-            throw new \RuntimeException("Failed to create directory: " . DIST_DEB_PATH);
+        $paths = [BUILD_ROOT_PATH, BUILD_BIN_PATH, BUILD_LIB_PATH, BUILD_MODULES_PATH, DIST_PATH, DIST_RPM_PATH, DIST_DEB_PATH];
+        foreach ($paths as $path) {
+            if (!is_dir($path) && !mkdir($path, 0755, true) && !is_dir($path)) {
+                throw new \RuntimeException("Failed to create directory: " . $path);
+            }
         }
 
         // Create temporary directory
         if (file_exists(TEMP_DIR)) {
             // Clean up any existing files
             exec('rm -rf ' . escapeshellarg(TEMP_DIR . '/*'));
-        } else {
-            if (!mkdir(TEMP_DIR, 0755, true) && !is_dir(TEMP_DIR)) {
-                throw new \RuntimeException("Failed to create directory: " . TEMP_DIR);
-            }
+        } elseif (!mkdir(TEMP_DIR, 0755, true) && !is_dir(TEMP_DIR)) {
+            throw new \RuntimeException("Failed to create directory: " . TEMP_DIR);
         }
     }
 
