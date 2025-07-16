@@ -28,7 +28,7 @@ craft-options:
     build: true
 
 extra-env:
-    {% set arch_flags = arch == 'x86_64' ? '-fcf-protection -march=x86_64_v3' : '' %}
+    {% set arch_flags = arch == 'x86_64' ? ' -fcf-protection -march=x86_64_v3' : '' %}
     {% set cflags = '-g0 -fpic -O3 -Wno-date-time -fstack-protector-strong -fstack-clash-protection' ~ arch_flags %}
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
