@@ -20,7 +20,7 @@ build-options:
 download-options:
     prefer-pre-built: false
     no-alt: false
-    ignore-cache-sources: 'php-src'
+    ignore-cache-sources: ''
 
 craft-options:
     doctor: true
@@ -29,7 +29,7 @@ craft-options:
 
 extra-env:
     {% set march = arch == 'x86_64' ? '-march=x86_64_v3' : '-march=x86_64_v3' %}
-    {% set cflags = '-g0 -fpic -O3 -fno-sanitize=undefined -fcf-protection -fstack-protector-strong -fstack-clash-protection ' ~ march %}
+    {% set cflags = '-g0 -fpic -O3 -Wno-date-time -fcf-protection -fstack-protector-strong -fstack-clash-protection ' ~ march %}
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
     SPC_TARGET: {{ target }}
