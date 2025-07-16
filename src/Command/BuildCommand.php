@@ -14,15 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class BuildCommand extends BaseCommand
 {
-    protected function configure(): void
-    {
-        $this
-            ->addOption('debug', null, InputOption::VALUE_NONE, 'Print debug messages')
-            ->addOption('phpv', null, InputOption::VALUE_REQUIRED, 'Specify PHP version to build', '8.4')
-            ->addOption('target', null, InputOption::VALUE_REQUIRED, 'Specify the target triple for Zig (e.g., x86_64-linux-gnu, aarch64-linux-gnu)', 'native-native')
-            ->addOption('type', null, InputOption::VALUE_REQUIRED, 'Specify which package types to build (rpm,deb)', 'rpm');
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         echo "BuildCommand::execute() called\n";
