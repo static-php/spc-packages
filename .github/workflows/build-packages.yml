@@ -48,7 +48,7 @@ jobs:
           fi
 
           # Check if package exists
-          ssh github@rpm.henderkes.com "ls /home/github/rpm/x86_64/${target_dir}/php-zts-cli-${{ steps.php_version.outputs.version }}*.rpm >/dev/null 2>&1" && exists="true" || exists="false"
+          ssh github@rpm.henderkes.com "test -f /home/github/rpm/x86_64/${target_dir}/php-zts-cli-${{ steps.php_version.outputs.version }}*.rpm" && exists="true" || exists="false"
 
           # Set output
           echo "exists=${exists}" >> $GITHUB_OUTPUT
@@ -141,7 +141,7 @@ jobs:
           fi
 
           # Check if package exists
-          ssh github@rpm.henderkes.com "ls /home/github/rpm/aarch64/${target_dir}/php-zts-cli-${{ steps.php_version.outputs.version }}*.rpm >/dev/null 2>&1" && exists="true" || exists="false"
+          ssh github@rpm.henderkes.com "test -f /home/github/rpm/aarch64/${target_dir}/php-zts-cli-${{ steps.php_version.outputs.version }}*.rpm" && exists="true" || exists="false"
 
           # Set output
           echo "exists=${exists}" >> $GITHUB_OUTPUT
