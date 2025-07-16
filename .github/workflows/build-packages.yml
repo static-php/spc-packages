@@ -14,10 +14,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-#        php-version: [8.2, 8.3, 8.4]
-        php-version: [8.4]
-#        arch: [x86_64, arm64]
-        arch: [arm64]
+        php-version: [8.2, 8.3, 8.4]
+#        php-version: [8.4]
+        arch: [x86_64, arm64]
+#        arch: [arm64]
 #        target: [native-native-gnu.2.17, native-native-gnu.2.28, native-native-gnu.2.34, native-native-gnu.2.39]
         target: [native-native-gnu.2.17, native-native-gnu.2.28, native-native-gnu.2.39]
     steps:
@@ -103,6 +103,6 @@ jobs:
         run: |
           scp dist/rpm/*.rpm github@rpm.henderkes.com:/home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+#      - name: Setup tmate session
+#        if: ${{ failure() }}
+#        uses: mxschmitt/action-tmate@v3
