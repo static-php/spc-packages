@@ -28,20 +28,16 @@ class CraftConfig
 
     private function loadConfig()
     {
-        // Get PHP version - default to 8.4 if not defined
         $phpVersion = defined('PHP_VERSION') ? PHP_VERSION : '8.4';
 
         try {
-            // Use the TwigRenderer to render the craft.yml template
             $craftYml = TwigRenderer::renderCraftTemplate($phpVersion);
 
-            // Parse the rendered YAML
             $this->craftConfig = Yaml::parse($craftYml);
         } catch (\Exception $e) {
             throw new \RuntimeException("Error rendering or parsing craft.yml template: " . $e->getMessage());
         }
 
-        // Get the list of extensions
         if (isset($this->craftConfig['extensions'])) {
             $extensions = $this->craftConfig['extensions'];
             if (is_string($extensions)) {
@@ -50,7 +46,6 @@ class CraftConfig
             $this->extensions = array_map('trim', $extensions);
         }
 
-        // Get the list of shared extensions
         if (isset($this->craftConfig['shared-extensions'])) {
             $sharedExtensions = $this->craftConfig['shared-extensions'];
             if (is_string($sharedExtensions)) {
@@ -59,7 +54,6 @@ class CraftConfig
             $this->sharedExtensions = array_map('trim', $sharedExtensions);
         }
 
-        // Get the list of SAPIs
         if (isset($this->craftConfig['sapi'])) {
             $sapis = $this->craftConfig['sapi'];
             if (is_string($sapis)) {
@@ -69,41 +63,21 @@ class CraftConfig
         }
     }
 
-    /**
-     * Get the list of static extensions from craft.yml
-     *
-     * @return array List of static extensions
-     */
     public function getStaticExtensions(): array
     {
         return $this->extensions;
     }
 
-    /**
-     * Get the list of shared extensions from craft.yml
-     *
-     * @return array List of shared extensions
-     */
     public function getSharedExtensions(): array
     {
         return $this->sharedExtensions;
     }
 
-    /**
-     * Get the list of SAPIs from craft.yml
-     *
-     * @return array List of SAPIs
-     */
     public function getSapis(): array
     {
         return $this->sapis;
     }
 
-    /**
-     * Get the raw craft.yml configuration
-     *
-     * @return array Raw configuration
-     */
     public function getRawConfig(): array
     {
         return $this->craftConfig;

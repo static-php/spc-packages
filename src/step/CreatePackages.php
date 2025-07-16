@@ -18,21 +18,16 @@ class CreatePackages
 
     public static function run($packageNames = null, string $packageTypes = 'rpm,deb', string $phpVersion = '8.4'): true
     {
-        // Store the PHP version for later use
         define('SPP_PACKAGE_PHP_VERSION', $phpVersion);
 
-        // Load the craft.yml configuration
         self::loadConfig();
 
-        // Get binary dependencies once at the start
         $phpBinary = BUILD_BIN_PATH . '/php';
         self::$binaryDependencies = self::getBinaryDependencies($phpBinary);
 
-        // Parse package types
         self::$packageTypes = explode(',', strtolower($packageTypes));
 
         if ($packageNames !== null) {
-            // Convert single string to array for backward compatibility
             if (is_string($packageNames)) {
                 $packageNames = [$packageNames];
             }
@@ -61,7 +56,6 @@ class CreatePackages
             }
         }
         else {
-            // Create packages for each SAPI (cli, fpm, embed)
             self::createSapiPackages();
             self::createFrankenPhpPackage();
             self::createComposerPackage();
@@ -76,10 +70,8 @@ class CreatePackages
     {
         echo "Loading configuration from Twig template...\n";
 
-        // Use the CraftConfig component to load the configuration
         $craftConfig = CraftConfig::getInstance();
 
-        // Get the configuration from the CraftConfig component
         self::$extensions = $craftConfig->getStaticExtensions();
         self::$sharedExtensions = $craftConfig->getSharedExtensions();
         self::$sapis = $craftConfig->getSapis();
@@ -103,7 +95,6 @@ class CreatePackages
     {
         echo "Creating package for SAPI: {$sapi}...\n";
 
-        // Determine the package class based on SAPI
         $packageClass = "\\staticphp\\package\\{$sapi}";
 
         if (!class_exists($packageClass)) {
@@ -111,13 +102,10 @@ class CreatePackages
             return;
         }
 
-        // Extract PHP version and architecture
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
 
-        // Determine the next available iteration
         $iteration = self::getNextIteration(self::getPrefix() . "-{$sapi}", $phpVersion, $architecture);
 
-        // Create the package
         $package = new $packageClass();
         $config = $package->getFpmConfig($phpVersion, $iteration);
 
@@ -128,7 +116,6 @@ class CreatePackages
     {
         echo "Creating packages for extensions...\n";
 
-        // Only create packages for shared extensions, not static ones
         foreach (self::$sharedExtensions as $extension) {
             self::createExtensionPackage($extension);
         }
@@ -138,13 +125,10 @@ class CreatePackages
     {
         echo "Creating package for extension: {$extension}...\n";
 
-        // Extract PHP version and architecture
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
 
-        // Determine the next available iteration
         $iteration = self::getNextIteration(self::getPrefix() . "-{$extension}", $phpVersion, $architecture);
 
-        // Create a package for this extension
         $package = new extension($extension);
         $packageClass = "\\staticphp\\package\\{$extension}";
         if (class_exists($packageClass)) {
@@ -201,7 +185,6 @@ class CreatePackages
             }
         }
 
-        // Add obsoletes
         if (isset($config['replaces']) && is_array($config['replaces'])) {
             foreach ($config['replaces'] as $replace) {
                 $fpmArgs[] = '--replaces';
@@ -264,7 +247,6 @@ class CreatePackages
             }
         }
 
-        // Build the RPM package
         $rpmProcess = new Process($fpmArgs);
         $rpmProcess->setTimeout(null);
         $rpmProcess->run(function ($type, $buffer) {
@@ -299,7 +281,6 @@ class CreatePackages
             }
         }
 
-        // Add obsoletes
         if (isset($config['replaces']) && is_array($config['replaces'])) {
             foreach ($config['replaces'] as $replace) {
                 $fpmArgs[] = '--replaces';
@@ -308,7 +289,7 @@ class CreatePackages
         }
 
         foreach (self::$binaryDependencies as $lib => $version) {
-            $lib = str_replace('.so.', '', $lib); // remove .so. for deb compatibility
+            $lib = str_replace('.so.', '', $lib);
             $lib = preg_replace('/_\D+/', '', $lib);
             $numericVersion = preg_replace('/[^0-9.]/', '', $version);
             $fpmArgs[] = '--depends';
@@ -334,7 +315,7 @@ class CreatePackages
                 $fpmArgs[] = $configFile;
             }
         }
-        $fpmArgs[] = '--deb-no-default-config-files'; // disable useless warning
+        $fpmArgs[] = '--deb-no-default-config-files';
 
         if (isset($config['files']) && is_array($config['files'])) {
             foreach ($config['files'] as $source => $dest) {
@@ -363,7 +344,6 @@ class CreatePackages
             }
         }
 
-        // Build the DEB package
         $debProcess = new Process($fpmArgs);
         $debProcess->setTimeout(null);
         $debProcess->run(function ($type, $buffer) {
@@ -375,22 +355,18 @@ class CreatePackages
 
     private static function getPhpVersionAndArchitecture(): array
     {
-        // Use the PHP version passed to the run method
         $phpVersion = defined('SPP_PACKAGE_PHP_VERSION') ? SPP_PACKAGE_PHP_VERSION : SPP_PHP_VERSION;
 
-        // Extract architecture
         $phpBinary = BUILD_BIN_PATH . '/php';
         if (!file_exists($phpBinary)) {
             echo "Warning: PHP binary not found at {$phpBinary}, using fallback method for architecture detection\n";
         }
 
-        // Get architecture
         $archProcess = new Process(['uname', '-m']);
         $archProcess->run();
         $architecture = trim($archProcess->getOutput());
 
         if (empty($architecture)) {
-            // Try alternative method
             $archProcess = new Process(['arch']);
             $archProcess->run();
             $architecture = trim($archProcess->getOutput());
@@ -407,12 +383,6 @@ class CreatePackages
         return [$phpVersion, $architecture];
     }
 
-    /**
-     * Get dependencies
-     *
-     * @param string $phpBinary Path to the PHP binary
-     * @return array Array containing GLIBC and CXXABI versions
-     */
     private static function getBinaryDependencies(string $binaryPath): array
     {
         $process = new Process(['ldd', '-v', $binaryPath]);
@@ -424,10 +394,8 @@ class CreatePackages
 
         $output = $process->getOutput();
 
-        // Discard everything before "$binaryPath:"
         $output = preg_replace('/.*?' . preg_quote($binaryPath, '/') . ':\s*\n/s', '', $output, 1);
 
-        // Discard everything after the next path-based section header like "/lib64/libstdc++.so.6:"
         $output = preg_replace('/\n\s*\/.*?:.*/s', '', $output, 1);
 
         $lines = explode("\n", $output);
@@ -444,12 +412,10 @@ class CreatePackages
                 $lib = $m[1];
                 $version = $m[2];
 
-                // Ignore non-numeric versions like GLIBC_PRIVATE
                 if (!preg_match('/\d+(\.\d+)+/', $version)) {
                     continue;
                 }
 
-                // Store highest version only
                 if (!isset($dependencies[$lib]) || version_compare($version, $dependencies[$lib], '>')) {
                     $dependencies[$lib] = $version;
                 }
@@ -459,19 +425,10 @@ class CreatePackages
         return $dependencies;
     }
 
-    /**
-     * Determine the next available iteration for a package
-     *
-     * @param string $name Package name
-     * @param string $phpVersion PHP version
-     * @param string $architecture Package architecture
-     * @return int Next available iteration
-     */
     private static function getNextIteration(string $name, string $phpVersion, string $architecture): int
     {
         $maxIteration = 0;
 
-        // Check RPM packages
         $rpmPattern = DIST_RPM_PATH . "/{$name}-{$phpVersion}-*.{$architecture}.rpm";
         $rpmFiles = glob($rpmPattern);
 
@@ -482,7 +439,6 @@ class CreatePackages
             }
         }
 
-        // Check DEB packages
         $debPattern = DIST_DEB_PATH . "/{$name}_{$phpVersion}-*_{$architecture}.deb";
         $debFiles = glob($debPattern);
 
@@ -493,7 +449,6 @@ class CreatePackages
             }
         }
 
-        // Return the next iteration
         return $maxIteration + 1;
     }
 
@@ -506,7 +461,6 @@ class CreatePackages
     {
         echo "Creating FrankenPHP package\n";
 
-        // Extract PHP version and architecture
         [, $architecture] = self::getPhpVersionAndArchitecture();
 
         self::prepareFrankenPhpRepository();
@@ -573,7 +527,6 @@ class CreatePackages
             "{$packageFolder}/empty/=/var/lib/frankenphp"
         ]];
 
-        // Build the RPM package
         $rpmProcess = new Process($fpmArgs);
         $rpmProcess->setTimeout(null);
         $rpmProcess->run(function ($type, $buffer) {
@@ -588,18 +541,13 @@ class CreatePackages
 
     }
 
-    /**
-     * Create a package for Composer
-     */
     private static function createComposerPackage(): void
     {
         echo "Creating package for Composer...\n";
 
-        // Create the Composer package
         $package = new composer();
         $config = $package->getFpmConfig();
 
-        // Get the latest Composer version
         $process = new Process(['curl', '-s', 'https://api.github.com/repos/composer/composer/releases/latest']);
         $process->run();
         if (!$process->isSuccessful()) {
@@ -608,13 +556,11 @@ class CreatePackages
 
         $releaseInfo = json_decode($process->getOutput(), true);
         $version = $releaseInfo['tag_name'];
-        $version = ltrim($version, 'v'); // Remove 'v' prefix if present
+        $version = ltrim($version, 'v');
 
-        // Determine the next available iteration
         $iteration = self::getNextIteration('composer', $version, 'noarch');
         echo "Using iteration: {$iteration} for Composer package\n";
 
-        // Create the package with 'noarch' architecture
         self::createPackageWithFpm('composer', $config, $version, 'noarch', $iteration, $package->getFpmExtraArgs());
 
         echo "Composer package created successfully.\n";
@@ -625,7 +571,6 @@ class CreatePackages
         $repoUrl = 'https://github.com/php/frankenphp.git';
         $targetPath = DIST_PATH . '/frankenphp';
 
-        // Get latest tag
         $tagProcess = new Process([
             'bash', '-c',
             "git ls-remote --tags $repoUrl | grep -o 'refs/tags/[^{}]*$' | sed 's#refs/tags/##' | sort -V | tail -n1"

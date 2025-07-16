@@ -28,8 +28,8 @@ craft-options:
     build: true
 
 extra-env:
-    {% set march = arch == 'x86_64' ? '-march=x86_64_v3' : '-march=armv8.4-a' %}
-    {% set cflags = '-g0 -fpic -O3 -Wno-date-time -fcf-protection -fstack-protector-strong -fstack-clash-protection ' ~ march %}
+    {% set march = arch == 'x86_64' ? ' -march=x86_64_v3' : '' %}
+    {% set cflags = '-g0 -fpic -O3 -Wno-date-time -fcf-protection -fstack-protector-strong -fstack-clash-protection' ~ march %}
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
     SPC_TARGET: {{ target }}

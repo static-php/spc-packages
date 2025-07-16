@@ -29,7 +29,6 @@ class PackageCommand extends BaseCommand
         $phpVersion = $input->getOption('phpv');
 
         if ($packageNames) {
-            // Split by comma to support multiple packages
             $packageNames = explode(',', $packageNames);
             $output->writeln("Creating packages for: " . implode(', ', $packageNames) . "...");
         } else {
