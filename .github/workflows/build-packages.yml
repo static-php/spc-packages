@@ -100,6 +100,6 @@ jobs:
         run: |
           scp dist/rpm/*.rpm github@rpm.henderkes.com:/home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+#      - name: Setup tmate session
+#        if: ${{ failure() }}
+#        uses: mxschmitt/action-tmate@v3
