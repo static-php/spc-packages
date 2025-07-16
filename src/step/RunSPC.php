@@ -9,8 +9,7 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 use Symfony\Component\Process\Process;
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
+use staticphp\util\TwigRenderer;
 
 class RunSPC
 {
@@ -51,24 +50,11 @@ class RunSPC
     {
         echo "RunSPC::run() called with debug=" . ($debug ? 'true' : 'false') . ", phpVersion={$phpVersion}\n";
 
-        $arch = str_contains(php_uname('m'), 'x86_64') ? 'x86_64' : 'aarch64';
         $craftYmlDest = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/craft.yml';
 
-        // Use Twig to render the craft.yml template
-        $loader = new FilesystemLoader(BASE_PATH . '/config/templates');
-        $twig = new Environment($loader);
-
-        // Prepare template variables
-        $templateVars = [
-            'php_version' => $phpVersion,
-            'php_version_nodot' => str_replace('.', '', $phpVersion),
-            'target' => SPP_TARGET,
-            'arch' => $arch
-        ];
-
-        // Render the template
+        // Render the template using the TwigRenderer
         try {
-            $craftYml = $twig->render('craft.yml.twig', $templateVars);
+            $craftYml = TwigRenderer::renderCraftTemplate($phpVersion);
 
             // Write the rendered craft.yml to the destination
             if (!file_put_contents($craftYmlDest, $craftYml)) {

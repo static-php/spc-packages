@@ -3,6 +3,7 @@
 namespace staticphp;
 
 use Symfony\Component\Yaml\Yaml;
+use staticphp\util\TwigRenderer;
 
 class CraftConfig
 {
@@ -27,19 +28,17 @@ class CraftConfig
 
     private function loadConfig()
     {
-        $arch = str_contains(php_uname('m'), 'x86_64') ? 'x86_64' : 'aarch64';
-        $craftYmlPath = BASE_PATH . "/config/{$arch}-craft.yml";
+        // Get PHP version - default to 8.4 if not defined
+        $phpVersion = defined('PHP_VERSION') ? PHP_VERSION : '8.4';
 
-        if (!file_exists($craftYmlPath)) {
-            throw new \RuntimeException("Configuration file not found: {$craftYmlPath}");
-        }
+        try {
+            // Use the TwigRenderer to render the craft.yml template
+            $craftYml = TwigRenderer::renderCraftTemplate($phpVersion);
 
-        // Parse the YAML file
-        $this->craftConfig = Yaml::parseFile($craftYmlPath);
-
-        // Replace the target placeholder with the actual target
-        if (isset($this->craftConfig['extra-env']) && isset($this->craftConfig['extra-env']['SPC_TARGET'])) {
-            $this->craftConfig['extra-env']['SPC_TARGET'] = SPP_TARGET;
+            // Parse the rendered YAML
+            $this->craftConfig = Yaml::parse($craftYml);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Error rendering or parsing craft.yml template: " . $e->getMessage());
         }
 
         // Get the list of extensions
