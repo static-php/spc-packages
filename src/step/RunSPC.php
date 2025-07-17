@@ -48,8 +48,6 @@ class RunSPC
 
     public static function run(bool $debug = false, string $phpVersion = '8.4'): bool
     {
-        echo "RunSPC::run() called with debug=" . ($debug ? 'true' : 'false') . ", phpVersion={$phpVersion}\n";
-
         $craftYmlDest = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/craft.yml';
 
         // Render the template using the TwigRenderer

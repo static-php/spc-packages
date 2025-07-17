@@ -26,10 +26,6 @@ abstract class BaseCommand extends Command
         $phpVersion = $input->getOption('phpv') ?? '8.4';
         $target = $input->getOption('target') ?? 'native-native';
 
-        echo "BaseCommand options:\n";
-        echo "  version: {$phpVersion}\n";
-        echo "  target: {$target}\n";
-
         // Check if constants are already defined
         if (defined('SPP_PHP_VERSION')) {
             echo "Constants already defined. SPP_PHP_VERSION=" . SPP_PHP_VERSION . "\n";

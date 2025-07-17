@@ -32,20 +32,8 @@ $application->add(new AllCommand());
 // Set default command to list commands when no command is specified
 $application->setDefaultCommand('list');
 
-// Debug the command arguments
-$commandArgs = array_slice($_SERVER['argv'], 1);
-echo "Command arguments: " . implode(' ', $commandArgs) . "\n";
-if (count($commandArgs) > 0) {
-    echo "Command name: " . $commandArgs[0] . "\n";
-} else {
-    echo "Command name: none\n";
-}
-
-// Run the application with error handling
 try {
-    echo "About to run application...\n";
     $exitCode = $application->run();
-    echo "Application run completed with exit code: " . $exitCode . "\n";
 } catch (Exception $e) {
     echo "Error running application: " . $e->getMessage() . "\n";
     echo "Stack trace: " . $e->getTraceAsString() . "\n";
