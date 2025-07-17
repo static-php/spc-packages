@@ -100,6 +100,11 @@ jobs:
         run: |
           scp dist/rpm/*.rpm github@rpm.henderkes.com:/home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/
 
+      - name: Update repository metadata
+        if: env.PACKAGE_EXISTS != 'true'
+        run: |
+          ssh github@rpm.henderkes.com "cd /home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/ && createrepo_static . && rm -rf repodata && createrepo_c ."
+
 #      - name: Setup tmate session
 #        if: ${{ failure() }}
 #        uses: mxschmitt/action-tmate@v3
