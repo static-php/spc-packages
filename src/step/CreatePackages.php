@@ -325,7 +325,7 @@ class CreatePackages
 
         if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
             $emptyDir = TEMP_DIR . '/spp_empty';
-            if (!file_exists($emptyDir) && !mkdir($emptyDir, true) && !is_dir($emptyDir)) {
+            if (!file_exists($emptyDir) && !mkdir($emptyDir, 0755,true) && !is_dir($emptyDir)) {
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $emptyDir));
             }
             if (is_dir($emptyDir)) {
@@ -513,7 +513,7 @@ class CreatePackages
             $fpmArgs[] = "$lib({$dependencyVersion})(64bit)";
         }
 
-        if (!is_dir("{$packageFolder}/empty/") && !mkdir("{$packageFolder}/empty/", true) && !is_dir("{$packageFolder}/empty/")) {
+        if (!is_dir("{$packageFolder}/empty/") && !mkdir("{$packageFolder}/empty/", 0755, true) && !is_dir("{$packageFolder}/empty/")) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', "{$packageFolder}/empty/"));
         }
 
