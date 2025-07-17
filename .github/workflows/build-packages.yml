@@ -103,7 +103,7 @@ jobs:
       - name: Update repository metadata
         if: env.PACKAGE_EXISTS != 'true'
         run: |
-          ssh github@rpm.henderkes.com "cd /home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/ && createrepo_static . && rm -rf repodata && createrepo_c ."
+          ssh github@rpm.henderkes.com "cd /home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/ && rm -rf repodata && createrepo_static && createrepo_c ."
 
 #      - name: Setup tmate session
 #        if: ${{ failure() }}
