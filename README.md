@@ -5,7 +5,6 @@ A tool for building and packaging PHP and shared extensions with static-php-cli.
 ## Requirements
 
 - PHP 8.3 or higher
-- Docker
 - ruby
 - fpm (gem)
 - rpmbuild (for creating RPM package repository)
