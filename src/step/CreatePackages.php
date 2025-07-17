@@ -57,6 +57,7 @@ class CreatePackages
         else {
             self::createSapiPackages();
             self::createFrankenPhpPackage();
+            self::createSapiPackage('devel');
             self::createComposerPackage();
             self::createExtensionPackages();
         }
