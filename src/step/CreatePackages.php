@@ -2,6 +2,7 @@
 
 namespace staticphp\step;
 
+use SPC\exception\RuntimeException;
 use staticphp\extension;
 use staticphp\package\composer;
 use Symfony\Component\Process\Process;
@@ -18,8 +19,6 @@ class CreatePackages
 
     public static function run($packageNames = null, string $packageTypes = 'rpm,deb', string $phpVersion = '8.4'): true
     {
-        define('SPP_PACKAGE_PHP_VERSION', $phpVersion);
-
         self::loadConfig();
 
         $phpBinary = BUILD_BIN_PATH . '/php';
@@ -93,8 +92,6 @@ class CreatePackages
 
     private static function createSapiPackage(string $sapi): void
     {
-        echo "Creating package for SAPI: {$sapi}...\n";
-
         $packageClass = "\\staticphp\\package\\{$sapi}";
 
         if (!class_exists($packageClass)) {
@@ -123,8 +120,6 @@ class CreatePackages
 
     private static function createExtensionPackage(string $extension): void
     {
-        echo "Creating package for extension: {$extension}...\n";
-
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
 
         $iteration = self::getNextIteration(self::getPrefix() . "-{$extension}", $phpVersion, $architecture);
@@ -355,11 +350,22 @@ class CreatePackages
 
     private static function getPhpVersionAndArchitecture(): array
     {
-        $phpVersion = defined('SPP_PACKAGE_PHP_VERSION') ? SPP_PACKAGE_PHP_VERSION : SPP_PHP_VERSION;
-
+        $basePhpVersion = SPP_PHP_VERSION;
         $phpBinary = BUILD_BIN_PATH . '/php';
+        $fullPhpVersion = null; // Default to base version if binary check fails
+
         if (!file_exists($phpBinary)) {
-            echo "Warning: PHP binary not found at {$phpBinary}, using fallback method for architecture detection\n";
+            throw new RuntimeException("Warning: PHP binary not found at {$phpBinary}, using base PHP version: {$basePhpVersion}");
+        }
+        $versionProcess = new Process([$phpBinary, '-r', 'echo PHP_VERSION;']);
+        $versionProcess->run();
+        $detectedVersion = trim($versionProcess->getOutput());
+
+        if (!empty($detectedVersion)) {
+            $fullPhpVersion = $detectedVersion;
+            echo "Detected full PHP version from binary: {$fullPhpVersion}\n";
+        } else {
+            throw new RuntimeException("Warning: Could not detect PHP version from binary using base version: {$basePhpVersion}");
         }
 
         $archProcess = new Process(['uname', '-m']);
@@ -377,10 +383,10 @@ class CreatePackages
             }
         }
 
-        echo "Detected PHP version: {$phpVersion}\n";
+        echo "Using PHP version for packages: {$fullPhpVersion}\n";
         echo "Detected architecture: {$architecture}\n";
 
-        return [$phpVersion, $architecture];
+        return [$fullPhpVersion, $architecture];
     }
 
     private static function getBinaryDependencies(string $binaryPath): array
@@ -543,8 +549,6 @@ class CreatePackages
 
     private static function createComposerPackage(): void
     {
-        echo "Creating package for Composer...\n";
-
         $package = new composer();
         $config = $package->getFpmConfig();
 
