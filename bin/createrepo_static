@@ -4,10 +4,18 @@ import os
 import re
 import glob
 import yaml
-from datetime import datetime
+from datetime import datetime, timezone
 from collections import defaultdict
 
 yaml.Dumper.ignore_aliases = lambda *args: True
+
+def detect_platform():
+    """Detect platform based on current directory path."""
+    cwd = os.getcwd()
+    for p in ['el7', 'el8', 'el9', 'el10']:
+        if p in cwd:
+            return p
+    return None
 
 def parse_rpm_info(filename):
     basename = os.path.basename(filename)
@@ -19,7 +27,7 @@ def parse_rpm_info(filename):
         version = match_php.group("version")
         release = match_php.group("release")
         arch = match_php.group("arch")
-        stream = '.'.join(version.split('.')[:2])
+        stream = '.'.join(version.split('.')[:2])  # e.g., 8.4
         return name, version, release, arch, stream
 
     # Match frankenphp RPMs: frankenphp-1.8.0_82-1.x86_64.rpm
@@ -30,15 +38,23 @@ def parse_rpm_info(filename):
         release = match_franken.group("release")
         arch = match_franken.group("arch")
         php_patch = version.split('_')[-1]
-        stream = f"8.{php_patch[-1]}"
+        stream = f"8.{php_patch[-1]}"  # Extract PHP minor version
         return name, version, release, arch, stream
+
+    # Match composer RPMs: composer-2.8.10-1.noarch.rpm
+    match_composer = re.match(r'(composer)-(?P<version>\d+\.\d+\.\d+)-(?P<release>\d+)\.(?P<arch>[^.]+)\.rpm', basename)
+    if match_composer:
+        name = match_composer.group(1)
+        version = match_composer.group("version")
+        release = match_composer.group("release")
+        arch = match_composer.group("arch")
+        return name, version, release, arch, None  # No stream assigned here
 
     return None
 
-def build_module_structure(rpm_map):
+def build_module_structure(rpm_map, platform):
     documents = []
-    timestamp = int(datetime.utcnow().strftime('%Y%m%d'))
-    platforms = ['el7', 'el8', 'el9', 'el10']
+    timestamp = int(datetime.now(timezone.utc).strftime('%Y%m%d'))
 
     for stream, pkg_list in sorted(rpm_map.items()):
         components = {}
@@ -53,6 +69,7 @@ def build_module_structure(rpm_map):
             artifacts.append(f"{name}-0:{version}-{release}.{arch}")
             name_ref_map[name] = version
 
+        # Core PHP ZTS components
         for comp in ['php-zts', 'php-zts-cli', 'php-zts-fpm', 'php-zts-embed']:
             if comp in name_ref_map:
                 rationale = 'Main package' if comp == 'php-zts' else comp.split('-')[-1].upper()
@@ -61,10 +78,18 @@ def build_module_structure(rpm_map):
                     'ref': name_ref_map[comp]
                 }
 
+        # FrankenPHP component
         if 'frankenphp' in name_ref_map:
             components['frankenphp'] = {
                 'rationale': 'Embedded web server',
                 'ref': name_ref_map['frankenphp']
+            }
+
+        # Composer component
+        if 'composer' in name_ref_map:
+            components['composer'] = {
+                'rationale': 'Composer CLI',
+                'ref': name_ref_map['composer']
             }
 
         doc = {
@@ -75,17 +100,17 @@ def build_module_structure(rpm_map):
                 'stream': f'static-{stream}',
                 'version': timestamp,
                 'context': 'local',
-                'summary': f'Static PHP {stream} packages',
-                'description': f'Static PHP {stream} built from local RPMs',
+                'summary': f'PHP {stream} (ZTS) packages',
+                'description': f'PHP {stream} (ZTS) built statically - no further dependencies outside this package',
                 'license': {
                     'module': ['MIT']
                 },
                 'dependencies': [{
                     'buildrequires': {
-                        'platform': list(platforms)
+                        'platform': [platform]
                     },
                     'requires': {
-                        'platform': list(platforms)
+                        'platform': [platform]
                     }
                 }],
                 'components': {
@@ -99,22 +124,39 @@ def build_module_structure(rpm_map):
         documents.append(doc)
     return documents
 
+# Detect platform
+platform = detect_platform()
+if not platform:
+    platform = "el10"
+    # raise SystemExit("Error: Could not detect platform (el7, el8, el9, el10) from current directory path.")
+
+# Collect RPMs
 rpm_files = glob.glob("*.rpm")
 rpm_map = defaultdict(list)
+composer_rpms = []
 
+# Classify RPMs
 for rpm in rpm_files:
     info = parse_rpm_info(rpm)
     if info:
-        _, _, _, _, stream = info
-        rpm_map[stream].append(rpm)
+        name, _, _, _, stream = info
+        if name == "composer":
+            composer_rpms.append(rpm)
+        elif stream:
+            rpm_map[stream].append(rpm)
 
-modules_yaml = build_module_structure(rpm_map)
+# Add Composer to every stream
+for stream in rpm_map:
+    rpm_map[stream].extend(composer_rpms)
 
+# Build modules.yaml
+modules_yaml = build_module_structure(rpm_map, platform)
 output_path = os.path.join(os.getcwd(), "modules.yaml")
+
 with open(output_path, "w") as f:
     for doc in modules_yaml:
         f.write('---\n')
         yaml.dump(doc, f, sort_keys=False, default_flow_style=False)
         f.write('...\n')
 
-output_path
+print(output_path)
