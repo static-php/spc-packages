@@ -10,6 +10,7 @@ use staticphp\CraftConfig;
 
 class CreatePackages
 {
+    private static array $versionArch = [];
     private static $extensions = [];
     private static $sharedExtensions = [];
     private static $sapis = [];
@@ -34,11 +35,8 @@ class CreatePackages
             foreach ($packageNames as $packageName) {
                 echo "Building package: {$packageName}\n";
 
-                if (in_array($packageName, self::$sapis) && $packageName !== 'frankenphp') {
+                if (in_array($packageName, self::$sapis, true)) {
                     self::createSapiPackage($packageName);
-                }
-                elseif ($packageName === 'frankenphp') {
-                    self::createFrankenPhpPackage();
                 }
                 elseif ($packageName === 'composer') {
                     self::createComposerPackage();
@@ -56,7 +54,6 @@ class CreatePackages
         }
         else {
             self::createSapiPackages();
-            self::createFrankenPhpPackage();
             self::createSapiPackage('devel');
             self::createComposerPackage();
             self::createExtensionPackages();
@@ -93,6 +90,10 @@ class CreatePackages
 
     private static function createSapiPackage(string $sapi): void
     {
+        if ($sapi === 'frankenphp') {
+            self::createFrankenPhpPackage();
+            return;
+        }
         $packageClass = "\\staticphp\\package\\{$sapi}";
 
         if (!class_exists($packageClass)) {
@@ -170,6 +171,7 @@ class CreatePackages
         $versionProcess = new Process([$phpBinary, ...$args, '-r', "echo phpversion('{$extension}');"]);
         $versionProcess->run();
         $extensionVersion = trim($versionProcess->getOutput());
+        $extensionVersion = preg_match('/(\d+\.\d+)(\.\d+)?/', $extensionVersion, $matches) ? $matches[0] : null;
 
         if (empty($extensionVersion)) {
             throw new \RuntimeException("Warning: Could not detect version for extension {$extension}, using PHP version: {$phpVersion}");
@@ -299,8 +301,9 @@ class CreatePackages
         $rpmProcess->run(function ($type, $buffer) {
             echo $buffer;
         });
-
-        echo "RPM package created: " . DIST_RPM_PATH . "/{$name}-{$phpVersion}-{$iteration}.{$architecture}.rpm\n";
+        if (!$rpmProcess->isSuccessful()) {
+            throw new RuntimeException("RPM package creation failed: " . $rpmProcess->getErrorOutput());
+        }
     }
 
     private static function createDebPackage(string $name, array $config, string $phpVersion, string $architecture, string $iteration, array $extraArgs = []): void
@@ -402,6 +405,9 @@ class CreatePackages
 
     private static function getPhpVersionAndArchitecture(): array
     {
+        if (!empty(self::$versionArch)) {
+            return self::$versionArch;
+        }
         $basePhpVersion = SPP_PHP_VERSION;
         $phpBinary = BUILD_BIN_PATH . '/php';
         $fullPhpVersion = null; // Default to base version if binary check fails
@@ -435,9 +441,7 @@ class CreatePackages
             }
         }
 
-        echo "Using PHP version for packages: {$fullPhpVersion}\n";
-        echo "Detected architecture: {$architecture}\n";
-
+        self::$versionArch = [$fullPhpVersion, $architecture];
         return [$fullPhpVersion, $architecture];
     }
 

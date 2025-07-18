@@ -47,7 +47,8 @@ class extension implements package
     public function getExtensionDependencies(string $extensionName, array $visited = []): array
     {
         $config = Config::getExt($extensionName);
-        if (!$config || empty($config['ext-depends'])) {
+        $keys = ['ext-depends', 'ext-suggests', 'ext-depends-unix', 'ext-suggests-unix', 'ext-depends-linux', 'ext-suggests-linux'];
+        if (!$config) {
             return [];
         }
 
@@ -55,7 +56,15 @@ class extension implements package
         $visited[] = $extensionName;
         $craftConfig = CraftConfig::getInstance();
 
-        foreach ($config['ext-depends'] as $dependency) {
+        $dependencies = [];
+        foreach ($keys as $key) {
+            if (isset($config[$key])) {
+                foreach ($config[$key] as $item) {
+                    $dependencies[] = $item;
+                }
+            }
+        }
+        foreach ($dependencies as $dependency) {
             if (!in_array($dependency, $craftConfig->getSharedExtensions()) || in_array($dependency, $craftConfig->getStaticExtensions())) {
                 continue;
             }
