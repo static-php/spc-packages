@@ -19,9 +19,6 @@ abstract class BaseCommand extends Command
 
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        echo "BaseCommand::initialize() called for " . get_class($this) . "\n";
-        echo "Command arguments: " . implode(' ', array_slice($_SERVER['argv'], 1)) . "\n";
-
         // Define build paths with PHP version
         $phpVersion = $input->getOption('phpv') ?? '8.4';
         $target = $input->getOption('target') ?? 'native-native';
