@@ -109,7 +109,7 @@ class CreatePackages
         $package = new $packageClass();
         $config = $package->getFpmConfig($phpVersion, $iteration);
 
-        self::createPackageWithFpm(self::getPrefix() . "-{$sapi}", $config, $phpVersion, $architecture, $iteration);
+        self::createPackageWithFpm(self::getPrefix() . "-{$sapi}", $config, $phpVersion, $architecture, $iteration, $package->getFpmExtraArgs());;
     }
 
     private static function createExtensionPackages(): void
