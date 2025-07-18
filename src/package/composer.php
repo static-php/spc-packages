@@ -57,34 +57,15 @@ class composer implements package
 
     public function getFpmExtraArgs(): array
     {
-        $afterInstallScript = <<<'BASH'
-#!/bin/bash
-if [ ! -e /usr/bin/php ]; then
-    ln -sf /usr/bin/php-zts /usr/bin/php
-fi
-BASH;
-        $afterRemoveScript = <<<'BASH'
-#!/bin/bash
-if [ -L /usr/bin/php ] && [ "$(readlink /usr/bin/php)" = "/usr/bin/php-zts" ]; then
-    rm -f /usr/bin/php
-fi
-BASH;
-
-        file_put_contents(TEMP_DIR . '/composer-after-install.sh', $afterInstallScript);
-        file_put_contents(TEMP_DIR . '/composer-after-remove.sh', $afterRemoveScript);
-        chmod(TEMP_DIR . '/composer-after-install.sh', 0755);
-        chmod(TEMP_DIR . '/composer-after-remove.sh', 0755);
-
         // Set the package as architecture-independent (noarch) and add metadata
-        return ['--architecture', 'noarch',
+        return [
+            '--architecture', 'noarch',
             '--description', 'Composer is a dependency manager for PHP',
             '--url', 'https://getcomposer.org/',
             '--license', 'MIT',
             '--vendor', 'Composer',
             '--maintainer', 'Static PHP <info@static-php.dev>',
             '--category', 'Development/Tools',
-            '--after-install', TEMP_DIR . '/composer-after-install.sh',
-            '--after-remove', TEMP_DIR . '/composer-after-remove.sh'
         ];
     }
 }
