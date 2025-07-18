@@ -61,7 +61,7 @@ class devel implements package
                 '"`eval echo ${prefix}/include`/php"'
             ],
             [
-                'lib/php-zts',
+                'lib64/php-zts`',
                 '"`eval echo ${prefix}/include`/php-zts"'
             ],
             $phpizeContent
@@ -75,6 +75,7 @@ class devel implements package
                 $modifiedPhpConfigPath => '/usr/bin/php-config-zts',
                 $modifiedPhpizePath => '/usr/bin/phpize-zts',
                 BUILD_INCLUDE_PATH => '/usr/include/php-zts',
+                BUILD_LIB_PATH . '/php' => '/usr/lib64/php-zts',
             ],
             'depends' => [
                 CreatePackages::getPrefix() . '-cli',
