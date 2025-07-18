@@ -25,11 +25,6 @@ class composer implements package
     {
         echo "Downloading latest Composer release...\n";
 
-        // Create a process to download the latest Composer
-        //$process = new Process([
-        //    'curl', '-s', '-L', 'https://github.com/composer/composer/releases/latest/download/composer.phar',
-        //    '-o', $this->composerPath
-        //]);
         if (!defined('DOWNLOAD_PATH')) {
             define('DOWNLOAD_PATH', TEMP_DIR);
         }
