@@ -41,13 +41,6 @@ class composer implements package
             hooks: ['setupGithubToken']
         );
 
-        // Modify the shebang line from #!/usr/bin/php to #!/usr/bin/php-zts
-        echo "Modifying shebang line in composer.phar...\n";
-        $content = file_get_contents($this->composerPath);
-        $content = str_replace("#!/usr/bin/env php\n", "#!/usr/bin/env php-zts\n", $content);
-        file_put_contents($this->composerPath, $content);
-        echo "Shebang line modified successfully.\n";
-
         // Make the file executable
         chmod($this->composerPath, 0755);
 
