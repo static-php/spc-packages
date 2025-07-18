@@ -3,6 +3,7 @@
 namespace staticphp\step;
 
 use SPC\exception\RuntimeException;
+use SPC\store\Downloader;
 use staticphp\extension;
 use staticphp\package\composer;
 use Symfony\Component\Process\Process;
@@ -608,13 +609,8 @@ class CreatePackages
         $package = new composer();
         $config = $package->getFpmConfig();
 
-        $process = new Process(['curl', '-s', 'https://api.github.com/repos/composer/composer/releases/latest']);
-        $process->run();
-        if (!$process->isSuccessful()) {
-            throw new \RuntimeException("Failed to get latest Composer version: " . $process->getErrorOutput());
-        }
-
-        $releaseInfo = json_decode($process->getOutput(), true);
+        $content = Downloader::curlExec('https://api.github.com/repos/composer/composer/releases/latest', hooks: ['setupGithubToken']);
+        $releaseInfo = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
         $version = $releaseInfo['tag_name'];
         $version = ltrim($version, 'v');
 

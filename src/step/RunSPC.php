@@ -110,7 +110,7 @@ class RunSPC
         $baseBuildDir = BASE_PATH . '/build';
 
         // Create the base build directory if it doesn't exist
-        if (!mkdir($baseBuildDir, 0755, true) && !is_dir($baseBuildDir)) {
+        if (!is_dir($baseBuildDir) && !mkdir($baseBuildDir, 0755, true) && !is_dir($baseBuildDir)) {
             echo "Failed to create directory: {$baseBuildDir}\n";
             return;
         }
@@ -144,7 +144,7 @@ class RunSPC
         }
 
         // Create the build directory if it doesn't exist
-        if (!mkdir($buildDir, 0755, true) && !is_dir($buildDir)) {
+        if (!is_dir($buildDir) && !mkdir($buildDir, 0755, true) && !is_dir($buildDir)) {
             echo "Failed to create directory: {$buildDir}\n";
             return;
         }

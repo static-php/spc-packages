@@ -32,6 +32,32 @@ $application->add(new AllCommand());
 // Set default command to list commands when no command is specified
 $application->setDefaultCommand('list');
 
+
+
+function setupGithubToken(string $method, string $url, array &$headers): void
+{
+    $token = getenv('GITHUB_TOKEN');
+    if (!$token) {
+        logger()->debug('no github token found, skip');
+        return;
+    }
+    if (getenv('GITHUB_USER')) {
+        $auth = base64_encode(getenv('GITHUB_USER') . ':' . $token);
+        $he = "Authorization: Basic {$auth}";
+        if (!in_array($he, $headers)) {
+            $headers[] = $he;
+        }
+        logger()->info("using basic github token for {$method} {$url}");
+    } else {
+        $auth = $token;
+        $he = "Authorization: Bearer {$auth}";
+        if (!in_array($he, $headers)) {
+            $headers[] = $he;
+        }
+        logger()->info("using bearer github token for {$method} {$url}");
+    }
+}
+
 try {
     $exitCode = $application->run();
 } catch (Exception $e) {
