@@ -10,7 +10,6 @@ from collections import defaultdict
 yaml.Dumper.ignore_aliases = lambda *args: True
 
 def detect_platform():
-    """Detect platform based on current directory path."""
     cwd = os.getcwd()
     for p in ['el7', 'el8', 'el9', 'el10']:
         if p in cwd:
@@ -27,28 +26,26 @@ def parse_rpm_info(filename):
         version = match_php.group("version")
         release = match_php.group("release")
         arch = match_php.group("arch")
-        stream = '.'.join(version.split('.')[:2])  # e.g., 8.4
+        stream = '.'.join(version.split('.')[:2])
         return name, version, release, arch, stream
 
-    # Match extension packages with _XX postfix: php-zts-extension-1.2.3_84-1.x86_64.rpm
+    # Match extension packages
     match_ext = re.match(r'(?P<name>php-zts-[^-]+)-(?P<version>\d+\.\d+\.\d+_\d+)-(?P<release>[^.]+)\.(?P<arch>[^.]+)\.rpm', basename)
     if match_ext:
         name = match_ext.group("name")
         version = match_ext.group("version")
         release = match_ext.group("release")
         arch = match_ext.group("arch")
-        # Extract PHP version from the postfix (e.g., from "1.2.3_84" extract "8.4")
         php_version = version.split('_')[-1]
         if len(php_version) >= 2:
             major = php_version[0]
             minor = php_version[1]
             stream = f"{major}.{minor}"
         else:
-            # Fallback to base version if postfix format is unexpected
             stream = '.'.join(version.split('_')[0].split('.')[:2])
         return name, version, release, arch, stream
 
-    # Match frankenphp RPMs: frankenphp-1.8.0_82-1.x86_64.rpm
+    # Match frankenphp
     match_franken = re.match(r'(frankenphp)-(?P<version>\d+\.\d+\.\d+_\d+)-(?P<release>\d+)\.(?P<arch>[^.]+)\.rpm', basename)
     if match_franken:
         name = match_franken.group(1)
@@ -56,17 +53,17 @@ def parse_rpm_info(filename):
         release = match_franken.group("release")
         arch = match_franken.group("arch")
         php_patch = version.split('_')[-1]
-        stream = f"8.{php_patch[-1]}"  # Extract PHP minor version
+        stream = f"8.{php_patch[-1]}"
         return name, version, release, arch, stream
 
-    # Match composer RPMs: composer-2.8.10-1.noarch.rpm
+    # Match composer
     match_composer = re.match(r'(composer)-(?P<version>\d+\.\d+\.\d+)-(?P<release>\d+)\.(?P<arch>[^.]+)\.rpm', basename)
     if match_composer:
         name = match_composer.group(1)
         version = match_composer.group("version")
         release = match_composer.group("release")
         arch = match_composer.group("arch")
-        return name, version, release, arch, None  # No stream assigned here
+        return name, version, release, arch, None
 
     return None
 
@@ -113,18 +110,27 @@ def build_module_structure(rpm_map, platform):
         documents.append(doc)
     return documents
 
+def build_defaults_document(default_stream):
+    return {
+        'document': 'modulemd-defaults',
+        'version': 1,
+        'data': {
+            'module': 'php-zts',
+            'stream': f'static-{default_stream}',
+            'profiles': {
+                'default': []
+            }
+        }
+    }
+
 # Detect platform
-platform = detect_platform()
-if not platform:
-    platform = "el10"
-    # raise SystemExit("Error: Could not detect platform (el7, el8, el9, el10) from current directory path.")
+platform = detect_platform() or "el10"
 
 # Collect RPMs
 rpm_files = glob.glob("*.rpm")
 rpm_map = defaultdict(list)
 composer_rpms = []
 
-# Classify RPMs
 for rpm in rpm_files:
     info = parse_rpm_info(rpm)
     if info:
@@ -140,8 +146,13 @@ for stream in rpm_map:
 
 # Build modules.yaml
 modules_yaml = build_module_structure(rpm_map, platform)
-output_path = os.path.join(os.getcwd(), "modules.yaml")
 
+# Determine highest stream for default
+if rpm_map:
+    default_stream = sorted(rpm_map.keys())[-1]  # Use highest PHP version
+    modules_yaml.append(build_defaults_document(default_stream))
+
+output_path = os.path.join(os.getcwd(), "modules.yaml")
 with open(output_path, "w") as f:
     for doc in modules_yaml:
         f.write('---\n')
