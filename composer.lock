@@ -81,12 +81,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "e675af9a18fce23568ea911f72e1f4b47e2bff09"
+                "reference": "fff23649cf9320450d2cc9291ad092935bb22f1b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/e675af9a18fce23568ea911f72e1f4b47e2bff09",
-                "reference": "e675af9a18fce23568ea911f72e1f4b47e2bff09",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/fff23649cf9320450d2cc9291ad092935bb22f1b",
+                "reference": "fff23649cf9320450d2cc9291ad092935bb22f1b",
                 "shasum": ""
             },
             "require": {
@@ -142,7 +142,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-07-16T11:58:08+00:00"
+            "time": "2025-07-18T13:45:46+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -2267,12 +2267,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "d9e8845908f658ef04aebe52283cfc63b192d421"
+                "reference": "5e472fed1bcf8d3a967247576053a20ef3cfefc0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/d9e8845908f658ef04aebe52283cfc63b192d421",
-                "reference": "d9e8845908f658ef04aebe52283cfc63b192d421",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/5e472fed1bcf8d3a967247576053a20ef3cfefc0",
+                "reference": "5e472fed1bcf8d3a967247576053a20ef3cfefc0",
                 "shasum": ""
             },
             "conflict": {
@@ -2672,7 +2672,7 @@
                 "lightsaml/lightsaml": "<1.3.5",
                 "limesurvey/limesurvey": "<6.5.12",
                 "livehelperchat/livehelperchat": "<=3.91",
-                "livewire/livewire": "<2.12.7|>=3.0.0.0-beta1,<3.5.2",
+                "livewire/livewire": "<2.12.7|>=3.0.0.0-beta1,<3.6.4",
                 "livewire/volt": "<1.7",
                 "lms/routes": "<2.1.1",
                 "localizationteam/l10nmgr": "<7.4|>=8,<8.7|>=9,<9.2",
@@ -3216,7 +3216,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-07-14T22:05:34+00:00"
+            "time": "2025-07-17T21:05:33+00:00"
         }
     ],
     "aliases": [],
