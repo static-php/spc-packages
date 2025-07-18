@@ -20,7 +20,7 @@ class devel implements package
                 '/^ldflags=.*$/m',
                 '/^libs=.*$/m',
                 '/^program_prefix=.*$/m',
-                '/^php_cli_binary=.*$/m',
+                '/^program_suffix=.*$/m',
                 '#/php(?!-zts)#'
             ],
             [
@@ -28,7 +28,7 @@ class devel implements package
                 'ldflags="-lpthread"',
                 'libs=""',
                 'program_prefix=""',
-                'php_cli_binary="php-zts"',
+                'program_suffix="-zts"',
                 '/php-zts'
             ],
             $phpConfigContent
