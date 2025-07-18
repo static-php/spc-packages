@@ -30,6 +30,24 @@ def parse_rpm_info(filename):
         stream = '.'.join(version.split('.')[:2])  # e.g., 8.4
         return name, version, release, arch, stream
 
+    # Match extension packages with _XX postfix: php-zts-extension-1.2.3_84-1.x86_64.rpm
+    match_ext = re.match(r'(?P<name>php-zts-[^-]+)-(?P<version>\d+\.\d+\.\d+_\d+)-(?P<release>[^.]+)\.(?P<arch>[^.]+)\.rpm', basename)
+    if match_ext:
+        name = match_ext.group("name")
+        version = match_ext.group("version")
+        release = match_ext.group("release")
+        arch = match_ext.group("arch")
+        # Extract PHP version from the postfix (e.g., from "1.2.3_84" extract "8.4")
+        php_version = version.split('_')[-1]
+        if len(php_version) >= 2:
+            major = php_version[0]
+            minor = php_version[1]
+            stream = f"{major}.{minor}"
+        else:
+            # Fallback to base version if postfix format is unexpected
+            stream = '.'.join(version.split('_')[0].split('.')[:2])
+        return name, version, release, arch, stream
+
     # Match frankenphp RPMs: frankenphp-1.8.0_82-1.x86_64.rpm
     match_franken = re.match(r'(frankenphp)-(?P<version>\d+\.\d+\.\d+_\d+)-(?P<release>\d+)\.(?P<arch>[^.]+)\.rpm', basename)
     if match_franken:
@@ -57,9 +75,7 @@ def build_module_structure(rpm_map, platform):
     timestamp = int(datetime.now(timezone.utc).strftime('%Y%m%d'))
 
     for stream, pkg_list in sorted(rpm_map.items()):
-        components = {}
         artifacts = []
-        name_ref_map = {}
 
         for pkg in sorted(pkg_list):
             info = parse_rpm_info(pkg)
@@ -67,30 +83,6 @@ def build_module_structure(rpm_map, platform):
                 continue
             name, version, release, arch, _ = info
             artifacts.append(f"{name}-0:{version}-{release}.{arch}")
-            name_ref_map[name] = version
-
-        # Core PHP ZTS components
-        for comp in ['php-zts', 'php-zts-cli', 'php-zts-fpm', 'php-zts-embed']:
-            if comp in name_ref_map:
-                rationale = 'Main package' if comp == 'php-zts' else comp.split('-')[-1].upper()
-                components[comp] = {
-                    'rationale': rationale,
-                    'ref': name_ref_map[comp]
-                }
-
-        # FrankenPHP component
-        if 'frankenphp' in name_ref_map:
-            components['frankenphp'] = {
-                'rationale': 'Embedded web server',
-                'ref': name_ref_map['frankenphp']
-            }
-
-        # Composer component
-        if 'composer' in name_ref_map:
-            components['composer'] = {
-                'rationale': 'Composer CLI',
-                'ref': name_ref_map['composer']
-            }
 
         doc = {
             'document': 'modulemd',
@@ -113,9 +105,6 @@ def build_module_structure(rpm_map, platform):
                         'platform': [platform]
                     }
                 }],
-                'components': {
-                    'rpms': components
-                },
                 'artifacts': {
                     'rpms': artifacts
                 }
