@@ -79,7 +79,6 @@ class devel implements package
             ],
             'depends' => [
                 CreatePackages::getPrefix() . '-cli',
-                CreatePackages::getPrefix() . '-embed',
             ],
             'provides' => [
                 'php-config-zts',
