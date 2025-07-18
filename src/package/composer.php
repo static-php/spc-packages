@@ -57,15 +57,12 @@ class composer implements package
 
     public function getFpmExtraArgs(): array
     {
-        // Create after-install script with conditional symlink creation
         $afterInstallScript = <<<'BASH'
 #!/bin/bash
 if [ ! -e /usr/bin/php ]; then
     ln -sf /usr/bin/php-zts /usr/bin/php
 fi
 BASH;
-
-// Create after-remove script with conditional symlink removal
         $afterRemoveScript = <<<'BASH'
 #!/bin/bash
 if [ -L /usr/bin/php ] && [ "$(readlink /usr/bin/php)" = "/usr/bin/php-zts" ]; then
