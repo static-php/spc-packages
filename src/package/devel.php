@@ -33,7 +33,9 @@ class devel implements package
             ],
             $phpConfigContent
         );
-        $phpConfigContent = str_replace('libphp.so', 'libphp-zts.so', $phpConfigContent);
+        $phpVersion = str_replace('.', '', SPP_PHP_VERSION);
+        $libName = 'lib' . CreatePackages::getPrefix() . "-$phpVersion.so";
+        $phpConfigContent = str_replace('libphp.so', $libName, $phpConfigContent);
 
         file_put_contents($modifiedPhpConfigPath, $phpConfigContent);
         chmod($modifiedPhpConfigPath, 0755);
@@ -87,9 +89,6 @@ class devel implements package
 
     public function getFpmExtraArgs(): array
     {
-        $phpVersion = str_replace('.', '', SPP_PHP_VERSION);
-        $libName = 'lib' . CreatePackages::getPrefix() . "-$phpVersion.so";
-        file_put_contents(TEMP_DIR . '/devel-postinstall.sh', "rm /usr/lib64/libphp-zts.so\nln -sf /usr/lib64/$libName /usr/lib64/libphp-zts.so");
-        return ['--after-install', TEMP_DIR . '/devel-postinstall.sh'];
+        return [];
     }
 }
