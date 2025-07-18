@@ -72,6 +72,8 @@ BASH;
 
         file_put_contents(TEMP_DIR . '/composer-after-install.sh', $afterInstallScript);
         file_put_contents(TEMP_DIR . '/composer-after-remove.sh', $afterRemoveScript);
+        chmod(TEMP_DIR . '/composer-after-install.sh', 0755);
+        chmod(TEMP_DIR . '/composer-after-remove.sh', 0755);
 
         // Set the package as architecture-independent (noarch) and add metadata
         return ['--architecture', 'noarch',
