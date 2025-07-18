@@ -21,6 +21,7 @@ class devel implements package
                 '/^libs=.*$/m',
                 '/^program_prefix=.*$/m',
                 '/^php_cli_binary=.*$/m',
+                '#/php(?!-zts)#'
             ],
             [
                 'prefix="/usr"',
@@ -28,9 +29,11 @@ class devel implements package
                 'libs=""',
                 'program_prefix=""',
                 'php_cli_binary="php-zts"',
+                '/php-zts'
             ],
             $phpConfigContent
         );
+        $phpConfigContent = str_replace('libphp.so', 'libphp-zts.so', $phpConfigContent);
 
         file_put_contents($modifiedPhpConfigPath, $phpConfigContent);
         chmod($modifiedPhpConfigPath, 0755);
@@ -50,23 +53,34 @@ class devel implements package
             ],
             $phpizeContent
         );
+        $phpizeContent = str_replace(
+            [
+                'lib/php`',
+                '"`eval echo ${prefix}/include`/php"'
+            ],
+            [
+                'lib/php-zts',
+                '"`eval echo ${prefix}/include`/php-zts"'
+            ],
+            $phpizeContent
+        );
 
         file_put_contents($modifiedPhpizePath, $phpizeContent);
         chmod($modifiedPhpizePath, 0755);
 
         return [
             'files' => [
-                $modifiedPhpConfigPath => '/usr/bin/php-config',
-                $modifiedPhpizePath => '/usr/bin/phpize',
-                BUILD_INCLUDE_PATH => '/usr/include/php',
+                $modifiedPhpConfigPath => '/usr/bin/php-config-zts',
+                $modifiedPhpizePath => '/usr/bin/phpize-zts',
+                BUILD_INCLUDE_PATH => '/usr/include/php-zts',
             ],
             'depends' => [
                 CreatePackages::getPrefix() . '-cli',
                 CreatePackages::getPrefix() . '-embed',
             ],
             'provides' => [
-                'php-config',
-                'phpize',
+                'php-config-zts',
+                'phpize-zts',
             ]
         ];
     }
@@ -75,7 +89,7 @@ class devel implements package
     {
         $phpVersion = str_replace('.', '', SPP_PHP_VERSION);
         $libName = 'lib' . CreatePackages::getPrefix() . "-$phpVersion.so";
-        file_put_contents(TEMP_DIR . '/devel-postinstall.sh', "rm /usr/lib64/libphp.so\nln -sf /usr/lib64/$libName /usr/lib64/libphp.so");
+        file_put_contents(TEMP_DIR . '/devel-postinstall.sh', "rm /usr/lib64/libphp-zts.so\nln -sf /usr/lib64/$libName /usr/lib64/libphp-zts.so");
         return ['--after-install', TEMP_DIR . '/devel-postinstall.sh'];
     }
 }
