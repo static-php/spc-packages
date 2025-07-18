@@ -122,8 +122,9 @@ class CreatePackages
     private static function createExtensionPackage(string $extension): void
     {
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
+        $extensionVersion = self::getExtensionVersion($extension, $phpVersion);
 
-        $iteration = self::getNextIteration(self::getPrefix() . "-{$extension}", $phpVersion, $architecture);
+        $iteration = self::getNextIteration(self::getPrefix() . "-{$extension}", $extensionVersion, $architecture);
 
         $package = new extension($extension);
         $packageClass = "\\staticphp\\package\\{$extension}";
@@ -137,16 +138,66 @@ class CreatePackages
             return;
         }
 
-        self::createPackageWithFpm(self::getPrefix() . "-{$extension}", $config, $phpVersion, $architecture, $iteration, $package->getFpmExtraArgs());;
+        self::createPackageWithFpm(self::getPrefix() . "-{$extension}", $config, $extensionVersion, $architecture, $iteration, $package->getFpmExtraArgs());;
+    }
+
+    private static function getExtensionVersion(string $extension, string $phpVersion): string
+    {
+        $phpBinary = BUILD_BIN_PATH . '/php';
+
+        if (!file_exists($phpBinary)) {
+            throw new \RuntimeException("Warning: PHP binary not found at {$phpBinary}, using PHP version for extension {$extension}: {$phpVersion}");
+        }
+
+        $extensionClass = "\\staticphp\\package\\extension\\$extension";
+        if (!class_exists($extensionClass)) {
+            $extensionClass = extension::class;
+        }
+        $extensionC = new $extensionClass($extension);
+        $dependencies = $extensionC->getExtensionDependencies($extension);
+        $args = [
+            '-d', 'extension_dir=' . BUILD_MODULES_PATH,
+        ];
+        foreach ($dependencies as $dependency) {
+            $depExt = new extension($dependency);
+            if ($depExt->isSharedExtension()) {
+                $args[] = '-d';
+                $args[] = "extension={$dependency}";
+            }
+        }
+        $args[] = '-d';
+        $args[] = "extension={$extension}";
+        $versionProcess = new Process([$phpBinary, ...$args, '-r', "echo phpversion('{$extension}');"]);
+        $versionProcess->run();
+        $extensionVersion = trim($versionProcess->getOutput());
+
+        if (empty($extensionVersion)) {
+            throw new \RuntimeException("Warning: Could not detect version for extension {$extension}, using PHP version: {$phpVersion}");
+        }
+
+        echo "Detected version for extension {$extension}: {$extensionVersion}\n";
+
+        // If extension version is different from PHP version, add postfix based on PHP major.minor version
+        if ($extensionVersion !== $phpVersion) {
+            // Extract major and minor version numbers from PHP version
+            if (preg_match('/^(\d+)\.(\d+)/', $phpVersion, $matches)) {
+                $majorMinor = $matches[1] . $matches[2]; // Combine major and minor without dot
+                $extensionVersion .= '_' . $majorMinor;
+            } else {
+                throw new \RuntimeException("Warning: Could not extract major.minor from PHP version: {$phpVersion}");
+            }
+        }
+
+        return $extensionVersion;
     }
 
     private static function createPackageWithFpm(string $name, array $config, string $phpVersion, string $architecture, string $iteration, array $extraArgs = []): void
     {
-        if (in_array('rpm', self::$packageTypes)) {
+        if (in_array('rpm', self::$packageTypes, true)) {
             self::createRpmPackage($name, $config, $phpVersion, $architecture, $iteration, $extraArgs);
         }
 
-        if (in_array('deb', self::$packageTypes)) {
+        if (in_array('deb', self::$packageTypes, true)) {
             self::createDebPackage($name, $config, $phpVersion, $architecture, $iteration, $extraArgs);
         }
     }

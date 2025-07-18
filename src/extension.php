@@ -8,6 +8,7 @@ use staticphp\step\CreatePackages;
 class extension implements package
 {
     private string $prefix;
+    private array $dependencies;
 
     public function __construct(
         private readonly string $name,
@@ -43,7 +44,7 @@ class extension implements package
         return $prefix;
     }
 
-    private function getExtensionDependencies(string $extensionName, array $visited = []): array
+    public function getExtensionDependencies(string $extensionName, array $visited = []): array
     {
         $config = Config::getExt($extensionName);
         if (!$config || empty($config['ext-depends'])) {
@@ -138,7 +139,7 @@ class extension implements package
         return $tempIniPath;
     }
 
-    protected function isSharedExtension(): bool
+    public function isSharedExtension(): bool
     {
         $craftConfig = CraftConfig::getInstance();
         return in_array($this->name, $craftConfig->getSharedExtensions()) && !in_array($this->name, $craftConfig->getStaticExtensions());
