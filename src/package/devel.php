@@ -74,8 +74,8 @@ class devel implements package
             'files' => [
                 $modifiedPhpConfigPath => '/usr/bin/php-config-zts',
                 $modifiedPhpizePath => '/usr/bin/phpize-zts',
-                BUILD_INCLUDE_PATH => '/usr/include/php-zts',
-                BUILD_LIB_PATH . '/php' => '/usr/lib64/php-zts',
+                BUILD_INCLUDE_PATH . '/php/' => '/usr/include/php-zts',
+                BUILD_LIB_PATH . '/php/build' => '/usr/lib64/php-zts',
             ],
             'depends' => [
                 CreatePackages::getPrefix() . '-cli',
