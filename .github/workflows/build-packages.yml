@@ -67,8 +67,7 @@ jobs:
 
           echo "${{ env.RPM_ARCH }} PHP ${{ matrix.php-version }} (${{ matrix.target }}) exists: ${exists}"
 
-#          if [ "$exists" = "true" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
-          if [ "$exists" = "true" ]; then
+          if [ "$exists" = "true" ] && false && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
             echo "Package already exists. Skipping build."
             echo "PACKAGE_EXISTS=true" >> $GITHUB_ENV
           else
