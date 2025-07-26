@@ -30,7 +30,7 @@ craft-options:
 extra-env:
     {% set arch_flags = arch == 'x86_64' ? ' -fcf-protection' : '' %}
     {% if arch == 'x86_64' and '.2.39' in target %} {% set arch_flags = arch_flags ~ ' -march=x86_64_v3' %} {% endif %}
-    {% if arch == 'x86_64' and '.2.34' in target %} {# x86_64_v2 causes relocation failure for frankenphp :/ #} {% endif %}
+    {% if arch == 'x86_64' and '.2.34' in target %} {% set arch_flags = arch_flags ~ ' -march=x86_64_v2' %} {% endif %}
     {% set cflags = '-g0 -fpic -O3 -Wno-date-time -fstack-protector-strong -fstack-clash-protection' ~ arch_flags %}
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
