@@ -31,7 +31,7 @@ extra-env:
     {% set arch_flags = arch == 'x86_64' ? ' -fcf-protection' : '' %}
     {% if arch == 'x86_64' and '.2.39' in target %} {% set arch_flags = arch_flags ~ ' -march=x86_64_v3' %} {% endif %}
     {% if arch == 'x86_64' and '.2.34' in target %} {# set arch_flags = arch_flags ~ ' -march=x86_64_v2' #} {% endif %}
-    {% set cflags = '-g0 -fpic -flto=thin -O3 -Wno-date-time -fstack-protector-strong -fstack-clash-protection' ~ arch_flags %}
+    {% set cflags = '-g0 -fpic -O3 -Wno-date-time -fstack-protector-strong -fstack-clash-protection' ~ arch_flags %}
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
     SPC_TARGET: {{ target }}
@@ -42,7 +42,7 @@ extra-env:
     SPC_OPT_BUILD_ARGS: "--with-config-file-path=/etc/php-zts.ini --with-config-file-scan-dir=/etc/php-zts.d"
     SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "{{ cflags }} -fpie -fno-ident -Wno-date-time"
     SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS: "-pie -release zts-{{ php_version_nodot }}"
-    LDFLAGS: "-Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -flto=thin"
+    LDFLAGS: "-Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack"
     SPC_CMD_PREFIX_PHP_CONFIGURE: "./configure --prefix= --with-valgrind=no --disable-shared --enable-static --disable-all --disable-cgi --disable-phpdbg --disable-debug --with-pic --disable-dependency-tracking --enable-rtld-now --enable-re2c-cgoto"
     SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES: "--with github.com/dunglas/frankenphp/caddy --with github.com/dunglas/mercure/caddy --with github.com/dunglas/vulcain/caddy --with github.com/dunglas/caddy-cbrotli --with github.com/baldinof/caddy-supervisor"
     PHP_BUILD_PROVIDER: "Static PHP <https://static-php.dev> #StandWithUkraine"
