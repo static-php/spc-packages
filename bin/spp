@@ -32,7 +32,12 @@ $application->add(new AllCommand());
 // Set default command to list commands when no command is specified
 $application->setDefaultCommand('list');
 
-
+try {
+    $exitCode = $application->run();
+} catch (Exception $e) {
+    echo "Error running application: " . $e->getMessage() . "\n";
+    echo "Stack trace: " . $e->getTraceAsString() . "\n";
+}
 
 function setupGithubToken(string $method, string $url, array &$headers): void
 {
@@ -56,11 +61,4 @@ function setupGithubToken(string $method, string $url, array &$headers): void
         }
         logger()->info("using bearer github token for {$method} {$url}");
     }
-}
-
-try {
-    $exitCode = $application->run();
-} catch (Exception $e) {
-    echo "Error running application: " . $e->getMessage() . "\n";
-    echo "Stack trace: " . $e->getTraceAsString() . "\n";
 }

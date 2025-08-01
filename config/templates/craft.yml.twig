@@ -31,7 +31,7 @@ extra-env:
     {% set arch_flags = arch == 'x86_64' ? ' -fcf-protection' : '' %}
     {% if arch == 'x86_64' and '.2.39' in target %} {% set arch_flags = arch_flags ~ ' -march=x86_64_v3' %} {% endif %}
     {% if arch == 'x86_64' and '.2.34' in target %} {# set arch_flags = arch_flags ~ ' -march=x86_64_v2' #} {% endif %}
-    {% set cflags = '-g0 -fpic -O3 -fexceptions -pipe -DNDEBUG -Wp,-U_FORTIFY_SOURCE,-D_FORTIFY_SOURCE=3 -specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -fstack-protector-strong -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1 -m64 -mtune=generic -fasynchronous-unwind-tables -fstack-clash-protection -mtls-dialect=gnu2 -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -fno-strict-aliasing' ~ arch_flags %}
+    {% set cflags = '-g0 -fpic -O3 -fexceptions -pipe -DNDEBUG -D_FORTIFY_SOURCE=3 -fstack-protector-strong -m64 -fasynchronous-unwind-tables -fstack-clash-protection -mtls-dialect=gnu2 -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -fno-strict-aliasing' ~ arch_flags %}
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
     SPC_TARGET: {{ target }}
