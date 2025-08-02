@@ -80,7 +80,7 @@ jobs:
 
       - name: Build PHP and packages
         run: |
-          php bin/spp all --target=${{ matrix.target }} --type=rpm --phpv=${{ matrix.php-version }}
+          php bin/spp all --target=${{ matrix.target }} --type=rpm --phpv=${{ matrix.php-version }} --debug
 
       - name: Upload packages
         run: |
