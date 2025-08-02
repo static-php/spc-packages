@@ -28,10 +28,10 @@ craft-options:
     build: true
 
 extra-env:
-    {% set arch_flags = arch == 'x86_64' ? ' -fcf-protection' : '' %}
+    {% set arch_flags = arch == 'x86_64' ? ' -fcf-protection -mtls-dialect=gnu2 -m64' : '' %}
     {% if arch == 'x86_64' and '.2.39' in target %} {% set arch_flags = arch_flags ~ ' -march=x86_64_v3' %} {% endif %}
     {% if arch == 'x86_64' and '.2.34' in target %} {# set arch_flags = arch_flags ~ ' -march=x86_64_v2' #} {% endif %}
-    {% set cflags = '-g0 -fpic -O3 -fexceptions -pipe -fstack-protector-strong -m64 -fasynchronous-unwind-tables -fstack-clash-protection -mtls-dialect=gnu2 -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -fno-strict-aliasing' ~ arch_flags %}
+    {% set cflags = '-g0 -fpic -O3 -fexceptions -pipe -fstack-protector-strong -fasynchronous-unwind-tables -fstack-clash-protection -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -fno-strict-aliasing' ~ arch_flags %}
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
     SPC_TARGET: {{ target }}
