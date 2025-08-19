@@ -116,6 +116,15 @@ jobs:
                 run: |
                     php bin/spp all --target=native-native-gnu --type=rpm --phpv=${{ matrix.php-version }}
 
+            -   name: SSH config
+                run: |
+                    install -d -m 700 "$HOME/.ssh"
+                    cat > "$HOME/.ssh/config" <<'EOF'
+                      Host *
+                      CheckHostIP no
+                      EOF
+                      chmod 600 "$HOME/.ssh/config"
+
             -   name: Upload packages
                 run: |
                     rsync -av --ignore-existing dist/rpm/*.rpm github@rpm.henderkes.com:/home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/
