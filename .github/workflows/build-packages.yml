@@ -34,10 +34,8 @@ jobs:
             -   name: Bootstrap container
                 run: |
                     dnf -y install epel-release dnf-plugins-core
-                    dnf -y install https://rpms.remirepo.net/enterprise/remi-release-${{ matrix.alma }}.rpm
-                    dnf -y module enable php:remi-8.4
                     dnf -y install \
-                      wget php-cli php-mbstring php-xml php-json php-curl php-zip perl \
+                      wget perl \
                       ruby rubygems ruby-devel make rpm-build rpmdevtools \
                       openssh rsync createrepo_c \
                       git jq tar gzip which sudo
@@ -51,6 +49,8 @@ jobs:
                       dnf -y install g++
                     fi
                     gem install --no-document fpm
+                    curl -#fSL https://dl.static-php.dev/static-php-cli/bulk/php-8.4.11-cli-linux-${{ matrix.arch }}.tar.gz | tar -xz -C /usr/local/bin && \
+                    chmod +x /usr/local/bin/php
                     dnf -y install glibc-langpack-en glibc-locale-source
                     localedef -i en_US -f UTF-8 en_US.UTF-8
 
