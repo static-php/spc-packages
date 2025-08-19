@@ -57,3 +57,6 @@ extra-env:
     SPC_CMD_PREFIX_PHP_CONFIGURE: "./configure --prefix= --with-valgrind=no --disable-shared --enable-static --disable-all --disable-cgi --disable-phpdbg --disable-debug --with-pic --disable-dependency-tracking --enable-rtld-now --enable-re2c-cgoto --disable-rpath"
     SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES: "--with github.com/dunglas/frankenphp/caddy --with github.com/dunglas/mercure/caddy --with github.com/dunglas/vulcain/caddy --with github.com/dunglas/caddy-cbrotli --with github.com/baldinof/caddy-supervisor"
     PHP_BUILD_PROVIDER: "Static PHP <https://static-php.dev> #StandWithUkraine"
+    PHP_BUILD_ARCH: '{{ arch }}'
+    PHP_BUILD_COMPILER: '{{ target == 'native-native-gnu' or target == 'native-native' ? 'gcc' : 'zig' }}'
+    PHP_BUILD_SYSTEM: 'AlmaLinux'
