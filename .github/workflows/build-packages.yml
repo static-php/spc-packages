@@ -35,7 +35,6 @@ jobs:
                     dnf -y install epel-release dnf-plugins-core
                     dnf -y install https://rpms.remirepo.net/enterprise/remi-release-${{ matrix.alma }}.rpm || true
                     dnf -y module enable php:remi-8.4
-                    dnf -y swap curl-minimal curl --allowerasing
                     dnf -y install \
                       php-cli php-mbstring php-xml php-json php-curl php-zip \
                       ruby rubygems ruby-devel make rpm-build rpmdevtools \
