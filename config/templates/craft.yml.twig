@@ -38,7 +38,7 @@ extra-env:
     SPC_TOOLCHAIN: 'SPC\toolchain\GccNativeToolchain'
     SPC_LIBC: 'glibc'
     {%- else -%}
-    SPC_TARGET: {{ target }}
+    SPC_TARGET: '{{ target }}'
     {% endif -%}
     EXTENSION_DIR: '/usr/lib64/php-zts/modules'
     SPC_CMD_VAR_PHP_EMBED_TYPE: 'shared'
