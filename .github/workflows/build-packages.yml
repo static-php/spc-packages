@@ -36,7 +36,7 @@ jobs:
                     dnf -y install https://rpms.remirepo.net/enterprise/remi-release-${{ matrix.alma }}.rpm || true
                     dnf -y module enable php:remi-8.4
                     dnf -y install \
-                      php-cli php-mbstring php-xml php-json php-curl php-zip \
+                      wget php-cli php-mbstring php-xml php-json php-curl php-zip \
                       ruby rubygems ruby-devel make rpm-build rpmdevtools \
                       openssh rsync createrepo_c \
                       git jq tar gzip which sudo
@@ -49,7 +49,7 @@ jobs:
 
             -   name: Install composer
                 run: |
-                    curl -sL https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
+                    wget https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
                     mv composer.phar /usr/bin/composer
 
             -   name: Install re2c
