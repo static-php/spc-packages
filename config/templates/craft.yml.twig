@@ -27,13 +27,12 @@ craft-options:
     download: true
     build: true
 
-extra-env:
 {% set arch_flags = arch == 'x86_64' ? ' -fcf-protection -mtls-dialect=gnu2 -m64' : '' %}
 {% if arch == 'x86_64' and os == '10' %} {% set arch_flags = arch_flags ~ ' -march=x86-64-v3' %} {% endif %}
 {% if arch == 'x86_64' and os == '9'  %} {% set arch_flags = arch_flags ~ ' -march=x86-64-v2' %} {% endif %}
 {% set using_gcc = target == 'native-native-gnu' or target == 'native-native' %}
 {% set specs_cflags = '-specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1' %}
-{% set specs_ldflags = '-specs=/usr/lib/rpm/redhat/redhat-hardened-ld -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1' %}
+{% set specs_ldflags = '-specs=/usr/lib/rpm/redhat/redhat-hardened-ld -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1 -Wl,-z,pack-relative-relocs' %}
 {% set cflags =
   '-g0 -fpic -O3 -fexceptions -pipe -fstack-protector-strong ' ~
   '-fasynchronous-unwind-tables -fstack-clash-protection ' ~
@@ -44,6 +43,8 @@ extra-env:
 {% else %}
 {% set cflags = cflags ~ ' -D_FORTIY_SOURCE=3' %}
 {% endif %}
+
+extra-env:
     {% if using_gcc -%}
     SPC_TOOLCHAIN: 'SPC\toolchain\GccNativeToolchain'
     SPC_LIBC: 'glibc'
@@ -55,9 +56,9 @@ extra-env:
     SPC_DEFAULT_C_FLAGS: "{{ cflags }}"
     SPC_DEFAULT_CXX_FLAGS: "{{ cflags }}"
     SPC_OPT_BUILD_ARGS: "--with-config-file-path=/etc/php-zts.ini --with-config-file-scan-dir=/etc/php-zts.d"
-    SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "{{ cflags }} -fpie -fno-ident -Wno-date-time"
+    SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "{{ cflags }} -fpie"
     SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS: "-pie -release zts-{{ php_version_nodot }}"
-    LDFLAGS: "-Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-z,noexecstack -Wl,-z,pack-relative-relocs -Wl,--build-id=sha1 {{ specs_ldflags }}"
+    LDFLAGS: "-Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-z,noexecstack -Wl,--build-id=sha1 {{ using_gcc ? specs_ldflags : '' }}"
     SPC_CMD_PREFIX_PHP_CONFIGURE: "./configure --prefix= --with-valgrind=no --disable-shared --enable-static --disable-all --disable-cgi --disable-phpdbg --disable-debug --with-pic --disable-dependency-tracking --enable-rtld-now --enable-re2c-cgoto --disable-rpath"
     SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES: "--with github.com/dunglas/frankenphp/caddy --with github.com/dunglas/mercure/caddy --with github.com/dunglas/vulcain/caddy --with github.com/dunglas/caddy-cbrotli --with github.com/baldinof/caddy-supervisor"
     PHP_BUILD_PROVIDER: "Static PHP <https://static-php.dev> #StandWithUkraine"
