@@ -34,22 +34,28 @@ jobs:
                 run: |
                     dnf -y install epel-release dnf-plugins-core
                     dnf -y install https://rpms.remirepo.net/enterprise/remi-release-${{ matrix.alma }}.rpm || true
-                    dnf -y module reset php || true
                     dnf -y module enable php:remi-8.4
-                    if grep -q 'release 9' /etc/redhat-release; then
-                      dnf -y swap curl-minimal curl --allowerasing
-                    fi
+                    dnf -y swap curl-minimal curl --allowerasing
                     dnf -y install \
-                      gcc g++ \
-                      php-cli php-mbstring php-xml php-json php-curl php-zip composer \
-                      ruby rubygems ruby-devel gcc make rpm-build rpmdevtools \
+                      gcc-toolset-14 python39 \
+                      php-cli php-mbstring php-xml php-json php-curl php-zip \
+                      ruby rubygems ruby-devel make rpm-build rpmdevtools \
                       openssh rsync createrepo_c \
                       git jq tar gzip which sudo
+
+                    if [[ "${{ matrix.alma }}" -eq 8 || "${{ matrix.alma }}" -eq 9 ]]; then
+                      dnf -y install gcc-toolset-14
+                      source /opt/rh/gcc-toolset-14/enable
+                    fi
                     gem install --no-document fpm
 
-            -   name: Install build deps
+            -   name: Intall composer
                 run: |
-                    dnf -y install bison flex autoconf automake cmake libtool gettext-devel patchelf perl-IPC-Cmd
+                    curl -sL https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
+                    mv composer.phar /usr/bin/composer
+
+            -   name: Install re2c
+                run: |
                     if [[ "${{ matrix.alma }}" -eq 9 || "${{ matrix.alma }}" -eq 10 ]]; then
                       dnf -y install re2c
                     else
