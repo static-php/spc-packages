@@ -46,6 +46,21 @@ jobs:
                       git jq tar gzip which sudo
                     gem install --no-document fpm
 
+            -   name: Install build deps
+                run: |
+                    dnf -y install bison flex autoconf automake cmake libtool gettext-devel patchelf perl-IPC-Cmd
+                    if [[ "${{ matrix.alma }}" -eq 9 || "${{ matrix.alma }}" -eq 10 ]]; then
+                      dnf -y install re2c
+                    else
+                      curl -L https://github.com/skvadrik/re2c/releases/download/4.3/re2c-4.3.tar.xz | tar xJ
+                      cd re2c-4.3
+                      ./configure
+                      make -j
+                      make install
+                      cd ..
+                      rm -rf re2c-4.3
+                    fi
+
             -   name: Set up SSH key
                 uses: webfactory/ssh-agent@v0.8.0
                 with:
