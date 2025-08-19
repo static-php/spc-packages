@@ -66,7 +66,7 @@ jobs:
                       curl -L https://github.com/skvadrik/re2c/releases/download/4.3/re2c-4.3.tar.xz | tar xJ
                       cd re2c-4.3
                       ./configure
-                      make -j
+                      make
                       make install
                       cd ..
                       rm -rf re2c-4.3
@@ -112,7 +112,7 @@ jobs:
 
             -   name: Build PHP and packages
                 run: |
-                    php bin/spp all --target=native-native-gnu --type=rpm --phpv=${{ matrix.php-version }}
+                    php bin/spp all --target=native-native-gnu --type=rpm --phpv=${{ matrix.php-version }} --debug
 
             -   name: Upload packages
                 run: |
