@@ -39,12 +39,13 @@ craft-options:
   '-fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -fno-strict-aliasing' ~ arch_flags
 %}
 {% if using_gcc %}
-{% if os == '8' %}
-{% set cflags = cflags ~ ' -Wp,-D_FORTIFY_SOURCE=2' ~ ' ' ~ specs_cflags %}
+    {% if os == '8' %}
+        {% set cflags = cflags ~ ' -Wp,-D_FORTIFY_SOURCE=2' ~ ' ' ~ specs_cflags %}
+    {% else %}
+        {% set cflags = cflags ~ ' -Wp,-U_FORTIFY_SOURCE,-D_FORTIY_SOURCE=3' ~ ' ' ~ specs_cflags %}
+    {% endif %}
 {% else %}
-{% set cflags = cflags ~ ' -Wp,-U_FORTIFY_SOURCE,-D_FORTIY_SOURCE=3' ~ ' ' ~ specs_cflags %}
-{% else %}
-{% set cflags = cflags ~ ' -D_FORTIY_SOURCE=3' %}
+    {% set cflags = cflags ~ ' -D_FORTIY_SOURCE=3' %}
 {% endif %}
 
 extra-env:
