@@ -11,6 +11,9 @@ jobs:
     runs-on: ${{ matrix.arch == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     container:
       image: almalinux:${{ matrix.alma }}
+    defaults:
+      run:
+        shell: bash
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
