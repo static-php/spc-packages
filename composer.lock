@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "899aa97008172e26012eb741f3425c5b",
+    "content-hash": "c66be53a2b76b5d46249b1fca76cb195",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -77,16 +77,16 @@
         },
         {
             "name": "crazywhalecc/static-php-cli",
-            "version": "dev-main",
+            "version": "dev-fix/imagick",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "6b5aaa38ae091618af4289baaf1fe1fb07afd129"
+                "reference": "e6832ecf612553085a9166026e4fca0cd9c134fc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/6b5aaa38ae091618af4289baaf1fe1fb07afd129",
-                "reference": "6b5aaa38ae091618af4289baaf1fe1fb07afd129",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/e6832ecf612553085a9166026e4fca0cd9c134fc",
+                "reference": "e6832ecf612553085a9166026e4fca0cd9c134fc",
                 "shasum": ""
             },
             "require": {
@@ -107,7 +107,6 @@
                 "phpstan/phpstan": "^1.10",
                 "phpunit/phpunit": "^10.3 || ^9.5"
             },
-            "default-branch": true,
             "bin": [
                 "bin/spc"
             ],
@@ -134,7 +133,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/main"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/fix/imagick"
             },
             "funding": [
                 {
@@ -142,7 +141,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-08-19T08:51:28+00:00"
+            "time": "2025-08-19T13:15:41+00:00"
         },
         {
             "name": "doctrine/inflector",
