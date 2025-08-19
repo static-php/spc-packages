@@ -31,16 +31,20 @@ extra-env:
 {% set arch_flags = arch == 'x86_64' ? ' -fcf-protection -mtls-dialect=gnu2 -m64' : '' %}
 {% if arch == 'x86_64' and os == '10' %} {% set arch_flags = arch_flags ~ ' -march=x86-64-v3' %} {% endif %}
 {% if arch == 'x86_64' and os == '9'  %} {% set arch_flags = arch_flags ~ ' -march=x86-64-v2' %} {% endif %}
+{% set using_gcc = target == 'native-native-gnu' or target == 'native-native' %}
 {% set specs_cflags = '-specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1' %}
 {% set specs_ldflags = '-specs=/usr/lib/rpm/redhat/redhat-hardened-ld -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1' %}
 {% set cflags =
   '-g0 -fpic -O3 -fexceptions -pipe -fstack-protector-strong ' ~
   '-fasynchronous-unwind-tables -fstack-clash-protection ' ~
-  '-fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -fno-strict-aliasing ' ~
-  '-Wp,-U_FORTIFY_SOURCE,-D_FORTIFY_SOURCE=3' ~
-  arch_flags ~ ' ' ~ specs_cflags
+  '-fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -fno-strict-aliasing' ~ arch_flags
 %}
-    {% if target == 'native-native-gnu' or target == 'native-native' -%}
+{% if using_gcc -%}
+{% set cflags = cflags ~ ' -Wp,-U_FORTIFY_SOURCE,-D_FORTIY_SOURCE=3' ~ ' ' ~ specs_cflags %}
+{% else %}
+{% set cflags = cflags ~ ' -D_FORTIY_SOURCE=3' %}
+{% endif %}
+    {% if using_gcc -%}
     SPC_TOOLCHAIN: 'SPC\toolchain\GccNativeToolchain'
     SPC_LIBC: 'glibc'
     {% else -%}
@@ -58,5 +62,5 @@ extra-env:
     SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES: "--with github.com/dunglas/frankenphp/caddy --with github.com/dunglas/mercure/caddy --with github.com/dunglas/vulcain/caddy --with github.com/dunglas/caddy-cbrotli --with github.com/baldinof/caddy-supervisor"
     PHP_BUILD_PROVIDER: "Static PHP <https://static-php.dev> #StandWithUkraine"
     PHP_BUILD_ARCH: '{{ arch }}'
-    PHP_BUILD_COMPILER: '{{ target == 'native-native-gnu' or target == 'native-native' ? 'gcc' : 'zig' }}'
+    PHP_BUILD_COMPILER: '{{ using_gcc ? 'gcc' : 'zig' }}'
     PHP_BUILD_SYSTEM: 'AlmaLinux'
