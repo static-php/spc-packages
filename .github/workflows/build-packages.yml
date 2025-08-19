@@ -51,8 +51,8 @@ jobs:
                       dnf -y install g++
                     fi
                     gem install --no-document fpm
-                    dnf -y install glibc-langpack-en
-                    localedef -c -i en_US -f UTF-8 en_US.UTF-8
+                    dnf -y install glibc-langpack-en glibc-locale-source
+                    localedef -i en_US -f UTF-8 en_US.UTF-8
 
             -   name: Install composer
                 run: |
