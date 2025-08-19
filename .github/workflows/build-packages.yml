@@ -34,7 +34,7 @@ jobs:
             -   name: Bootstrap container
                 run: |
                     dnf -y install epel-release dnf-plugins-core
-                    dnf -y install https://rpms.remirepo.net/enterprise/remi-release-${{ matrix.alma }}.rpm || true
+                    dnf -y install https://rpms.remirepo.net/enterprise/remi-release-${{ matrix.alma }}.rpm
                     dnf -y module enable php:remi-8.4
                     dnf -y install \
                       wget php-cli php-mbstring php-xml php-json php-curl php-zip perl \
@@ -66,7 +66,7 @@ jobs:
                       curl -L https://github.com/skvadrik/re2c/releases/download/4.3/re2c-4.3.tar.xz | tar xJ
                       cd re2c-4.3
                       ./configure
-                      make
+                      make -j2
                       make install
                       cd ..
                       rm -rf re2c-4.3
