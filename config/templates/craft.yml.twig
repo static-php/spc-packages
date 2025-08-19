@@ -29,12 +29,17 @@ craft-options:
 
 extra-env:
     {% set arch_flags = arch == 'x86_64' ? ' -fcf-protection -mtls-dialect=gnu2 -m64' : '' %}
-    {% if arch == 'x86_64' and '.2.39' in target %} {% set arch_flags = arch_flags ~ ' -march=x86_64_v3' %} {% endif %}
-    {% if arch == 'x86_64' and '.2.34' in target %} {# set arch_flags = arch_flags ~ ' -march=x86_64_v2' #} {% endif %}
+    {% if arch == 'x86_64' and '.2.39' in target %} {% set arch_flags = arch_flags ~ ' -march=x86-64-v3' %} {% endif %}
+    {% if arch == 'x86_64' and '.2.34' in target %} {# set arch_flags = arch_flags ~ ' -march=x86-64-v2' #} {% endif %}
     {% set cflags = '-g0 -fpic -O3 -fexceptions -pipe -fstack-protector-strong -fasynchronous-unwind-tables -fstack-clash-protection -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -fno-strict-aliasing' ~ arch_flags %}
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
+    {% if '.2.39' in target or target == '' %}
+    SPC_TOOLCHAIN: 'SPC\toolchain\GccNativeToolchain'
+    SPC_LIBC: 'glibc'
+    {% else %}
     SPC_TARGET: {{ target }}
+    {% endif %}
     EXTENSION_DIR: /usr/lib64/php-zts/modules
     SPC_CMD_VAR_PHP_EMBED_TYPE: shared
     SPC_DEFAULT_C_FLAGS: "{{ cflags }}"
