@@ -40,6 +40,7 @@ jobs:
                       dnf -y swap curl-minimal curl --allowerasing
                     fi
                     dnf -y install \
+                      gcc g++ \
                       php-cli php-mbstring php-xml php-json php-curl php-zip composer \
                       ruby rubygems ruby-devel gcc make rpm-build rpmdevtools \
                       openssh rsync createrepo_c \
