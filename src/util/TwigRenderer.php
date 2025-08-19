@@ -30,7 +30,7 @@ class TwigRenderer
             if (str_contains(SPP_TARGET, '.2.17')) {
                 $majorOsVersion = 7;
             }
-            if (str_contains(SPP_TARGET, '.2.28')) {
+            elseif (str_contains(SPP_TARGET, '.2.28')) {
                 $majorOsVersion = 8;
             }
             elseif (str_contains(SPP_TARGET, '.2.34')) {
