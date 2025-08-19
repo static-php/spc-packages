@@ -30,9 +30,6 @@ jobs:
                     -   alma: 10
                         target_dir: el10
         steps:
-            -   name: Checkout
-                uses: actions/checkout@v4
-
             -   name: Bootstrap container
                 run: |
                     dnf -y install epel-release dnf-plugins-core
@@ -83,6 +80,9 @@ jobs:
 
             -   name: Checkout code
                 uses: actions/checkout@v4
+
+            -   name: Composer install
+                run: composer install
 
             -   name: Build PHP and packages
                 run: |
