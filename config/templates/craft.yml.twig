@@ -34,12 +34,12 @@ extra-env:
     {% set cflags = '-g0 -fpic -O3 -fexceptions -pipe -fstack-protector-strong -fasynchronous-unwind-tables -fstack-clash-protection -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -fno-strict-aliasing' ~ arch_flags %}
     # e.g. Use github token to avoid rate limit
     # GITHUB_TOKEN: your-github-token
-    {% if '.2.39' in target or target == 'native-native' -%}
+    {% if '.2.39' in target or target == 'native-native' and false -%}
     SPC_TOOLCHAIN: 'SPC\toolchain\GccNativeToolchain'
     SPC_LIBC: 'glibc'
-    {% else %}
+    {%- else -%}
     SPC_TARGET: {{ target }}
-    {%- endif -%}
+    {% endif -%}
     EXTENSION_DIR: '/usr/lib64/php-zts/modules'
     SPC_CMD_VAR_PHP_EMBED_TYPE: 'shared'
     SPC_DEFAULT_C_FLAGS: "{{ cflags }}"
