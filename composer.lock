@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "899aa97008172e26012eb741f3425c5b",
+    "content-hash": "4eec83568a1e6fa7b5b78cf2cb3e52d5",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -77,16 +77,16 @@
         },
         {
             "name": "crazywhalecc/static-php-cli",
-            "version": "dev-main",
+            "version": "dev-brotli-watcher",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "3804e842bbac394c979e5da4e3940426a95a44b0"
+                "reference": "af90b840ee222935b711aec92a7e59b16508183e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/3804e842bbac394c979e5da4e3940426a95a44b0",
-                "reference": "3804e842bbac394c979e5da4e3940426a95a44b0",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/af90b840ee222935b711aec92a7e59b16508183e",
+                "reference": "af90b840ee222935b711aec92a7e59b16508183e",
                 "shasum": ""
             },
             "require": {
@@ -107,7 +107,6 @@
                 "phpstan/phpstan": "^1.10",
                 "phpunit/phpunit": "^10.3 || ^9.5"
             },
-            "default-branch": true,
             "bin": [
                 "bin/spc"
             ],
@@ -134,7 +133,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/main"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/brotli-watcher"
             },
             "funding": [
                 {
@@ -142,7 +141,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-08-20T05:56:08+00:00"
+            "time": "2025-08-25T02:59:27+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -2302,12 +2301,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "aba5d69a31ad55e7f105fe6d6caffba529d56c2c"
+                "reference": "f9827bdb1caa9af2bde8def6899734610e7bddf9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/aba5d69a31ad55e7f105fe6d6caffba529d56c2c",
-                "reference": "aba5d69a31ad55e7f105fe6d6caffba529d56c2c",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/f9827bdb1caa9af2bde8def6899734610e7bddf9",
+                "reference": "f9827bdb1caa9af2bde8def6899734610e7bddf9",
                 "shasum": ""
             },
             "conflict": {
@@ -2760,6 +2759,7 @@
                 "mongodb/mongodb": ">=1,<1.9.2",
                 "monolog/monolog": ">=1.8,<1.12",
                 "moodle/moodle": "<4.3.12|>=4.4,<4.4.8|>=4.5.0.0-beta,<4.5.4",
+                "moonshine/moonshine": "<=3.12.5",
                 "mos/cimage": "<0.7.19",
                 "movim/moxl": ">=0.8,<=0.10",
                 "movingbytes/social-network": "<=1.2.1",
@@ -3115,7 +3115,7 @@
                 "uasoft-indonesia/badaso": "<=2.9.7",
                 "unisharp/laravel-filemanager": "<2.9.1",
                 "universal-omega/dynamic-page-list3": "<3.6.4",
-                "unopim/unopim": "<0.1.5",
+                "unopim/unopim": "<=0.3",
                 "userfrosting/userfrosting": ">=0.3.1,<4.6.3",
                 "usmanhalalit/pixie": "<1.0.3|>=2,<2.0.2",
                 "uvdesk/community-skeleton": "<=1.1.1",
@@ -3257,7 +3257,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-08-19T21:05:31+00:00"
+            "time": "2025-08-22T17:05:03+00:00"
         }
     ],
     "aliases": [],
