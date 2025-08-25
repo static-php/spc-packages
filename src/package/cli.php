@@ -35,6 +35,18 @@ class cli implements package
 
         return [
             'config_files' => $configFiles,
+            'empty_directories' => [
+                '/usr/share/php-zts/preload',
+                '/var/lib/php-zts/session',
+                '/var/lib/php-zts/wsdlcache',
+                '/var/lib/php-zts/opcache',
+            ],
+            'directories' => [
+                '/usr/share/php-zts/preload',
+                '/var/lib/php-zts/session',
+                '/var/lib/php-zts/wsdlcache',
+                '/var/lib/php-zts/opcache',
+            ],
             'provides' => $provides,
             'replaces' => $replaces,
             'files' => $files

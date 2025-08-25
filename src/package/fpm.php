@@ -23,15 +23,9 @@ class fpm implements package
             ],
             'empty_directories' => [
                 '/etc/php-zts-fpm.d/',
-                '/var/lib/php-zts/session',
-                '/var/lib/php-zts/wsdlcache',
-                '/var/lib/php-zts/opcache',
             ],
             'directories' => [
                 '/etc/php-zts-fpm.d/',
-                '/var/lib/php-zts/session',
-                '/var/lib/php-zts/wsdlcache',
-                '/var/lib/php-zts/opcache',
             ],
         ];
     }
