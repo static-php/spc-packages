@@ -8,7 +8,6 @@ use staticphp\step\CreatePackages;
 class extension implements package
 {
     private string $prefix;
-    private array $dependencies;
 
     public function __construct(
         private readonly string $name,
