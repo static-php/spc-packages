@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4eec83568a1e6fa7b5b78cf2cb3e52d5",
+    "content-hash": "899aa97008172e26012eb741f3425c5b",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -77,16 +77,16 @@
         },
         {
             "name": "crazywhalecc/static-php-cli",
-            "version": "dev-brotli-watcher",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "af90b840ee222935b711aec92a7e59b16508183e"
+                "reference": "bea3bd8392bcf7ce40fac5311592ed97f149da61"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/af90b840ee222935b711aec92a7e59b16508183e",
-                "reference": "af90b840ee222935b711aec92a7e59b16508183e",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/bea3bd8392bcf7ce40fac5311592ed97f149da61",
+                "reference": "bea3bd8392bcf7ce40fac5311592ed97f149da61",
                 "shasum": ""
             },
             "require": {
@@ -107,6 +107,7 @@
                 "phpstan/phpstan": "^1.10",
                 "phpunit/phpunit": "^10.3 || ^9.5"
             },
+            "default-branch": true,
             "bin": [
                 "bin/spc"
             ],
@@ -133,7 +134,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/brotli-watcher"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/main"
             },
             "funding": [
                 {
@@ -141,7 +142,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-08-25T02:59:27+00:00"
+            "time": "2025-08-22T05:23:49+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -3272,9 +3273,9 @@
         "php": ">=8.3",
         "ext-zlib": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "platform-overrides": {
         "php": "8.3.0"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
