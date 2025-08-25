@@ -18,7 +18,7 @@ class fpm implements package
             ],
             'files' => [
                 INI_PATH . '/php-fpm.conf' => '/etc/php-zts-fpm.conf',
-                INI_PATH . '/www.conf' => '/etc/php-zts-fpm.d/conf',
+                INI_PATH . '/www.conf' => '/etc/php-zts-fpm.d/www.conf',
                 BUILD_BIN_PATH . '/php-fpm' => '/usr/sbin/php-zts-fpm',
             ],
             'empty_directories' => [
