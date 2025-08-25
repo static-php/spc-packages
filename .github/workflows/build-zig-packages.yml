@@ -1,5 +1,4 @@
-
-name: Build and Upload Packages
+name: Build and upload zig packages
 
 on:
     schedule:
