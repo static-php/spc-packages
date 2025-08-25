@@ -15,9 +15,9 @@ class cli implements package
 
         $provides = ['php-zts'];
         $replaces = [];
-        $configFiles = ['/etc/php-zts.ini'];
+        $configFiles = ['/etc/php-zts/php.ini'];
         $files = [
-            INI_PATH . '/php.ini' => '/etc/php-zts.ini',
+            INI_PATH . '/php.ini' => '/etc/php-zts/php.ini',
             BUILD_BIN_PATH . '/php' => '/usr/bin/php-zts',
         ];
 
@@ -28,8 +28,8 @@ class cli implements package
             // Add .ini files for statically compiled extensions
             $iniFile = INI_PATH . "/extension/{$ext}.ini";
             if (file_exists($iniFile)) {
-                $files[$iniFile] = "/etc/php-zts.d/{$ext}.ini";
-                $configFiles[] = "/etc/php-zts.d/{$ext}.ini";
+                $files[$iniFile] = "/etc/php-zts/conf.d/{$ext}.ini";
+                $configFiles[] = "/etc/php-zts/conf.d/{$ext}.ini";
             }
         }
 

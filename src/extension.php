@@ -23,26 +23,24 @@ class extension implements package
             return '';
         }
 
+        $config = Config::getExt($this->name);
+
+        if ($this->name === 'xdebug' || $this->name === 'ffi') {
+            return '15-';
+        }
+        if ($config['zend-extension'] ?? false) {
+            return '10-';
+        }
+
         $allDependencies = $this->getExtensionDependencies($this->name);
 
         if (empty($allDependencies)) {
-            return '';
+            return '20-';
         }
 
-        $prefix = '';
-
-        foreach ($allDependencies as $dependency) {
-            if (strcmp($this->name, $dependency) < 0) {
-                $prefix = 'z';
-
-                while (strcmp($prefix . $this->name, $dependency) < 0) {
-                    $prefix .= 'z';
-                }
-            }
-        }
-
-        return $prefix;
+        return '30-';
     }
+
 
     public function getExtensionDependencies(string $extensionName, array $visited = []): array
     {
@@ -107,12 +105,12 @@ class extension implements package
 
         return [
             'config-files' => [
-                '/etc/php-zts.d/' . $this->prefix . $this->name . '.ini',
+                '/etc/php-zts/conf.d/' . $this->prefix . $this->name . '.ini',
             ],
             'depends' => $depends,
             'files' => [
                 ...($this->getIniPath() ?
-                    [$this->getIniPath() => '/etc/php-zts.d/' . $this->prefix . $this->name . '.ini']
+                    [$this->getIniPath() => '/etc/php-zts/conf.d/' . $this->prefix . $this->name . '.ini']
                     : []
                 ),
                 ...($this->isSharedExtension() ?
