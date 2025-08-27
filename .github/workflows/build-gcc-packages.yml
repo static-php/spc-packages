@@ -122,7 +122,7 @@ jobs:
                 if: ${{ failure() }}
                 uses: actions/upload-artifact@v4
                 with:
-                    name: build-logs-${{ matrx.arch }}-el${{ matrix.alma }}-php${{ matrix.php-version }}
+                    name: build-logs-${{ matrix.arch }}-el${{ matrix.alma }}-php${{ matrix.php-version }}
                     path: log
 
 #            -   name: Install tmate
