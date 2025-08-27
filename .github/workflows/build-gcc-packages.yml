@@ -118,6 +118,13 @@ jobs:
                 run: |
                     ssh github@rpm.henderkes.com "cd /home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/ && rm -rf repodata && createrepo_static && createrepo_c ."
 
+            -   name: "Upload logs"
+                if: ${{ failure() }}
+                uses: actions/upload-artifact@v4
+                with:
+                    name: build-logs-${{ matrx.arch }}-el${{ matrix.alma }}-php${{ matrix.php-version }}
+                    path: log
+
 #            -   name: Install tmate
 #                if: ${{ failure() }}
 #                run: |
