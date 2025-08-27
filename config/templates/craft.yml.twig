@@ -57,7 +57,7 @@ extra-env:
     {% endif -%}
     EXTENSION_DIR: '/usr/lib64/php-zts/modules'
     SPC_CMD_VAR_PHP_EMBED_TYPE: 'shared'
-    SPC_MICRO_PATCHES: ''
+    SPC_MICRO_PATCHES:
     SPC_DEFAULT_C_FLAGS: "{{ cflags }}"
     SPC_DEFAULT_CXX_FLAGS: "{{ cflags }}"
     SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "{{ cflags }} -fpie"
