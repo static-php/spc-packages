@@ -13,19 +13,17 @@ class fpm implements package
             'depends' => [
                 CreatePackages::getPrefix() . '-cli',
             ],
-            'provides' => [
-                'php-zts-fpm',
-            ],
             'files' => [
-                INI_PATH . '/php-fpm.conf' => '/etc/php-zts-fpm.conf',
-                INI_PATH . '/www.conf' => '/etc/php-zts-fpm.d/www.conf',
+                INI_PATH . '/php-fpm.conf' => '/etc/php-zts/php-fpm.conf',
+                INI_PATH . '/www.conf' => '/etc/php-zts/fpm.d/www.conf',
+                INI_PATH . '/php-fpm.service' => '/usr/lib/systemd/system/php-zts-fpm.service',
                 BUILD_BIN_PATH . '/php-fpm' => '/usr/sbin/php-zts-fpm',
             ],
             'empty_directories' => [
-                '/etc/php-zts-fpm.d/',
+                '/etc/php-zts/fpm.d/',
             ],
             'directories' => [
-                '/etc/php-zts-fpm.d/',
+                '/etc/php-zts/fpm.d/',
             ],
         ];
     }
