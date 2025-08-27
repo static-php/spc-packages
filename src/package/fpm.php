@@ -21,9 +21,11 @@ class fpm implements package
             ],
             'empty_directories' => [
                 '/etc/php-zts/fpm.d/',
+                '/var/log/php-zts/php-fpm',
             ],
             'directories' => [
                 '/etc/php-zts/fpm.d/',
+                '/var/log/php-zts/php-fpm',
             ],
         ];
     }
