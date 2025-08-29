@@ -97,10 +97,46 @@ class extension implements package
         if (!$config) {
             throw new \Exception("Extension configuration for '{$this->name}' not found.");
         }
-        $depends = [CreatePackages::getPrefix() . '-cli'];
-        foreach ($config['ext-depends'] ?? [] as $dep) {
-            $depends[] = CreatePackages::getPrefix() . '-' . $dep;
+        $prefix = CreatePackages::getPrefix();
+        $depends = [$prefix . '-cli'];
+        $seen = [];
+        $ordered = [];
+
+        /**
+         * Add a package and recursively include its ext-depends.
+         *
+         * @param string   $name
+         * @param callable $loadConfig function(string $name): ?array
+         */
+        $collect = function (string $name) use (&$collect, &$ordered, &$seen, $prefix): void {
+            if (isset($seen[$name])) {
+                return;
+            }
+            $seen[$name] = true;
+
+            $cfg = Config::getExt($name);
+            if ($cfg['type'] !== 'addon') {
+                $ordered[] = $prefix . '-' . $name;
+            }
+            if (!is_array($cfg)) {
+                return;
+            }
+
+            foreach (($cfg['ext-depends'] ?? []) as $dep) {
+                $collect($dep);
+            }
+        };
+
+        foreach (($config['ext-depends'] ?? []) as $dep) {
+            $collect($dep);
         }
+        foreach (($config['ext-suggests'] ?? []) as $sug) {
+            if (Config::getExt($sug)['type'] === 'addon') {
+                $collect($sug);
+            }
+        }
+
+        $depends = array_merge($depends, $ordered);
 
         return [
             'config-files' => [
