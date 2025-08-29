@@ -3,6 +3,7 @@
 namespace staticphp\step;
 
 use SPC\exception\RuntimeException;
+use SPC\store\Config;
 use SPC\store\Downloader;
 use staticphp\extension;
 use staticphp\package\composer;
@@ -162,7 +163,7 @@ class CreatePackages
         ];
         foreach ($dependencies as $dependency) {
             $depExt = new extension($dependency);
-            if ($depExt->isSharedExtension()) {
+            if ($depExt->isSharedExtension() && Config::getExt($dependency)['type'] !== 'addon') {
                 $args[] = '-d';
                 $args[] = "extension={$dependency}";
             }
