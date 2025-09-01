@@ -123,7 +123,7 @@ jobs:
                 uses: actions/upload-artifact@v4
                 with:
                     name: build-logs-${{ matrix.arch }}-el${{ matrix.alma }}-php${{ matrix.php-version }}
-                    path: log
+                    path: vendor/crazywhalecc/static-php-cli/log
 
 #            -   name: Install tmate
 #                if: ${{ failure() }}

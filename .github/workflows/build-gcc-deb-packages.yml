@@ -128,4 +128,4 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: build-logs-${{ matrix.arch }}-ubuntu-${{ matrix.os }}-php${{ matrix.php-version }}
-                  path: log
+                  path: vendor/crazywhalecc/static-php-cli/log

@@ -2,7 +2,7 @@ name: Build and upload zig rpm packages
 
 on:
     schedule:
-        - cron: '0 0 * * *'  # Run daily at midnight UTC
+        -   cron: '0 0 * * *'  # Run daily at midnight UTC
     workflow_dispatch:     # Allow manual triggering
 
 jobs:
@@ -14,81 +14,88 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: [8.2, 8.3, 8.4]
-                arch: [x86_64, arm64]
-                target: [native-native-gnu.2.17]
+                php-version: [ 8.2, 8.3, 8.4 ]
+                arch: [ x86_64, arm64 ]
+                target: [ native-native-gnu.2.17 ]
         steps:
-            - name: Set up SSH key
-              uses: webfactory/ssh-agent@v0.8.0
-              with:
-                  ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
+            -   name: Set up SSH key
+                uses: webfactory/ssh-agent@v0.8.0
+                with:
+                    ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
 
-            - name: Add remote host to known_hosts
-              run: |
-                  mkdir -p ~/.ssh
-                  cat >> ~/.ssh/known_hosts <<'EOF'
-                    rpm.henderkes.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPQq0y77dDEtxECVMhCxjcqiV369goMcbInsY/d+F1yXGwqOXQ6RqIEzgaVhgq0joMJT5BiGXNXQ+OI10/KtzGI=
-                    rpm.henderkes.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2laCc5jifgjL/2zLzgP1E/X3kouXdaZv00KtAV1DOO5umThoWzb16cswnVtjtLUEMIuo9rPLB79xX2Asa+nN3uMgJDANnr/xnhRoI++yOGLga40/O69U88j5x+5FXODscH/k4n85mfcjzm/fZLXcHlb17ibCmU20I3v46sydn95Pp4/ShDvqsHVB4gWEKJ+jStkooUz2H1UZ8ZquNtaPTlmkOeClNj6gxag74P5b9VB6M5YNac2Emi3Nm0dYkc+BL0Qv+NEtFR1lR63DLa3O/NGTALGJYGmTUkjwiv8KygegaKhd2zxESmWhV7eYIPax8zL+GE9sX1Xwwh1huS0vsuwr2dXPP1/q5slz1AQV/lx85fGdiHc0F8RUXwqXbvGxZJheTuC/Mgu0cFzp5gqO4kTP28X+9fokzScBKBCIfObDXrl7rZgTXAA8IQ5gHk1tGchaEOIcDsjdISW5HVOiwocYSwUNMHzuZ08qAulatIywtOGcWVRdvOs7TcvSgfZ0=
-                    rpm.henderkes.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICaB5IjokRHAH0Y9pzVe/Jx3s6cn0OADJ9uTxQQubBMu
-                  EOF
+            -   name: Add remote host to known_hosts
+                run: |
+                    mkdir -p ~/.ssh
+                    cat >> ~/.ssh/known_hosts <<'EOF'
+                      rpm.henderkes.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPQq0y77dDEtxECVMhCxjcqiV369goMcbInsY/d+F1yXGwqOXQ6RqIEzgaVhgq0joMJT5BiGXNXQ+OI10/KtzGI=
+                      rpm.henderkes.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2laCc5jifgjL/2zLzgP1E/X3kouXdaZv00KtAV1DOO5umThoWzb16cswnVtjtLUEMIuo9rPLB79xX2Asa+nN3uMgJDANnr/xnhRoI++yOGLga40/O69U88j5x+5FXODscH/k4n85mfcjzm/fZLXcHlb17ibCmU20I3v46sydn95Pp4/ShDvqsHVB4gWEKJ+jStkooUz2H1UZ8ZquNtaPTlmkOeClNj6gxag74P5b9VB6M5YNac2Emi3Nm0dYkc+BL0Qv+NEtFR1lR63DLa3O/NGTALGJYGmTUkjwiv8KygegaKhd2zxESmWhV7eYIPax8zL+GE9sX1Xwwh1huS0vsuwr2dXPP1/q5slz1AQV/lx85fGdiHc0F8RUXwqXbvGxZJheTuC/Mgu0cFzp5gqO4kTP28X+9fokzScBKBCIfObDXrl7rZgTXAA8IQ5gHk1tGchaEOIcDsjdISW5HVOiwocYSwUNMHzuZ08qAulatIywtOGcWVRdvOs7TcvSgfZ0=
+                      rpm.henderkes.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICaB5IjokRHAH0Y9pzVe/Jx3s6cn0OADJ9uTxQQubBMu
+                    EOF
 
-            - name: Get PHP version
-              run: |
-                  # Get current PHP version using the PHP API
-                  php_version=$(curl -s "https://www.php.net/releases/index.php?json&version=${{ matrix.php-version }}" | jq -r '.version')
-                  echo "Current PHP version: ${php_version}"
-                  echo "PHP_VERSION=${php_version}" >> $GITHUB_ENV
+            -   name: Get PHP version
+                run: |
+                    # Get current PHP version using the PHP API
+                    php_version=$(curl -s "https://www.php.net/releases/index.php?json&version=${{ matrix.php-version }}" | jq -r '.version')
+                    echo "Current PHP version: ${php_version}"
+                    echo "PHP_VERSION=${php_version}" >> $GITHUB_ENV
 
-            - name: Set architecture variables
-              run: |
-                  if [[ "${{ matrix.arch }}" == "arm64" ]]; then
-                    echo "RPM_ARCH=aarch64" >> $GITHUB_ENV
-                  else
-                    echo "RPM_ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
-                  fi
+            -   name: Set architecture variables
+                run: |
+                    if [[ "${{ matrix.arch }}" == "arm64" ]]; then
+                      echo "RPM_ARCH=aarch64" >> $GITHUB_ENV
+                    else
+                      echo "RPM_ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+                    fi
 
-            - name: Set target folder
-              run: |
-                  if [[ "${{ matrix.target }}" == *"2.17"* ]]; then
-                    echo "TARGET_DIR=el7" >> $GITHUB_ENV
-                  elif [[ "${{ matrix.target }}" == *"2.28"* ]]; then
-                    echo "TARGET_DIR=el8" >> $GITHUB_ENV
-                  elif [[ "${{ matrix.target }}" == *"2.34"* ]]; then
-                    echo "TARGET_DIR=el9" >> $GITHUB_ENV
-                  elif [[ "${{ matrix.target }}" == *"2.39"* ]]; then
-                    echo "TARGET_DIR=el10" >> $GITHUB_ENV
-                  else
-                    echo "TARGET_DIR=el10" >> $GITHUB_ENV
-                  fi
+            -   name: Set target folder
+                run: |
+                    if [[ "${{ matrix.target }}" == *"2.17"* ]]; then
+                      echo "TARGET_DIR=el7" >> $GITHUB_ENV
+                    elif [[ "${{ matrix.target }}" == *"2.28"* ]]; then
+                      echo "TARGET_DIR=el8" >> $GITHUB_ENV
+                    elif [[ "${{ matrix.target }}" == *"2.34"* ]]; then
+                      echo "TARGET_DIR=el9" >> $GITHUB_ENV
+                    elif [[ "${{ matrix.target }}" == *"2.39"* ]]; then
+                      echo "TARGET_DIR=el10" >> $GITHUB_ENV
+                    else
+                      echo "TARGET_DIR=el10" >> $GITHUB_ENV
+                    fi
 
-            - name: Checkout code
-              uses: actions/checkout@v4
+            -   name: Checkout code
+                uses: actions/checkout@v4
 
-            - name: Set up PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '8.4'
-                  extensions: mbstring, xml, json, curl, zip
-                  tools: composer:v2
+            -   name: Set up PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: '8.4'
+                    extensions: mbstring, xml, json, curl, zip
+                    tools: composer:v2
 
-            - name: Install dependencies
-              run: |
-                  sudo apt-get update
-                  sudo apt-get install -y ruby rpm build-essential
-                  sudo gem install fpm
-                  composer install
+            -   name: Install dependencies
+                run: |
+                    sudo apt-get update
+                    sudo apt-get install -y ruby rpm build-essential
+                    sudo gem install fpm
+                    composer install
 
-            - name: Build PHP and packages
-              run: |
-                  php bin/spp all --target=${{ matrix.target }} --type=rpm --phpv=${{ matrix.php-version }} --debug
+            -   name: Build PHP and packages
+                run: |
+                    php bin/spp all --target=${{ matrix.target }} --type=rpm --phpv=${{ matrix.php-version }} --debug
 
-            - name: Upload packages
-              run: |
-                  rsync -av --ignore-existing dist/rpm/*.rpm github@rpm.henderkes.com:/home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/
+            -   name: Upload packages
+                run: |
+                    rsync -av --ignore-existing dist/rpm/*.rpm github@rpm.henderkes.com:/home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/
 
-            - name: Update repository metadata
-              run: |
-                  ssh github@rpm.henderkes.com "cd /home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/ && rm -rf repodata && createrepo_static && createrepo_c ."
+            -   name: Update repository metadata
+                run: |
+                    ssh github@rpm.henderkes.com "cd /home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/ && rm -rf repodata && createrepo_static && createrepo_c ."
+
+            -   name: "Upload logs"
+                if: ${{ failure() }}
+                uses: actions/upload-artifact@v4
+                with:
+                    name: build-logs-${{ matrix.arch }}-el7-php${{ matrix.php-version }}
+                    path: vendor/crazywhalecc/static-php-cli/log
 
 #      - name: Setup tmate session
 #        if: ${{ failure() }}
