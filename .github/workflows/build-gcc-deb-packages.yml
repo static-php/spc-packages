@@ -2,7 +2,7 @@ name: Build and upload gcc deb packages
 
 on:
     schedule:
-        -   cron: '0 1 * * *'
+        - cron: '0 1 * * *'
     workflow_dispatch:
 
 jobs:
@@ -16,120 +16,159 @@ jobs:
             matrix:
                 php-version: [ 8.4 ]
                 arch: [ amd64, arm64 ]
-                os: [ 24.04 ]
+                os: [ 22.04, 24.04 ]
+
         steps:
-            -   name: Set up SSH key
-                uses: webfactory/ssh-agent@v0.8.0
-                with:
-                    ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-            -   name: Add remote host to known_hosts
-                run: |
-                    mkdir -p ~/.ssh
-                    cat >> ~/.ssh/known_hosts <<'EOF'
-                      deb.henderkes.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPQq0y77dDEtxECVMhCxjcqiV369goMcbInsY/d+F1yXGwqOXQ6RqIEzgaVhgq0joMJT5BiGXNXQ+OI10/KtzGI=
-                      deb.henderkes.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2laCc5jifgjL/2zLzgP1E/X3kouXdaZv00KtAV1DOO5umThoWzb16cswnVtjtLUEMIuo9rPLB79xX2Asa+nN3uMgJDANnr/xnhRoI++yOGLga40/O69U88j5x+5FXODscH/k4n85mfcjzm/fZLXcHlb17ibCmU20I3v46sydn95Pp4/ShDvqsHVB4gWEKJ+jStkooUz2H1UZ8ZquNtaPTlmkOeClNj6gxag74P5b9VB6M5YNac2Emi3Nm0dYkc+BL0Qv+NEtFR1lR63DLa3O/NGTALGJYGmTUkjwiv8KygegaKhd2zxESmWhV7eYIPax8zL+GE9sX1Xwwh1huS0vsuwr2dXPP1/q5slz1AQV/lx85fGdiHc0F8RUXwqXbvGxZJheTuC/Mgu0cFzp5gqO4kTP28X+9fokzScBKBCIfObDXrl7rZgTXAA8IQ5gHk1tGchaEOIcDsjdISW5HVOiwocYSwUNMHzuZ08qAulatIywtOGcWVRdvOs7TcvSgfZ0=
-                      deb.henderkes.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICaB5IjokRHAH0Y9pzVe/Jx3s6cn0OADJ9uTxQQubBMu
-                    EOF
+            - name: Map codename
+              id: map
+              run: |
+                  case "${{ matrix.os }}" in
+                    22.04) echo "codename=jammy" >> $GITHUB_OUTPUT ;;
+                    24.04) echo "codename=noble" >> $GITHUB_OUTPUT ;;
+                    *) echo "Unsupported OS version: ${{ matrix.os }}" >&2; exit 1 ;;
+                  esac
 
-            -   name: Checkout code
-                uses: actions/checkout@v4
+            - name: Set up PHP for composer
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.4'
+                  tools: composer:v2
 
-            -   name: Set up PHP for composer
-                uses: shivammathur/setup-php@v2
-                with:
-                    php-version: '8.4'
-                    tools: composer:v2
+            - name: Install build tooling
+              run: |
+                  set -euo pipefail
+                  sudo apt-get update
+                  sudo apt-get install -y ruby build-essential jq curl gzip
+                  sudo gem install --no-document fpm
+                  composer install
 
-            -   name: Install build and repo tooling
-                run: |
-                    sudo apt-get update
-                    sudo apt-get install -y ruby build-essential rsync jq curl gnupg gzip reprepro
-                    sudo gem install --no-document fpm
-                    composer install
+            - name: Build PHP and packages (deb)
+              run: |
+                  set -euo pipefail
+                  php bin/spp all --target=native-native-gnu --type=deb --phpv=${{ matrix.php-version }}
 
-            -   name: Build PHP and packages (deb)
-                run: |
-                    php bin/spp all --target=native-native-gnu --type=deb --phpv=${{ matrix.php-version }}
+            - name: Stage deb artifacts
+              run: |
+                  set -euo pipefail
+                  mkdir -p "artifacts/${{ steps.map.outputs.codename }}/${{ matrix.arch }}"
+                  shopt -s nullglob
+                  mv dist/deb/*.deb "artifacts/${{ steps.map.outputs.codename }}/${{ matrix.arch }}/"
 
-            -   name: Build APT repo (standard dists/pool layout, signed)
-                run: |
-                    set -euo pipefail
+            - name: Upload debs
+              uses: actions/upload-artifact@v4
+              with:
+                  name: "debs-${{ steps.map.outputs.codename }}-${{ matrix.arch }}"
+                  path: artifacts/**
+                  if-no-files-found: error
+                  retention-days: 7
 
-                    # Map Ubuntu version -> codename
-                    case "${{ matrix.os }}" in
-                      22.04) CODENAME=jammy ;;
-                      24.04) CODENAME=noble ;;
-                      *) echo "Unsupported OS version: ${{ matrix.os }}" >&2; exit 1 ;;
-                    esac
-                    export CODENAME
+            - name: Upload logs
+              if: ${{ failure() }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: build-logs-${{ matrix.arch }}-ubuntu-${{ matrix.os }}-php${{ matrix.php-version }}
+                  path: vendor/crazywhalecc/static-php-cli/log
 
-                    REPO_ROOT="$(pwd)/repo"
-                    mkdir -p "${REPO_ROOT}/conf"
+            - name: Setup tmate session
+              if: ${{ failure() }}
+              uses: mxschmitt/action-tmate@v3
 
-                    # Base metadata
-                    ORIGIN="Static PHP repository"
-                    LABEL="static-php"
-                    COMPONENT="main"
-                    DESC="Static PHP repository"
+    assemble-repo:
+        needs: build
+        runs-on: ubuntu-latest
+        env:
+            DEB_GPG_PRIVATE_KEY: ${{ secrets.DEB_GPG_PRIVATE_KEY }}
+            DEB_GPG_PASSWORD: ${{ secrets.DEB_GPG_PASSWORD }}
+        steps:
+            - uses: actions/checkout@v4
 
-                    # Write distributions file (jammy + noble)
-                    cat > "${REPO_ROOT}/conf/distributions" <<EOF
-                      Codename: jammy
-                      Suite: stable
-                      Components: ${COMPONENT}
-                      Architectures: amd64 arm64 all
-                      Origin: ${ORIGIN}
-                      Label: ${LABEL}
-                      Description: ${DESC}
-                    EOF
-                    cat >> "${REPO_ROOT}/conf/distributions" <<EOF
-                      Codename: noble
-                      Suite: stable
-                      Components: ${COMPONENT}
-                      Architectures: amd64 arm64 all
-                      Origin: ${ORIGIN}
-                      Label: ${LABEL}
-                      Description: ${DESC}
-                    EOF
+            - name: Install repo tooling
+              run: |
+                  set -euo pipefail
+                  sudo apt-get update
+                  sudo apt-get install -y reprepro gnupg
 
-                    mkdir -p "${HOME}/.gnupg"
-                    chmod 700 "${HOME}/.gnupg"
-                    printf '%s' "${{ secrets.DEB_GPG_PRIVATE_KEY }}" | \
-                      gpg --batch --yes --pinentry-mode loopback --passphrase "${{ secrets.DEB_GPG_PASSWORD }}" --import
-                    echo "SignWith: yes" >> "${REPO_ROOT}/conf/distributions"
+            - name: Download all debs
+              uses: actions/download-artifact@v4
+              with:
+                  pattern: debs-*
+                  merge-multiple: true
+                  path: collected
 
-                    # Include built packages for this matrix entry into the correct codename
-                    shopt -s nullglob
-                    debs=(dist/deb/*.deb)
-                    if [ ${#debs[@]} -eq 0 ]; then
-                      echo "No .deb packages found in dist/deb/" >&2
-                      exit 1
-                    fi
+            - name: Build signed APT repo (aggregate)
+              run: |
+                  set -euo pipefail
+                  umask 077
 
-                    export GNUPGHOME="${HOME}/.gnupg"
-                    reprepro -b "${REPO_ROOT}" includedeb "${CODENAME}" "${debs[@]}"
+                  REPO_ROOT="$(pwd)/repo"
+                  mkdir -p "${REPO_ROOT}/conf"
 
-                    # Expose for later steps
-                    echo "CODENAME=${CODENAME}" >> $GITHUB_ENV
-                    echo "REPO_ROOT=${REPO_ROOT}" >> $GITHUB_ENV
+                  ORIGIN="Static PHP repository"
+                  LABEL="static-php"
+                  COMPONENT="main"
+                  DESC="Static PHP repository"
 
-            -   name: Upload repo to server (only this codename + pool)
-                run: |
-                    set -euo pipefail
-                    ssh github@deb.henderkes.com "mkdir -p /home/github/deb/dists/${CODENAME} /home/github/deb/pool"
-                    rsync -av --delete "${REPO_ROOT}/dists/${CODENAME}/" \
-                      github@deb.henderkes.com:/home/github/deb/dists/${CODENAME}/
-                    rsync -av "${REPO_ROOT}/pool/" \
-                      github@deb.henderkes.com:/home/github/deb/pool/
+                  cat > "${REPO_ROOT}/conf/distributions" <<EOF
+                  Codename: jammy
+                  Suite: stable
+                  Components: ${COMPONENT}
+                  Architectures: amd64 arm64
+                  Origin: ${ORIGIN}
+                  Label: ${LABEL}
+                  Description: ${DESC}
 
-            -   name: Upload logs
-                if: ${{ failure() }}
-                uses: actions/upload-artifact@v4
-                with:
-                    name: build-logs-${{ matrix.arch }}-ubuntu-${{ matrix.os }}-php${{ matrix.php-version }}
-                    path: vendor/crazywhalecc/static-php-cli/log
+                  Codename: noble
+                  Suite: stable
+                  Components: ${COMPONENT}
+                  Architectures: amd64 arm64
+                  Origin: ${ORIGIN}
+                  Label: ${LABEL}
+                  Description: ${DESC}
+                  EOF
 
-            -   name: Setup tmate session
-                if: ${{ failure() }}
-                uses: mxschmitt/action-tmate@v3
+                  export GNUPGHOME="${HOME}/.gnupg"
+                  mkdir -p "${GNUPGHOME}"; chmod 700 "${GNUPGHOME}"
+
+                  echo "allow-loopback-pinentry" > "${GNUPGHOME}/gpg-agent.conf"
+                  gpgconf --kill gpg-agent
+
+                  FPR=$(printf '%s' "${DEB_GPG_PRIVATE_KEY}" \
+                    | gpg --batch --quiet --with-colons --import-options show-only --import 2>/dev/null \
+                    | awk -F: '/^fpr:/ {print $10; exit}')
+                  printf '%s' "${DEB_GPG_PRIVATE_KEY}" | gpg --batch --yes --import
+
+                  {
+                    echo "pinentry-mode loopback"
+                    echo "default-key ${FPR}"
+                  } > "${GNUPGHOME}/gpg.conf"
+
+                  t=$(mktemp); echo warmup > "$t"
+                  gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+                      --local-user "${FPR}" --sign --output /dev/null "$t" <<<"${DEB_GPG_PASSWORD}"
+                  rm -f "$t"
+
+                  echo "SignWith: ${FPR}" >> "${REPO_ROOT}/conf/distributions"
+
+                  shopt -s nullglob globstar
+
+                  jammy_debs=(collected/artifacts/jammy/**/*.deb collected/artifacts/jammy/*.deb)
+                  noble_debs=(collected/artifacts/noble/**/*.deb collected/artifacts/noble/*.deb)
+
+                  if [ ${#jammy_debs[@]} -gt 0 ]; then
+                    reprepro -b "${REPO_ROOT}" includedeb jammy "${jammy_debs[@]}"
+                  fi
+                  if [ ${#noble_debs[@]} -gt 0 ]; then
+                    reprepro -b "${REPO_ROOT}" includedeb noble "${noble_debs[@]}"
+                  fi
+
+                  reprepro -b "${REPO_ROOT}" export
+
+            - name: Upload repo artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: apt-repo
+                  path: repo/**
+                  retention-days: 7
