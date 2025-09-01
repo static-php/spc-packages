@@ -38,7 +38,7 @@ craft-options:
   '-fasynchronous-unwind-tables -fstack-clash-protection ' ~
   '-fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -fno-strict-aliasing' ~ arch_flags
 %}
-{% if using_gcc %}
+{% if using_gcc and version in ['7', '8', '9', '10'] %}
     {% if os == '7' or os == '8' %}
         {% set cflags = cflags ~ ' -Wp,-D_FORTIFY_SOURCE=2' ~ ' ' ~ specs_cflags %}
     {% else %}

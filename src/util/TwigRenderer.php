@@ -25,22 +25,28 @@ class TwigRenderer
         // Use Twig to render the craft.yml template
         $loader = new FilesystemLoader(BASE_PATH . '/config/templates');
         $twig = new Environment($loader);
-        $majorOsVersion = (int)trim(shell_exec('rpm -E %rhel 2>/dev/null')) ?: null;
-        if ($majorOsVersion === null) {
+        $majorOsVersion = trim(shell_exec('rpm -E %rhel 2>/dev/null')) ?: null;
+
+        if ($majorOsVersion === null || $majorOsVersion === '') {
+            // Try Ubuntu / Debian detection
+            $lsb = trim(shell_exec('lsb_release -rs 2>/dev/null')) ?: null;
+            if ($lsb !== null && $lsb !== '') {
+                // Use full version string, e.g. "22.04"
+                $majorOsVersion = $lsb;
+            }
+        }
+
+        if ($majorOsVersion === null || $majorOsVersion === '') {
             if (str_contains(SPP_TARGET, '.2.17')) {
-                $majorOsVersion = 7;
-            }
-            elseif (str_contains(SPP_TARGET, '.2.28')) {
-                $majorOsVersion = 8;
-            }
-            elseif (str_contains(SPP_TARGET, '.2.34')) {
-                $majorOsVersion = 9;
-            }
-            elseif (str_contains(SPP_TARGET, '.2.39')) {
-                $majorOsVersion = 10;
-            }
-            else {
-                $majorOsVersion = 18; // other os = pretend we're on el10
+                $majorOsVersion = '7';
+            } elseif (str_contains(SPP_TARGET, '.2.28')) {
+                $majorOsVersion = '8';
+            } elseif (str_contains(SPP_TARGET, '.2.34')) {
+                $majorOsVersion = '9';
+            } elseif (str_contains(SPP_TARGET, '.2.39')) {
+                $majorOsVersion = '10';
+            } else {
+                $majorOsVersion = '18'; // other OS = pretend we're on el10
             }
         }
 

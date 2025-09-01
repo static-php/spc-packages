@@ -118,6 +118,9 @@ class CreatePackages
         echo "Creating packages for extensions...\n";
 
         foreach (self::$sharedExtensions as $extension) {
+            if (Config::getExt($extension)['type'] === 'addon') {
+                continue;
+            }
             self::createExtensionPackage($extension);
         }
     }
@@ -304,13 +307,15 @@ class CreatePackages
             echo $buffer;
         });
         if (!$rpmProcess->isSuccessful()) {
-            throw new RuntimeException("RPM package creation failed: " . $rpmProcess->getErrorOutput());
+            throw new \RuntimeException("RPM package creation failed: " . $rpmProcess->getErrorOutput());
         }
     }
 
     private static function createDebPackage(string $name, array $config, string $phpVersion, string $architecture, string $iteration, array $extraArgs = []): void
     {
         echo "Creating DEB package for {$name}...\n";
+
+        $phpVersion = preg_replace('/_\d+$/', '', $phpVersion);
 
         $fpmArgs = [
             'fpm',

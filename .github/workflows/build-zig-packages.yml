@@ -1,4 +1,4 @@
-name: Build and upload zig packages
+name: Build and upload zig rpm packages
 
 on:
     schedule:

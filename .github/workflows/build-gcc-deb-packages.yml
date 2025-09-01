@@ -1,0 +1,131 @@
+name: Build and upload gcc deb packages
+
+on:
+    schedule:
+        - cron: '0 1 * * *'
+    workflow_dispatch:
+
+jobs:
+    build:
+        name: Build on ubuntu-${{ matrix.os }} for ${{ matrix.arch }} PHP ${{ matrix.php-version }}
+        runs-on: ${{ matrix.arch == 'amd64' && format('ubuntu-{0}', matrix.os) || format('ubuntu-{0}-arm', matrix.os) }}
+        permissions:
+            contents: read
+        strategy:
+            fail-fast: false
+            matrix:
+                php-version: [8.4]
+                arch: [amd64, arm64]
+                os: [22.04, 24.04]
+        steps:
+            - name: Set up SSH key
+              uses: webfactory/ssh-agent@v0.8.0
+              with:
+                  ssh-private-key: ${{ secrets.GITHUBDEBHENDERKESPRIVATEKEY }}
+
+            - name: Add remote host to known_hosts
+              run: |
+                  mkdir -p ~/.ssh
+                  cat >> ~/.ssh/known_hosts <<'EOF'
+                    deb.henderkes.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPQq0y77dDEtxECVMhCxjcqiV369goMcbInsY/d+F1yXGwqOXQ6RqIEzgaVhgq0joMJT5BiGXNXQ+OI10/KtzGI=
+                    deb.henderkes.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2laCc5jifgjL/2zLzgP1E/X3kouXdaZv00KtAV1DOO5umThoWzb16cswnVtjtLUEMIuo9rPLB79xX2Asa+nN3uMgJDANnr/xnhRoI++yOGLga40/O69U88j5x+5FXODscH/k4n85mfcjzm/fZLXcHlb17ibCmU20I3v46sydn95Pp4/ShDvqsHVB4gWEKJ+jStkooUz2H1UZ8ZquNtaPTlmkOeClNj6gxag74P5b9VB6M5YNac2Emi3Nm0dYkc+BL0Qv+NEtFR1lR63DLa3O/NGTALGJYGmTUkjwiv8KygegaKhd2zxESmWhV7eYIPax8zL+GE9sX1Xwwh1huS0vsuwr2dXPP1/q5slz1AQV/lx85fGdiHc0F8RUXwqXbvGxZJheTuC/Mgu0cFzp5gqO4kTP28X+9fokzScBKBCIfObDXrl7rZgTXAA8IQ5gHk1tGchaEOIcDsjdISW5HVOiwocYSwUNMHzuZ08qAulatIywtOGcWVRdvOs7TcvSgfZ0=
+                    deb.henderkes.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICaB5IjokRHAH0Y9pzVe/Jx3s6cn0OADJ9uTxQQubBMu
+                  EOF
+
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up PHP for composer
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.4'
+                  tools: composer:v2
+
+            - name: Install build and repo tooling
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y ruby build-essential rsync jq curl gnupg gzip reprepro
+                  sudo gem install --no-document fpm
+                  composer install
+
+            - name: Build PHP and packages (deb)
+              run: |
+                  php bin/spp all --target=native-native-gnu --type=deb --phpv=${{ matrix.php-version }}
+
+            - name: Build APT repo (standard dists/pool layout, signed)
+              run: |
+                  set -euo pipefail
+
+                  # Map Ubuntu version -> codename
+                  case "${{ matrix.os }}" in
+                    22.04) CODENAME=jammy ;;
+                    24.04) CODENAME=noble ;;
+                    *) echo "Unsupported OS version: ${{ matrix.os }}" >&2; exit 1 ;;
+                  esac
+                  export CODENAME
+
+                  REPO_ROOT="$(pwd)/repo"
+                  mkdir -p "${REPO_ROOT}/conf"
+
+                  # Base metadata
+                  ORIGIN="Static PHP repository"
+                  LABEL="static-php"
+                  COMPONENT="main"
+                  DESC="Static PHP repository"
+
+                  # Write distributions file (jammy + noble)
+                  cat > "${REPO_ROOT}/conf/distributions" <<EOF
+                    Codename: jammy
+                    Suite: stable
+                    Components: ${COMPONENT}
+                    Architectures: amd64 arm64 all
+                    Origin: ${ORIGIN}
+                    Label: ${LABEL}
+                    Description: ${DESC}
+                  EOF
+                  cat >> "${REPO_ROOT}/conf/distributions" <<EOF
+                    Codename: noble
+                    Suite: stable
+                    Components: ${COMPONENT}
+                    Architectures: amd64 arm64 all
+                    Origin: ${ORIGIN}
+                    Label: ${LABEL}
+                    Description: ${DESC}
+                  EOF
+
+                  mkdir -p "${HOME}/.gnupg"
+                  chmod 700 "${HOME}/.gnupg"
+                  printf '%s' "${{ secrets.DEB_GPG_PRIVATE_KEY }}" | \
+                    gpg --batch --yes --pinentry-mode loopback --passphrase "${{ secrets.DEB_GPG_PASSWORD }}" --import
+                  echo "SignWith: yes" >> "${REPO_ROOT}/conf/distributions"
+
+                  # Include built packages for this matrix entry into the correct codename
+                  shopt -s nullglob
+                  debs=(dist/deb/*.deb)
+                  if [ ${#debs[@]} -eq 0 ]; then
+                    echo "No .deb packages found in dist/deb/" >&2
+                    exit 1
+                  fi
+
+                  export GNUPGHOME="${HOME}/.gnupg"
+                  reprepro -b "${REPO_ROOT}" includedeb "${CODENAME}" "${debs[@]}"
+
+                  # Expose for later steps
+                  echo "CODENAME=${CODENAME}" >> $GITHUB_ENV
+                  echo "REPO_ROOT=${REPO_ROOT}" >> $GITHUB_ENV
+
+            - name: Upload repo to server (only this codename + pool)
+              run: |
+                  set -euo pipefail
+                  ssh github@deb.henderkes.com "mkdir -p /home/github/deb/dists/${CODENAME} /home/github/deb/pool"
+                  rsync -av --delete "${REPO_ROOT}/dists/${CODENAME}/" \
+                    github@deb.henderkes.com:/home/github/deb/dists/${CODENAME}/
+                  rsync -av "${REPO_ROOT}/pool/" \
+                    github@deb.henderkes.com:/home/github/deb/pool/
+
+            - name: Upload logs
+              if: ${{ failure() }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: build-logs-${{ matrix.arch }}-ubuntu-${{ matrix.os }}-php${{ matrix.php-version }}
+                  path: log
