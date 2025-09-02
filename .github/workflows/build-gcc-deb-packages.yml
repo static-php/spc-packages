@@ -153,15 +153,8 @@ jobs:
                     echo "SignWith: ${FPR}" >> "${REPO_ROOT}/conf/distributions"
 
                     shopt -s nullglob globstar
-
-                    jammy_debs=(
-                      collected/jammy/amd64/**/*.deb collected/jammy/amd64/*.deb
-                      collected/jammy/arm64/**/*_arm64.deb collected/jammy/arm64/*_arm64.deb
-                    )
-                    noble_debs=(
-                      collected/noble/amd64/**/*.deb collected/noble/amd64/*.deb
-                      collected/noble/arm64/**/*_arm64.deb collected/noble/arm64/*_arm64.deb
-                    )
+                    jammy_debs=( collected/jammy/**/*.deb )
+                    noble_debs=( collected/noble/**/*.deb )
 
                     if [ ${#jammy_debs[@]} -gt 0 ]; then
                       reprepro -b "${REPO_ROOT}" includedeb jammy "${jammy_debs[@]}"

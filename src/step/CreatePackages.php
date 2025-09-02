@@ -311,11 +311,22 @@ class CreatePackages
         }
     }
 
-    private static function createDebPackage(string $name, array $config, string $phpVersion, string $architecture, string $iteration, array $extraArgs = []): void
-    {
+    private static function createDebPackage(
+        string $name,
+        array $config,
+        string $phpVersion,
+        string $architecture,
+        string $iteration,
+        array $extraArgs = [],
+    ): void {
         echo "Creating DEB package for {$name}...\n";
 
         $phpVersion = preg_replace('/_\d+$/', '', $phpVersion);
+
+        $osRelease = parse_ini_file('/etc/os-release');
+        $distroCodename = $osRelease['VERSION_CODENAME'] ?? null;
+        $debIteration = $distroCodename !== '' ? "{$iteration}~{$distroCodename}" : $iteration;
+        $fullVersion = "{$phpVersion}-{$debIteration}";
 
         $fpmArgs = [
             'fpm',
@@ -323,9 +334,9 @@ class CreatePackages
             '-t', 'deb',
             '-p', DIST_DEB_PATH,
             '--name', $name,
-            '--version', $phpVersion,
+            '--version', $phpVersion,          // upstream version
             '--architecture', $architecture,
-            '--iteration', $iteration,
+            '--iteration', $debIteration,       // Debian revision (includes distro)
             '--description', "Static PHP Package for {$name}",
             '--license', 'MIT',
             '--maintainer', 'Static PHP <info@static-php.dev>'
@@ -334,14 +345,14 @@ class CreatePackages
         if (isset($config['provides']) && is_array($config['provides'])) {
             foreach ($config['provides'] as $provide) {
                 $fpmArgs[] = '--provides';
-                $fpmArgs[] = "$provide (= $phpVersion)";
+                $fpmArgs[] = "{$provide} (= {$fullVersion})";
             }
         }
 
         if (isset($config['replaces']) && is_array($config['replaces'])) {
             foreach ($config['replaces'] as $replace) {
                 $fpmArgs[] = '--replaces';
-                $fpmArgs[] = "$replace < {$phpVersion}-{$iteration})";
+                $fpmArgs[] = "{$replace} (< {$fullVersion})";
             }
         }
 
@@ -350,7 +361,7 @@ class CreatePackages
             $lib = preg_replace('/_\D+/', '', $lib);
             $numericVersion = preg_replace('/[^0-9.]/', '', $version);
             $fpmArgs[] = '--depends';
-            $fpmArgs[] = "$lib (>= {$numericVersion})";
+            $fpmArgs[] = "{$lib} (>= {$numericVersion})";
         }
         if (isset($config['depends']) && is_array($config['depends'])) {
             foreach ($config['depends'] as $depend) {
@@ -378,8 +389,7 @@ class CreatePackages
             foreach ($config['files'] as $source => $dest) {
                 if (file_exists($source)) {
                     $fpmArgs[] = $source . '=' . $dest;
-                }
-                else {
+                } else {
                     echo "Warning: Source file not found: {$source}\n";
                 }
             }
@@ -387,7 +397,7 @@ class CreatePackages
 
         if (isset($config['empty_directories']) && is_array($config['empty_directories'])) {
             $emptyDir = TEMP_DIR . '/spp_empty';
-            if (!file_exists($emptyDir) && !mkdir($emptyDir, 0755,true) && !is_dir($emptyDir)) {
+            if (!file_exists($emptyDir) && !mkdir($emptyDir, 0755, true) && !is_dir($emptyDir)) {
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $emptyDir));
             }
             if (is_dir($emptyDir)) {
@@ -407,7 +417,7 @@ class CreatePackages
             echo $buffer;
         });
 
-        echo "DEB package created: " . DIST_DEB_PATH . "/{$name}_{$phpVersion}-{$iteration}_{$architecture}.deb\n";
+        echo "DEB package created: " . DIST_DEB_PATH . "/{$name}_{$phpVersion}-{$debIteration}_{$architecture}.deb\n";
     }
 
     private static function getPhpVersionAndArchitecture(): array
@@ -417,7 +427,6 @@ class CreatePackages
         }
         $basePhpVersion = SPP_PHP_VERSION;
         $phpBinary = BUILD_BIN_PATH . '/php';
-        $fullPhpVersion = null; // Default to base version if binary check fails
 
         if (!file_exists($phpBinary)) {
             throw new RuntimeException("Warning: PHP binary not found at {$phpBinary}, using base PHP version: {$basePhpVersion}");
