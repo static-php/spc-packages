@@ -81,12 +81,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "38ec03fe301ab41a66ba22718ca8b00580de9b97"
+                "reference": "a77e49cbc9cca0cccf40cd2772131159b86b981c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/38ec03fe301ab41a66ba22718ca8b00580de9b97",
-                "reference": "38ec03fe301ab41a66ba22718ca8b00580de9b97",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/a77e49cbc9cca0cccf40cd2772131159b86b981c",
+                "reference": "a77e49cbc9cca0cccf40cd2772131159b86b981c",
                 "shasum": ""
             },
             "require": {
@@ -142,7 +142,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-08-31T13:06:11+00:00"
+            "time": "2025-09-01T16:17:44+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -509,16 +509,16 @@
         },
         {
             "name": "laravel/helpers",
-            "version": "v1.7.2",
+            "version": "v1.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/helpers.git",
-                "reference": "672d79d5b5f65dc821e57783fa11f22c4d762d70"
+                "reference": "97738f7282cdac8d261468ad214d80e88042edd3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/helpers/zipball/672d79d5b5f65dc821e57783fa11f22c4d762d70",
-                "reference": "672d79d5b5f65dc821e57783fa11f22c4d762d70",
+                "url": "https://api.github.com/repos/laravel/helpers/zipball/97738f7282cdac8d261468ad214d80e88042edd3",
+                "reference": "97738f7282cdac8d261468ad214d80e88042edd3",
                 "shasum": ""
             },
             "require": {
@@ -560,9 +560,9 @@
                 "laravel"
             ],
             "support": {
-                "source": "https://github.com/laravel/helpers/tree/v1.7.2"
+                "source": "https://github.com/laravel/helpers/tree/v1.8.0"
             },
-            "time": "2025-01-24T15:41:25+00:00"
+            "time": "2025-09-01T19:53:58+00:00"
         },
         {
             "name": "laravel/prompts",
