@@ -2,6 +2,7 @@
 
 namespace staticphp\package;
 
+use SPC\builder\linux\SystemUtil;
 use SPC\store\Downloader;
 use staticphp\package;
 use staticphp\step\CreatePackages;
@@ -57,9 +58,11 @@ class composer implements package
 
     public function getFpmExtraArgs(): array
     {
+        $is_deb = in_array(SystemUtil::getOSRelease()['dist'], ['ubuntu', 'debian']);
+        $arch = arch2gnu(php_uname('m'));
         // Set the package as architecture-independent (noarch) and add metadata
         return [
-            '--architecture', 'noarch',
+            '--architecture', $is_deb ? $arch : 'noarch',
             '--description', 'Composer is a dependency manager for PHP',
             '--url', 'https://getcomposer.org/',
             '--license', 'MIT',
