@@ -2,7 +2,6 @@
 
 namespace staticphp\step;
 
-use SPC\exception\RuntimeException;
 use SPC\store\Config;
 use SPC\store\Downloader;
 use staticphp\extension;
@@ -429,7 +428,7 @@ class CreatePackages
         $phpBinary = BUILD_BIN_PATH . '/php';
 
         if (!file_exists($phpBinary)) {
-            throw new RuntimeException("Warning: PHP binary not found at {$phpBinary}, using base PHP version: {$basePhpVersion}");
+            throw new \RuntimeException("Warning: PHP binary not found at {$phpBinary}, using base PHP version: {$basePhpVersion}");
         }
         $versionProcess = new Process([$phpBinary, '-r', 'echo PHP_VERSION;']);
         $versionProcess->run();
@@ -439,7 +438,7 @@ class CreatePackages
             $fullPhpVersion = $detectedVersion;
             echo "Detected full PHP version from binary: {$fullPhpVersion}\n";
         } else {
-            throw new RuntimeException("Warning: Could not detect PHP version from binary using base version: {$basePhpVersion}");
+            throw new \RuntimeException("Warning: Could not detect PHP version from binary using base version: {$basePhpVersion}");
         }
 
         $archProcess = new Process(['uname', '-m']);
@@ -629,10 +628,11 @@ class CreatePackages
         $version = $releaseInfo['tag_name'];
         $version = ltrim($version, 'v');
 
-        $iteration = self::getNextIteration('composer', $version, 'noarch');
+        $arch = arch2gnu(php_uname('m'));
+        $iteration = self::getNextIteration('composer', $version, $arch);
         echo "Using iteration: {$iteration} for Composer package\n";
 
-        self::createPackageWithFpm('composer', $config, $version, 'noarch', $iteration, $package->getFpmExtraArgs());
+        self::createPackageWithFpm('composer', $config, $version, $arch, $iteration, $package->getFpmExtraArgs());
 
         echo "Composer package created successfully.\n";
     }

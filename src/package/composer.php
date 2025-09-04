@@ -58,14 +58,11 @@ class composer implements package
 
     public function getFpmExtraArgs(): array
     {
-        $arch = arch2gnu(php_uname('m'));
         return [
-            '--architecture', $arch,
             '--description', 'Composer is a dependency manager for PHP',
             '--url', 'https://getcomposer.org/',
             '--license', 'MIT',
             '--vendor', 'Composer',
-            '--maintainer', 'Static PHP <info@static-php.dev>',
             '--category', 'Development/Tools',
         ];
     }
