@@ -628,7 +628,7 @@ class CreatePackages
         $version = $releaseInfo['tag_name'];
         $version = ltrim($version, 'v');
 
-        $arch = arch2gnu(php_uname('m'));
+        [, $arch] = self::getPhpVersionAndArchitecture();
         $iteration = self::getNextIteration('composer', $version, $arch);
         echo "Using iteration: {$iteration} for Composer package\n";
 
