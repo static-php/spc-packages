@@ -31,8 +31,7 @@
         "laravel/helpers": "^1.7",
         "ext-zlib": "*",
         "twig/twig": "^3.0"
-    }
-    ,
+    },
     "require-dev": {
         "roave/security-advisories": "dev-latest"
     },
