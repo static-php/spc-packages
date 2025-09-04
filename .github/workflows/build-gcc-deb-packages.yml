@@ -182,13 +182,6 @@ jobs:
             -   name: Upload APT repo to deb.henderkes.com
                 run: rsync -azv --delete repo/ github@deb.henderkes.com:/home/github/deb/
 
-            -   name: Upload repo artifact
-                uses: actions/upload-artifact@v4
-                with:
-                    name: apt-repo
-                    path: repo/**
-                    retention-days: 7
-
             -   name: Setup tmate session
                 if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
                 uses: mxschmitt/action-tmate@v3
