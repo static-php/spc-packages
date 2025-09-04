@@ -355,12 +355,25 @@ class CreatePackages
             }
         }
 
+        $systemLibraryMap = [
+            'ld-linux-x86-64.so.2' => 'libc6',
+            'libm.so.6' => 'libc6',
+            'libc.so.6' => 'libc6',
+            'libgcc_s.so.1' => 'libgcc-s1',
+            'libstdc++.so.6' => 'libstdc++6',
+        ];
         foreach (self::$binaryDependencies as $lib => $version) {
-            $lib = str_replace('.so.', '', $lib);
-            $lib = preg_replace('/_\D+/', '', $lib);
+            if (isset($systemLibraryMap[$lib])) {
+                // Use mapped name for system libraries
+                $packageName = $systemLibraryMap[$lib];
+            } else {
+                // For other libraries, remove .so suffix
+                $packageName = preg_replace('/\.so(\.\d+)?$/', '', $lib);
+            }
+
             $numericVersion = preg_replace('/[^0-9.]/', '', $version);
             $fpmArgs[] = '--depends';
-            $fpmArgs[] = "{$lib} (>= {$numericVersion})";
+            $fpmArgs[] = "{$packageName} (>= {$numericVersion})";
         }
         if (isset($config['depends']) && is_array($config['depends'])) {
             foreach ($config['depends'] as $depend) {
