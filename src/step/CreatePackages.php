@@ -636,7 +636,15 @@ class CreatePackages
         $package = new composer();
         $config = $package->getFpmConfig();
 
-        $content = Downloader::curlExec('https://api.github.com/repos/composer/composer/releases/latest', hooks: ['setupGithubToken']);
+        $retries = 20;
+        $content = null;
+        while (!$content && --$retries >= 0) {
+            try {
+                $content = Downloader::curlExec('https://api.github.com/repos/composer/composer/releases/latest', hooks: ['setupGithubToken']);
+            } catch (\Exception) {
+                sleep(3);
+            }
+        }
         $releaseInfo = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
         $version = $releaseInfo['tag_name'];
         $version = ltrim($version, 'v');
