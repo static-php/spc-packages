@@ -81,12 +81,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "2eeba33f9441382a31c9d6ff1a362dfc102193ff"
+                "reference": "8d303348d98d86b376515e23ee3b08dfec9ecffd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/2eeba33f9441382a31c9d6ff1a362dfc102193ff",
-                "reference": "2eeba33f9441382a31c9d6ff1a362dfc102193ff",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/8d303348d98d86b376515e23ee3b08dfec9ecffd",
+                "reference": "8d303348d98d86b376515e23ee3b08dfec9ecffd",
                 "shasum": ""
             },
             "require": {
@@ -134,7 +134,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/main"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/2.7.3"
             },
             "funding": [
                 {
@@ -142,7 +142,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-09-04T16:15:40+00:00"
+            "time": "2025-09-05T09:52:26+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -2306,12 +2306,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "3602c597d29de335a36c0b50b96cc161d853b54f"
+                "reference": "dc5c4ede5c331ae21fb68947ff89672df9b7cc7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/3602c597d29de335a36c0b50b96cc161d853b54f",
-                "reference": "3602c597d29de335a36c0b50b96cc161d853b54f",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/dc5c4ede5c331ae21fb68947ff89672df9b7cc7d",
+                "reference": "dc5c4ede5c331ae21fb68947ff89672df9b7cc7d",
                 "shasum": ""
             },
             "conflict": {
@@ -2889,7 +2889,7 @@
                 "prestashop/blockwishlist": ">=2,<2.1.1",
                 "prestashop/contactform": ">=1.0.1,<4.3",
                 "prestashop/gamification": "<2.3.2",
-                "prestashop/prestashop": "<8.1.6",
+                "prestashop/prestashop": "<8.2.3",
                 "prestashop/productcomments": "<5.0.2",
                 "prestashop/ps_contactinfo": "<=3.3.2",
                 "prestashop/ps_emailsubscription": "<2.6.1",
@@ -3263,7 +3263,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-03T23:04:57+00:00"
+            "time": "2025-09-04T20:05:35+00:00"
         }
     ],
     "aliases": [],
