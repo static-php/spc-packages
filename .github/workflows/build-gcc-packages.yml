@@ -117,6 +117,7 @@ jobs:
                 run: |
                     mkdir -p vendor/crazywhalecc/static-php-cli/downloads
                     tar -xzf downloads.tar.gz -C vendor/crazywhalecc/static-php-cli/downloads
+                    rm downloads.tar.gz
 
             -   name: Build PHP and packages
                 run: |

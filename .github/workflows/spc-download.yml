@@ -1,3 +1,5 @@
+name: spc-download
+
 on:
     schedule:
         -   cron: '0 0 * * *'
