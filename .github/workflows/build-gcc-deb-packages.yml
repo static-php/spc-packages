@@ -80,6 +80,9 @@ jobs:
                     name: downloads
                     path: vendor/crazywhalecc/static-php-cli/downloads/
 
+            -   name: Chown downloads
+                run: sudo chown -R $USER:$USER vendor/crazywhalecc/static-php-cli/downloads
+
             -   name: Build PHP and packages (deb)
                 run: |
                     set -euo pipefail

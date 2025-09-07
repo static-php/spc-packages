@@ -112,6 +112,9 @@ jobs:
                     name: downloads
                     path: vendor/crazywhalecc/static-php-cli/downloads/
 
+            -   name: Chown downloads
+                run: sudo chown -R $USER:$USER vendor/crazywhalecc/static-php-cli/downloads
+
             -   name: Build PHP and packages
                 run: |
                     php bin/spp all --target=${{ matrix.target }} --type=rpm --phpv=${{ matrix.php-version }} --debug
