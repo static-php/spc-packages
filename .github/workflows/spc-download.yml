@@ -27,11 +27,10 @@ jobs:
 
             -   name: Create tarball (keep permissions)
                 run: |
-                    tar -czf downloads.tar.gz downloads
+                    tar -czf downloads.tar.gz -C downloads .
 
             -   name: Upload downloads directory
                 uses: actions/upload-artifact@v4
                 with:
                     name: downloads-tarball
                     path: downloads.tar.gz
-                    include-hidden-files: true

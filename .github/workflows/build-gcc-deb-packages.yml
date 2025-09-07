@@ -47,12 +47,6 @@ jobs:
                     sudo gem install --no-document fpm
                     composer install
 
-            -   name: Download extensions artifact
-                uses: actions/download-artifact@v4
-                with:
-                    name: downloads
-                    path: vendor/crazywhalecc/static-php-cli/downloads/
-
             -   name: Download artifact from spc-download.yml
                 uses: dawidd6/action-download-artifact@v11
                 with:
