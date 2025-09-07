@@ -8,19 +8,11 @@ on:
 jobs:
     download:
         runs-on: ubuntu-24.04
-        defaults:
-            run:
-                shell: bash
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             DOWNLOAD_PATH: vendor/crazywhalecc/static-php-cli/downloads
         steps:
-            -   name: Install dependencies
-                run: |
-                    sudo apt-get update
-                    sudo apt-get install -y wget git tar gzip
-
-            -   name: Set up PHP for composer
+            -   name: Set up PHP
                 uses: shivammathur/setup-php@v2
                 with:
                     php-version: '8.4'
