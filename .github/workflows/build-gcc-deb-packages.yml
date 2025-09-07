@@ -175,7 +175,7 @@ jobs:
                       | awk -F: '/^fpr:/ {print $10; exit}')
                     printf '%s' "${DEB_GPG_PRIVATE_KEY}" | gpg --batch --yes --import
 
-                    gpg --armor --export "${FPR}" > "${REPO_ROOT}/static-php.pub"
+                    gpg --output "${REPO_ROOT}/static-php.gpg" --export "${FPR}"
 
                     {
                       echo "pinentry-mode loopback"
