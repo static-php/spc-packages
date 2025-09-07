@@ -110,9 +110,9 @@ jobs:
                     name: build-logs-${{ matrix.arch }}-ubuntu-${{ matrix.os }}-php${{ matrix.php-version }}
                     path: vendor/crazywhalecc/static-php-cli/log
 
-#            -   name: Setup tmate session
-#                if: ${{ failure() }}
-#                uses: mxschmitt/action-tmate@v3
+            -   name: Setup tmate session
+                if: ${{ failure() }}
+                uses: mxschmitt/action-tmate@v3
 
     assemble-repo:
         needs: build

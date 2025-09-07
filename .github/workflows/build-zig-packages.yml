@@ -134,6 +134,6 @@ jobs:
                     name: build-logs-${{ matrix.arch }}-el7-php${{ matrix.php-version }}
                     path: vendor/crazywhalecc/static-php-cli/log
 
-#      - name: Setup tmate session
-#        if: ${{ failure() }}
-#        uses: mxschmitt/action-tmate@v3
+#            -   name: Setup tmate session
+#                if: ${{ failure() }}
+#                uses: mxschmitt/action-tmate@v3
