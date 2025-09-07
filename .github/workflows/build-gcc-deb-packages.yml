@@ -175,6 +175,8 @@ jobs:
                       | awk -F: '/^fpr:/ {print $10; exit}')
                     printf '%s' "${DEB_GPG_PRIVATE_KEY}" | gpg --batch --yes --import
 
+                    gpg --armor --export "${FPR}" > "${REPO_ROOT}/static-php.pub"
+
                     {
                       echo "pinentry-mode loopback"
                       echo "default-key ${FPR}"
@@ -217,6 +219,6 @@ jobs:
             -   name: Upload APT repo to deb.henderkes.com
                 run: rsync -azv --delete repo/ github@deb.henderkes.com:/home/github/deb/
 
-            -   name: Setup tmate session
-                if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
-                uses: mxschmitt/action-tmate@v3
+#            -   name: Setup tmate session
+#                if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
+#                uses: mxschmitt/action-tmate@v3

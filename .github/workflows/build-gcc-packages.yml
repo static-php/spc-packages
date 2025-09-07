@@ -140,26 +140,6 @@ jobs:
                     name: downloads
                     path: vendor/crazywhalecc/static-php-cli/downloads/
 
-            -   name: Install tmate
-                run: |
-                    case "${{ matrix.arch }}" in
-                    x86_64)
-                        arch="amd64"
-                       ;;
-                     arm64)
-                         arch="arm64v8"
-                         ;;
-                     esac
-                     dir="tmate-2.4.0-static-linux-$arch"
-                    curl -L "https://github.com/tmate-io/tmate/releases/download/2.4.0/$dir.tar.xz" | tar -xJ -O "$dir/tmate" > /usr/bin/tmate
-                    chmod +x /usr/bin/tmate
-
-            -   name: Setup tmate session
-                uses: mxschmitt/action-tmate@v3
-                with:
-                    install-dependencies: false
-                    sudo: false
-
             -   name: Build PHP and packages
                 run: |
                     php bin/spp all --target=native-native-gnu --type=rpm --phpv=${{ matrix.php-version }}
