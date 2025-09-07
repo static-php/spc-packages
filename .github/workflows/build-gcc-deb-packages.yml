@@ -27,12 +27,17 @@ jobs:
                 run: |
                     php vendor/bin/spc download -e apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib,amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd
 
+            -   name: Create tarball (keep permissions)
+                run: |
+                    tar -czf downloads.tar.gz downloads
+
             -   name: Upload downloads directory
                 uses: actions/upload-artifact@v4
                 with:
                     name: downloads
-                    path: downloads/*
+                    path: downloads.tar.gz
                     include-hidden-files: true
+
 
     build:
         needs: download
@@ -79,6 +84,11 @@ jobs:
                 with:
                     name: downloads
                     path: vendor/crazywhalecc/static-php-cli/downloads/
+
+            -   name: Extract with permissions
+                run: |
+                    mkdir -p vendor/crazywhalecc/static-php-cli/downloads
+                    tar -xzf downloads.tar.gz -C vendor/crazywhalecc/static-php-cli/downloads
 
             -   name: Chown downloads
                 run: |
