@@ -1,45 +1,14 @@
 name: Build and upload zig rpm packages
 
 on:
-    schedule:
-        -   cron: '0 0 * * *'  # Run daily at midnight UTC
-    workflow_dispatch:         # Allow manual triggering
+    workflow_run:
+        workflows: [ "spc-download" ]
+        types:
+            - completed
+    workflow_dispatch:
 
 jobs:
-    download:
-        runs-on: ubuntu-24.04
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        steps:
-            -   name: Set up PHP
-                uses: shivammathur/setup-php@v2
-                with:
-                    php-version: '8.4'
-                    tools: composer:v2
-
-            -   name: Checkout code
-                uses: actions/checkout@v4
-
-            -   name: Composer install
-                run: composer install
-
-            -   name: Download extensions
-                run: |
-                    php vendor/bin/spc download -e apcu,ast,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib,amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd
-
-            -   name: Create tarball (keep permissions)
-                run: |
-                    tar -czf downloads.tar.gz downloads
-
-            -   name: Upload downloads directory
-                uses: actions/upload-artifact@v4
-                with:
-                    name: downloads
-                    path: downloads.tar.gz
-                    include-hidden-files: true
-
     build:
-        needs: download
         runs-on: ${{ matrix.arch == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -110,11 +79,11 @@ jobs:
                     sudo gem install fpm
                     composer install
 
-            -   name: Download extensions artifact
-                uses: actions/download-artifact@v4
+            -   name: Download artifact from spc-download.yml
+                uses: dawidd6/action-download-artifact@v11
                 with:
-                    name: downloads
-                    path: vendor/crazywhalecc/static-php-cli/downloads/
+                    workflow: spc-download.yml
+                    name: downloads-tarball
 
             -   name: Extract with permissions
                 run: |
