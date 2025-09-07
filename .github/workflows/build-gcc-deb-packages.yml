@@ -114,34 +114,12 @@ jobs:
 
             -   name: Build signed APT repo (aggregate)
                 run: |
-                    set -euo pipefail
-                    umask 077
-
                     REPO_ROOT="$(pwd)/repo"
                     mkdir -p "${REPO_ROOT}/conf"
-
                     ORIGIN="Static PHP repository"
                     LABEL="static-php"
                     COMPONENT="main"
                     DESC="Static PHP repository"
-
-                    cat > "${REPO_ROOT}/conf/distributions" <<EOF
-                    Codename: jammy
-                    Suite: stable
-                    Components: ${COMPONENT}
-                    Architectures: amd64 arm64
-                    Origin: ${ORIGIN}
-                    Label: ${LABEL}
-                    Description: ${DESC}
-
-                    Codename: noble
-                    Suite: stable
-                    Components: ${COMPONENT}
-                    Architectures: amd64 arm64
-                    Origin: ${ORIGIN}
-                    Label: ${LABEL}
-                    Description: ${DESC}
-                    EOF
 
                     export GNUPGHOME="${HOME}/.gnupg"
                     mkdir -p "${GNUPGHOME}"; chmod 700 "${GNUPGHOME}"
@@ -166,7 +144,25 @@ jobs:
                         --local-user "${FPR}" --sign --output /dev/null "$t" <<<"${DEB_GPG_PASSWORD}"
                     rm -f "$t"
 
-                    echo "SignWith: ${FPR}" >> "${REPO_ROOT}/conf/distributions"
+                    cat > "${REPO_ROOT}/conf/distributions" <<EOF
+                    Codename: jammy
+                    Suite: stable
+                    Components: ${COMPONENT}
+                    Architectures: amd64 arm64
+                    Origin: ${ORIGIN}
+                    Label: ${LABEL}
+                    Description: ${DESC}
+                    SignWith: ${FPR}
+
+                    Codename: noble
+                    Suite: stable
+                    Components: ${COMPONENT}
+                    Architectures: amd64 arm64
+                    Origin: ${ORIGIN}
+                    Label: ${LABEL}
+                    Description: ${DESC}
+                    SignWith: ${FPR}
+                    EOF
 
                     shopt -s nullglob globstar
                     jammy_debs=( collected/jammy/**/*.deb )
