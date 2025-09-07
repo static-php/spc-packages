@@ -10,7 +10,6 @@ jobs:
         runs-on: ubuntu-24.04
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            DOWNLOAD_PATH: vendor/crazywhalecc/static-php-cli/downloads
         steps:
             -   name: Set up PHP
                 uses: shivammathur/setup-php@v2
@@ -32,7 +31,7 @@ jobs:
                 uses: actions/upload-artifact@v4
                 with:
                     name: downloads
-                    path: vendor/crazywhalecc/static-php-cli/downloads/*
+                    path: downloads/*
 
     build:
         needs: download
@@ -45,7 +44,6 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             BASH_ENV: /tmp/gha-bashenv
-            DOWNLOAD_PATH: vendor/crazywhalecc/static-php-cli/downloads
         strategy:
             fail-fast: false
             matrix:
