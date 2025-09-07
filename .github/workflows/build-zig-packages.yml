@@ -113,7 +113,9 @@ jobs:
                     path: vendor/crazywhalecc/static-php-cli/downloads/
 
             -   name: Chown downloads
-                run: sudo chown -R $USER:$USER vendor/crazywhalecc/static-php-cli/downloads
+                run: |
+                    sudo chown -R $USER:$USER vendor/crazywhalecc/static-php-cli/downloads
+                    chmod +x vendor/crazywhalecc/static-php-cli/downloads/qdbm/configure
 
             -   name: Build PHP and packages
                 run: |
