@@ -31,7 +31,8 @@ jobs:
                 uses: actions/upload-artifact@v4
                 with:
                     name: downloads
-                    path: downloads
+                    path: downloads/*
+                    include-hidden-files: true
 
     build:
         needs: download
@@ -137,7 +138,7 @@ jobs:
                 uses: actions/download-artifact@v4
                 with:
                     name: downloads
-                    path: vendor/crazywhalecc/static-php-cli/
+                    path: vendor/crazywhalecc/static-php-cli/downloads/
 
             -   name: Install tmate
                 run: |
