@@ -44,6 +44,9 @@ jobs:
                     gem install --no-document fpm
                     curl -#fSL https://dl.static-php.dev/static-php-cli/common/php-8.4.12-cli-linux-${{ env.RPM_ARCH }}.tar.gz | tar -xz -C /usr/local/bin
                     chmod +x /usr/local/bin/php
+                    sudo apt install -y locales
+                    sudo locale-gen en_US.UTF-8
+                    sudo update-locale LANG=en_US.UTF-8
 
             -   name: Install composer
                 run: |
@@ -92,10 +95,10 @@ jobs:
                     name: build-logs-${{ matrix.arch }}-${{ matrix.os }}-php${{ matrix.php-version }}
                     path: vendor/crazywhalecc/static-php-cli/log
 
-            -   name: Setup tmate session
-                if: ${{ failure() }}
-                uses: mxschmitt/action-tmate@v3
-                timeout-minutes: 10
+#            -   name: Setup tmate session
+#                if: ${{ failure() }}
+#                uses: mxschmitt/action-tmate@v3
+#                timeout-minutes: 10
 
     assemble-repo:
         needs: build
