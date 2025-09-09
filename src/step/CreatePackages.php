@@ -351,7 +351,7 @@ class CreatePackages
         if (isset($config['replaces']) && is_array($config['replaces'])) {
             foreach ($config['replaces'] as $replace) {
                 $fpmArgs[] = '--replaces';
-                $fpmArgs[] = "{$replace} (< {$fullVersion})";
+                $fpmArgs[] = "{$replace} (<= {$fullVersion})";
             }
         }
 
@@ -628,7 +628,83 @@ class CreatePackages
 
     private static function createDebFrankenPhpPackage(mixed $architecture)
     {
+        echo "Creating DEB package for FrankenPHP...\n";
 
+        $packageFolder = DIST_PATH . '/frankenphp/package';
+        $phpVersion = str_replace('.', '', SPP_PHP_VERSION);
+        $phpEmbedName = 'lib' . self::getPrefix() . '-' . $phpVersion . '.so';
+
+        $ldLibraryPath = 'LD_LIBRARY_PATH=' . BUILD_LIB_PATH;
+        [, $output] = shell()->execWithResult($ldLibraryPath . ' ' . BUILD_BIN_PATH . '/frankenphp --version');
+        $output = implode("\n", $output);
+        preg_match('/FrankenPHP v(\d+\.\d+\.\d+)/', $output, $matches);
+        $latestTag = $matches[1];
+        $version = $latestTag . '_' . $phpVersion;
+
+        $name = "frankenphp";
+
+        $osRelease = parse_ini_file('/etc/os-release');
+        $distroCodename = $osRelease['VERSION_CODENAME'] ?? null;
+        $iteration = self::getNextIteration($name, $version, $architecture);
+        $debIteration = $distroCodename !== '' ? "{$iteration}~{$distroCodename}" : $iteration;
+
+        $fpmArgs = [
+            'fpm',
+            '-s', 'dir',
+            '-t', 'deb',
+            '-p', DIST_DEB_PATH,
+            '-n', $name,
+            '-v', $version,
+            '--config-files', '/etc/frankenphp/Caddyfile',
+        ];
+
+        $systemLibraryMap = [
+            'ld-linux-x86-64.so.2' => 'libc6',
+            'libm.so.6' => 'libc6',
+            'libc.so.6' => 'libc6',
+            'libgcc_s.so.1' => 'libgcc-s1',
+            'libstdc++.so.6' => 'libstdc++6',
+        ];
+        foreach (self::$binaryDependencies as $lib => $version) {
+            if (isset($systemLibraryMap[$lib])) {
+                // Use mapped name for system libraries
+                $packageName = $systemLibraryMap[$lib];
+            } else {
+                // For other libraries, remove .so suffix
+                $packageName = preg_replace('/\.so(\.\d+)?$/', '', $lib);
+            }
+
+            $numericVersion = preg_replace('/[^0-9.]/', '', $version);
+            $fpmArgs[] = '--depends';
+            $fpmArgs[] = "{$packageName} (>= {$numericVersion})";
+        }
+
+        if (!is_dir("{$packageFolder}/empty/") && !mkdir("{$packageFolder}/empty/", 0755, true) && !is_dir("{$packageFolder}/empty/")) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', "{$packageFolder}/empty/"));
+        }
+
+        $fpmArgs = [...$fpmArgs, ...[
+            '--depends', $phpEmbedName,
+            '--after-install', "{$packageFolder}/debian/postinst.sh",
+            '--before-remove', "{$packageFolder}/debian/prerm.sh",
+            '--after-remove', "{$packageFolder}/debian/postrm.sh",
+            '--iteration', $debIteration,
+            '--rpm-user', 'frankenphp',
+            '--rpm-group', 'frankenphp',
+            BUILD_BIN_PATH . '/frankenphp=/usr/bin/frankenphp',
+            "{$packageFolder}/debian/frankenphp.service=/usr/lib/systemd/system/frankenphp.service",
+            "{$packageFolder}/Caddyfile=/etc/frankenphp/Caddyfile",
+            "{$packageFolder}/content/=/usr/share/frankenphp",
+            "{$packageFolder}/empty/=/var/lib/frankenphp"
+        ]];
+
+        $rpmProcess = new Process($fpmArgs);
+        $rpmProcess->setTimeout(null);
+        $rpmProcess->run(function ($type, $buffer) {
+            echo $buffer;
+        });
+
+        echo "DEB package created: " . DIST_DEB_PATH . "/{$name}-{$version}-{$debIteration}.{$architecture}.deb\n";
     }
 
     private static function createComposerPackage(): void
