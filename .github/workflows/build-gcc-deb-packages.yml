@@ -10,7 +10,7 @@ on:
 jobs:
     build:
         name: Build for ${{ matrix.os }} ${{ matrix.arch }} PHP ${{ matrix.php-version }}
-        runs-on: ubuntu-${{ matrix.arch == 'amd64' && 'latest' || 'latest-arm' }}
+        runs-on: ubuntu-${{ matrix.arch == 'amd64' && '24.04' || '24.04-arm' }}
         container:
             image: ${{ (matrix.os == 'bookworm' || matrix.os == 'trixie') && format('debian:{0}', matrix.os) || format('ubuntu:{0}', matrix.os) }}
         permissions:
@@ -30,7 +30,8 @@ jobs:
                 run: |
                     apt-get update
                     apt-get install -y ruby build-essential jq curl gzip sudo git wget
-                    apt-get install -y php-cli php-curl php-zip php-mbstring php-xml
+                    curl -#fSL https://dl.static-php.dev/static-php-cli/common/php-8.4.12-cli-linux-${{ env.RPM_ARCH }}.tar.gz | tar -xz -C /usr/local/bin && \
+                    chmod +x /usr/local/bin/php
                     apt-get install -y gnupg
                     gem install --no-document fpm
 
@@ -81,6 +82,7 @@ jobs:
 #            -   name: Setup tmate session
 #                if: ${{ failure() }}
 #                uses: mxschmitt/action-tmate@v3
+#                timeout-minutes: 10
 
     assemble-repo:
         needs: build
@@ -210,3 +212,4 @@ jobs:
 #            -   name: Setup tmate session
 #                if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
 #                uses: mxschmitt/action-tmate@v3
+#                timeout-minutes: 10
