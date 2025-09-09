@@ -15,6 +15,12 @@ jobs:
             image: ${{ (matrix.os == 'bookworm' || matrix.os == 'trixie') && format('debian:{0}', matrix.os) || format('ubuntu:{0}', matrix.os) }}
         permissions:
             contents: read
+        defaults:
+            run:
+                shell: bash
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            BASH_ENV: /tmp/gha-bashenv
         strategy:
             fail-fast: false
             matrix:
@@ -23,9 +29,6 @@ jobs:
                 os: [ 'jammy', 'noble', 'bookworm', 'trixie' ]
 
         steps:
-            -   name: Checkout code
-                uses: actions/checkout@v4
-
             -   name: Set architecture variables
                 run: |
                     if [[ "${{ matrix.arch }}" == "arm64" ]]; then
@@ -46,6 +49,9 @@ jobs:
                 run: |
                     wget https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
                     mv composer.phar /usr/bin/composer
+
+            -   name: Checkout code
+                uses: actions/checkout@v4
 
             -   name: Install build tooling
                 run: composer install
