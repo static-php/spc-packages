@@ -9,8 +9,10 @@ on:
 
 jobs:
     build:
-        name: Build on ubuntu-${{ matrix.os }} for ${{ matrix.arch }} PHP ${{ matrix.php-version }}
-        runs-on: ${{ matrix.arch == 'amd64' && format('ubuntu-{0}', matrix.os) || format('ubuntu-{0}-arm', matrix.os) }}
+        name: Build for ${{ matrix.os }} ${{ matrix.arch }} PHP ${{ matrix.php-version }}
+        runs-on: ubuntu-${{ matrix.arch == 'amd64' && 'latest' || 'latest-arm' }}
+        container:
+            image: ${{ (matrix.os == 'bookworm' || matrix.os == 'trixie') && format('debian:{0}', matrix.os) || format('ubuntu:{0}', matrix.os) }}
         permissions:
             contents: read
         strategy:
@@ -18,34 +20,27 @@ jobs:
             matrix:
                 php-version: [ 8.4 ]
                 arch: [ amd64, arm64 ]
-                os: [ 22.04, 24.04 ]
+                os: [ 'jammy', 'noble', 'bookworm', 'trixie' ]
 
         steps:
             -   name: Checkout code
                 uses: actions/checkout@v4
 
-            -   name: Map codename
-                id: map
+            -   name: Bootstrap container
                 run: |
-                    case "${{ matrix.os }}" in
-                      22.04) echo "codename=jammy" >> $GITHUB_OUTPUT ;;
-                      24.04) echo "codename=noble" >> $GITHUB_OUTPUT ;;
-                      *) echo "Unsupported OS version: ${{ matrix.os }}" >&2; exit 1 ;;
-                    esac
+                    apt-get update
+                    apt-get install -y ruby build-essential jq curl gzip sudo git wget
+                    apt-get install -y php-cli php-curl php-zip php-mbstring php-xml
+                    apt-get install -y gnupg
+                    gem install --no-document fpm
 
-            -   name: Set up PHP for composer
-                uses: shivammathur/setup-php@v2
-                with:
-                    php-version: '8.4'
-                    tools: composer:v2
+            -   name: Install composer
+                run: |
+                    wget https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
+                    mv composer.phar /usr/bin/composer
 
             -   name: Install build tooling
-                run: |
-                    set -euo pipefail
-                    sudo apt-get update
-                    sudo apt-get install -y ruby build-essential jq curl gzip
-                    sudo gem install --no-document fpm
-                    composer install
+                run: composer install
 
             -   name: Download artifact from spc-download.yml
                 uses: dawidd6/action-download-artifact@v11
@@ -60,21 +55,18 @@ jobs:
                     rm downloads.tar.gz
 
             -   name: Build PHP and packages (deb)
-                run: |
-                    set -euo pipefail
-                    php bin/spp all --target=native-native-gnu --type=deb --phpv=${{ matrix.php-version }}
+                run: php bin/spp all --target=native-native-gnu --type=deb --phpv=${{ matrix.php-version }}
 
             -   name: Stage deb artifacts
                 run: |
-                    set -euo pipefail
-                    mkdir -p "artifacts/${{ steps.map.outputs.codename }}/${{ matrix.arch }}"
+                    mkdir -p "artifacts/${{ matrix.os }}/${{ matrix.arch }}"
                     shopt -s nullglob
-                    mv dist/deb/*.deb "artifacts/${{ steps.map.outputs.codename }}/${{ matrix.arch }}/"
+                    mv dist/deb/*.deb "artifacts/${{ matrix.os }}/${{ matrix.arch }}/"
 
             -   name: Upload debs
                 uses: actions/upload-artifact@v4
                 with:
-                    name: "debs-${{ steps.map.outputs.codename }}-${{ matrix.arch }}"
+                    name: "debs-${{ matrix.os }}-${{ matrix.arch }}"
                     path: artifacts/**
                     if-no-files-found: error
                     retention-days: 7
@@ -83,7 +75,7 @@ jobs:
                 if: ${{ failure() }}
                 uses: actions/upload-artifact@v4
                 with:
-                    name: build-logs-${{ matrix.arch }}-ubuntu-${{ matrix.os }}-php${{ matrix.php-version }}
+                    name: build-logs-${{ matrix.arch }}-${{ matrix.os }}-php${{ matrix.php-version }}
                     path: vendor/crazywhalecc/static-php-cli/log
 
             -   name: Setup tmate session
@@ -101,7 +93,6 @@ jobs:
 
             -   name: Install repo tooling
                 run: |
-                    set -euo pipefail
                     sudo apt-get update
                     sudo apt-get install -y reprepro gnupg rsync
 
@@ -162,18 +153,36 @@ jobs:
                     Label: ${LABEL}
                     Description: ${DESC}
                     SignWith: ${FPR}
+
+                    Codename: bookworm
+                    Suite: stable
+                    Components: ${COMPONENT}
+                    Architectures: amd64 arm64
+                    Origin: ${ORIGIN}
+                    Label: ${LABEL}
+                    Description: ${DESC}
+                    SignWith: ${FPR}
+
+                    Codename: trixie
+                    Suite: stable
+                    Components: ${COMPONENT}
+                    Architectures: amd64 arm64
+                    Origin: ${ORIGIN}
+                    Label: ${LABEL}
+                    Description: ${DESC}
+                    SignWith: ${FPR}
                     EOF
 
                     shopt -s nullglob globstar
                     jammy_debs=( collected/jammy/**/*.deb )
                     noble_debs=( collected/noble/**/*.deb )
+                    bookworm_debs=( collected/bookworm/**/*.deb )
+                    trixie_debs=( collected/trixie/**/*.deb )
 
-                    if [ ${#jammy_debs[@]} -gt 0 ]; then
-                      reprepro -b "${REPO_ROOT}" includedeb jammy "${jammy_debs[@]}"
-                    fi
-                    if [ ${#noble_debs[@]} -gt 0 ]; then
-                      reprepro -b "${REPO_ROOT}" includedeb noble "${noble_debs[@]}"
-                    fi
+                    reprepro -b "${REPO_ROOT}" includedeb jammy "${jammy_debs[@]}"
+                    reprepro -b "${REPO_ROOT}" includedeb noble "${noble_debs[@]}"
+                    reprepro -b "${REPO_ROOT}" includedeb bookworm "${bookworm_debs[@]}"
+                    reprepro -b "${REPO_ROOT}" includedeb trixie "${trixie_debs[@]}"
 
                     reprepro -b "${REPO_ROOT}" export
 
@@ -184,12 +193,13 @@ jobs:
 
             -   name: Add remote host to known_hosts
                 run: |
-                    mkdir -p ~/.ssh
-                    cat >> ~/.ssh/known_hosts <<'EOF'
-                      deb.henderkes.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPQq0y77dDEtxECVMhCxjcqiV369goMcbInsY/d+F1yXGwqOXQ6RqIEzgaVhgq0joMJT5BiGXNXQ+OI10/KtzGI=
-                      deb.henderkes.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2laCc5jifgjL/2zLzgP1E/X3kouXdaZv00KtAV1DOO5umThoWzb16cswnVtjtLUEMIuo9rPLB79xX2Asa+nN3uMgJDANnr/xnhRoI++yOGLga40/O69U88j5x+5FXODscH/k4n85mfcjzm/fZLXcHlb17ibCmU20I3v46sydn95Pp4/ShDvqsHVB4gWEKJ+jStkooUz2H1UZ8ZquNtaPTlmkOeClNj6gxag74P5b9VB6M5YNac2Emi3Nm0dYkc+BL0Qv+NEtFR1lR63DLa3O/NGTALGJYGmTUkjwiv8KygegaKhd2zxESmWhV7eYIPax8zL+GE9sX1Xwwh1huS0vsuwr2dXPP1/q5slz1AQV/lx85fGdiHc0F8RUXwqXbvGxZJheTuC/Mgu0cFzp5gqO4kTP28X+9fokzScBKBCIfObDXrl7rZgTXAA8IQ5gHk1tGchaEOIcDsjdISW5HVOiwocYSwUNMHzuZ08qAulatIywtOGcWVRdvOs7TcvSgfZ0=
-                      deb.henderkes.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICaB5IjokRHAH0Y9pzVe/Jx3s6cn0OADJ9uTxQQubBMu
-                    EOF
+                  mkdir -p ~/.ssh
+                  cat >> ~/.ssh/known_hosts <<'EOF'
+                  deb.henderkes.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPQq0y77dDEtxECVMhCxjcqiV369goMcbInsY/d+F1yXGwqOXQ6RqIEzgaVhgq0joMJT5BiGXNXQ+OI10/KtzGI=
+                  deb.henderkes.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2laCc5jifgjL/2zLzgP1E/X3kouXdaZv00KtAV1DOO5umThoWzb16cswnVtjtLUEMIuo9rPLB79xX2Asa+nN3uMgJDANnr/xnhRoI++yOGLga40/O69U88j5x+5FXODscH/k4n85mfcjzm/fZLXcHlb17ibCmU20I3v46sydn95Pp4/ShDvqsHVB4gWEKJ+jStkooUz2H1UZ8ZquNtaPTlmkOeClNj6gxag74P5b9VB6M5YNac2Emi3Nm0dYkc+BL0Qv+NEtFR1lR63DLa3O/NGTALGJYGmTUkjwiv8KygegaKhd2zxESmWhV7eYIPax8zL+GE9sX1Xwwh1huS0vsuwr2dXPP1/q5slz1AQV/lx85fGdiHc0F8RUXwqXbvGxZJheTuC/Mgu0cFzp5gqO4kTP28X+9fokzScBKBCIfObDXrl7rZgTXAA8IQ5gHk1tGchaEOIcDsjdISW5HVOiwocYSwUNMHzuZ08qAulatIywtOGcWVRdvOs7TcvSgfZ0=
+                  deb.henderkes.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICaB5IjokRHAH0Y9pzVe/Jx3s6cn0OADJ9uTxQQubBMu
+                  EOF
+                  chmod 600 ~/.ssh/known_hosts
 
             -   name: Upload APT repo to deb.henderkes.com
                 run: rsync -azv --delete repo/ github@deb.henderkes.com:/home/github/deb/
