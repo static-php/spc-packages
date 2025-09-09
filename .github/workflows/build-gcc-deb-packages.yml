@@ -45,6 +45,7 @@ jobs:
                     curl -#fSL https://dl.static-php.dev/static-php-cli/common/php-8.4.12-cli-linux-${{ env.RPM_ARCH }}.tar.gz | tar -xz -C /usr/local/bin
                     chmod +x /usr/local/bin/php
                     sudo apt install -y locales
+                    echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
                     sudo locale-gen en_US.UTF-8
                     sudo update-locale LANG=en_US.UTF-8
 
