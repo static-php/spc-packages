@@ -26,6 +26,14 @@ jobs:
             -   name: Checkout code
                 uses: actions/checkout@v4
 
+            -   name: Set architecture variables
+                run: |
+                    if [[ "${{ matrix.arch }}" == "arm64" ]]; then
+                      echo "RPM_ARCH=aarch64" >> $GITHUB_ENV
+                    else
+                      echo "RPM_ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+                    fi
+
             -   name: Bootstrap container
                 run: |
                     apt-get update
