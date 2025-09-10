@@ -88,6 +88,50 @@ jobs:
                 run: |
                     php bin/spp all --target=${{ matrix.target }} --type=rpm --phpv=${{ matrix.php-version }}
 
+            -   name: Prepare rpm signing
+                run: |
+                    # Setup GPG
+                    export GNUPGHOME="${HOME}/.gnupg"
+                    mkdir -p "${GNUPGHOME}"
+                    chmod 700 "${GNUPGHOME}"
+
+                    echo "allow-loopback-pinentry" > "${GNUPGHOME}/gpg-agent.conf"
+                    gpgconf --kill gpg-agent
+
+                    # Import private key and extract fingerprint
+                    FPR=$(printf '%s' "${{ secrets.DEB_GPG_PRIVATE_KEY }}" \
+                      | gpg --batch --quiet --with-colons --import-options show-only --import 2>/dev/null \
+                      | awk -F: '/^fpr:/ {print $10; exit}')
+                    printf '%s' "${{ secrets.DEB_GPG_PRIVATE_KEY }}" | gpg --batch --yes --import
+
+                    # Configure gpg.conf
+                    {
+                      echo "pinentry-mode loopback"
+                      echo "default-key ${FPR}"
+                    } > "${GNUPGHOME}/gpg.conf"
+
+                    # Unlock key with passphrase (warmup)
+                    t=$(mktemp); echo warmup > "$t"
+                    gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+                        --local-user "${FPR}" --sign --output /dev/null "$t" <<<"${{ secrets.DEB_GPG_PASSWORD }}"
+                    rm -f "$t"
+
+                    # Create ~/.rpmmacros (not /root/.rpmmacros!)
+                    cat > ~/.rpmmacros <<EOF
+                    %_signature gpg
+                    %_gpg_path ${GNUPGHOME}
+                    %_gpg_name ${FPR}
+                    %_gpgbin /usr/bin/gpg
+                    %__gpg /usr/bin/gpg
+                    %__gpg_check_password_cmd /bin/true
+                    EOF
+
+            -   name: Sign RPM packages
+                run: |
+                    for rpm in dist/rpm/*.rpm; do
+                      rpmsign --addsign "$rpm"
+                    done
+
             -   name: Upload packages
                 run: |
                     rsync -av --ignore-existing dist/rpm/*.rpm github@rpm.henderkes.com:/home/github/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/
