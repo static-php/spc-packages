@@ -144,7 +144,7 @@ jobs:
                         --local-user "${FPR}" --sign --output /dev/null "$t" <<<"${{ secrets.DEB_GPG_PASSWORD }}"
                     rm -f "$t"
 
-                    # Create ~/.rpmmacros
+                    # Create ~/.rpmmacros (not /root/.rpmmacros!)
                     cat > ~/.rpmmacros <<EOF
                     %_signature gpg
                     %_gpg_path ${GNUPGHOME}
@@ -178,7 +178,7 @@ jobs:
             -   name: Sign RPM packages
                 run: |
                     for rpm in dist/rpm/*.rpm; do
-                      GNUPGHOME="${HOME}/.gnupg" rpmsign --addsign "$rpm"
+                      rpmsign --addsign "$rpm"
                     done
 
             -   name: Upload packages
