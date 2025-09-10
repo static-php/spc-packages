@@ -227,6 +227,9 @@ class CreatePackages
             '--vendor', 'Static PHP <info@static-php.dev>',
             '--url', 'rpms.henderkes.com',
         ], ...$extraArgs];
+        if (getenv('RPM_SIGN')) {
+            $fpmArgs[] = '--rpm-sign';
+        }
 
         if (isset($config['provides']) && is_array($config['provides'])) {
             foreach ($config['provides'] as $provide) {
