@@ -155,7 +155,6 @@ jobs:
                     EOF
 
             -   name: Install tmate
-                if: ${{ failure() }}
                 run: |
                     case "${{ matrix.arch }}" in
                       x86_64)
