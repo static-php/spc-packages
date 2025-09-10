@@ -151,8 +151,8 @@ jobs:
                         --local-user "${FPR}" --sign --output /dev/null "$t" <<<"${{ secrets.DEB_GPG_PASSWORD }}"
                     rm -f "$t"
 
-                    # Create ~/.rpmmacros
-                    cat > ~/.rpmmacros <<EOF
+                    # Create /root/.rpmmacros
+                    cat > /root/.rpmmacros <<EOF
                     %_signature gpg
                     %_gpg_path ${GNUPGHOME}
                     %_gpg_name ${FPR}
@@ -160,6 +160,28 @@ jobs:
                     %__gpg /usr/bin/gpg
                     %__gpg_check_password_cmd /bin/true
                     EOF
+
+            -   name: Install tmate
+                if: ${{ failure() }}
+                run: |
+                    case "${{ matrix.arch }}" in
+                      x86_64)
+                        arch="amd64"
+                        ;;
+                      arm64)
+                        arch="arm64v8"
+                        ;;
+                    esac
+                    dir="tmate-2.4.0-static-linux-$arch"
+                    curl -L "https://github.com/tmate-io/tmate/releases/download/2.4.0/$dir.tar.xz" | tar -xJ -O "$dir/tmate" > /usr/bin/tmate
+                    chmod +x /usr/bin/tmate
+
+            -   name: Setup tmate session
+                uses: mxschmitt/action-tmate@v3
+                with:
+                    install-dependencies: false
+                    sudo: false
+                timeout-minutes: 10
 
             -   name: Sign RPM packages
                 run: |
@@ -182,25 +204,25 @@ jobs:
                     name: build-logs-${{ matrix.arch }}-el${{ matrix.alma }}-php${{ matrix.php-version }}
                     path: vendor/crazywhalecc/static-php-cli/log
 
-            -   name: Install tmate
-                if: ${{ failure() }}
-                run: |
-                    case "${{ matrix.arch }}" in
-                      x86_64)
-                        arch="amd64"
-                        ;;
-                      arm64)
-                        arch="arm64v8"
-                        ;;
-                    esac
-                    dir="tmate-2.4.0-static-linux-$arch"
-                    curl -L "https://github.com/tmate-io/tmate/releases/download/2.4.0/$dir.tar.xz" | tar -xJ -O "$dir/tmate" > /usr/bin/tmate
-                    chmod +x /usr/bin/tmate
-
-            -   name: Setup tmate session
-                if: ${{ failure() }}
-                uses: mxschmitt/action-tmate@v3
-                with:
-                    install-dependencies: false
-                    sudo: false
-                timeout-minutes: 10
+#            -   name: Install tmate
+#                if: ${{ failure() }}
+#                run: |
+#                    case "${{ matrix.arch }}" in
+#                      x86_64)
+#                        arch="amd64"
+#                        ;;
+#                      arm64)
+#                        arch="arm64v8"
+#                        ;;
+#                    esac
+#                    dir="tmate-2.4.0-static-linux-$arch"
+#                    curl -L "https://github.com/tmate-io/tmate/releases/download/2.4.0/$dir.tar.xz" | tar -xJ -O "$dir/tmate" > /usr/bin/tmate
+#                    chmod +x /usr/bin/tmate
+#
+#            -   name: Setup tmate session
+#                if: ${{ failure() }}
+#                uses: mxschmitt/action-tmate@v3
+#                with:
+#                    install-dependencies: false
+#                    sudo: false
+#                timeout-minutes: 10
