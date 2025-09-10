@@ -91,13 +91,6 @@ jobs:
                     EOF
                     chmod 600 /root/.ssh/known_hosts
 
-            -   name: Get PHP version
-                run: |
-                    # Get current PHP version using the PHP API
-                    php_version=$(curl -s "https://www.php.net/releases/index.php?json&version=${{ matrix.php-version }}" | jq -r '.version')
-                    echo "Current PHP version: ${php_version}"
-                    echo "PHP_VERSION=${php_version}" >> $GITHUB_ENV
-
             -   name: Set target folder
                 run: echo "TARGET_DIR=el${{ matrix.alma }}" >> $GITHUB_ENV
 

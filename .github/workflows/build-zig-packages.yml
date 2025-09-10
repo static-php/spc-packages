@@ -33,13 +33,6 @@ jobs:
                       rpm.henderkes.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICaB5IjokRHAH0Y9pzVe/Jx3s6cn0OADJ9uTxQQubBMu
                     EOF
 
-            -   name: Get PHP version
-                run: |
-                    # Get current PHP version using the PHP API
-                    php_version=$(curl -s "https://www.php.net/releases/index.php?json&version=${{ matrix.php-version }}" | jq -r '.version')
-                    echo "Current PHP version: ${php_version}"
-                    echo "PHP_VERSION=${php_version}" >> $GITHUB_ENV
-
             -   name: Set architecture variables
                 run: |
                     if [[ "${{ matrix.arch }}" == "arm64" ]]; then
