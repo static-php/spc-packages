@@ -144,8 +144,8 @@ jobs:
                         --local-user "${FPR}" --sign --output /dev/null "$t" <<<"${{ secrets.DEB_GPG_PASSWORD }}"
                     rm -f "$t"
 
-                    # Create /root/.rpmmacros
-                    cat > /root/.rpmmacros <<EOF
+                    # Create ~/.rpmmacros
+                    cat > ~/.rpmmacros <<EOF
                     %_signature gpg
                     %_gpg_path ${GNUPGHOME}
                     %_gpg_name ${FPR}
