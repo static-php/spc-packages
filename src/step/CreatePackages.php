@@ -39,9 +39,6 @@ class CreatePackages
                 if (in_array($packageName, self::$sapis, true)) {
                     self::createSapiPackage($packageName);
                 }
-                elseif ($packageName === 'composer') {
-                    self::createComposerPackage();
-                }
                 elseif ($packageName === 'devel') {
                     self::createSapiPackage($packageName);
                 }
@@ -56,7 +53,6 @@ class CreatePackages
         else {
             self::createSapiPackages();
             self::createSapiPackage('devel');
-            self::createComposerPackage();
             self::createExtensionPackages();
         }
 
@@ -709,33 +705,6 @@ class CreatePackages
         });
 
         echo "DEB package created: " . DIST_DEB_PATH . "/{$name}-{$version}-{$debIteration}.{$architecture}.deb\n";
-    }
-
-    private static function createComposerPackage(): void
-    {
-        $package = new composer();
-        $config = $package->getFpmConfig();
-
-        $retries = 20;
-        $content = null;
-        while (!$content && --$retries >= 0) {
-            try {
-                $content = Downloader::curlExec('https://api.github.com/repos/composer/composer/releases/latest', hooks: ['setupGithubToken']);
-            } catch (\Exception) {
-                sleep(3);
-            }
-        }
-        $releaseInfo = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-        $version = $releaseInfo['tag_name'];
-        $version = ltrim($version, 'v');
-
-        [, $arch] = self::getPhpVersionAndArchitecture();
-        $iteration = self::getNextIteration('composer', $version, $arch);
-        echo "Using iteration: {$iteration} for Composer package\n";
-
-        self::createPackageWithFpm('composer', $config, $version, $arch, $iteration, $package->getFpmExtraArgs());
-
-        echo "Composer package created successfully.\n";
     }
 
     private static function prepareFrankenPhpRepository(): string
