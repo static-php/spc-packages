@@ -2,4 +2,5 @@
 name=Static PHP repository
 baseurl=https://rpm.henderkes.com/\$basearch/el\$releasever
 enabled=1
-gpgcheck=0
+gpgcheck=1
+gpgkey=https://key.henderkes.com/static-php.gpg
