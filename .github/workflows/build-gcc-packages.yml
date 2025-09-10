@@ -173,7 +173,7 @@ jobs:
                 with:
                     install-dependencies: false
                     sudo: false
-                timeout-minutes: 10
+                timeout-minutes: 20
 
             -   name: Sign RPM packages
                 run: |
