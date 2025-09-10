@@ -91,6 +91,38 @@ jobs:
                     EOF
                     chmod 600 /root/.ssh/known_hosts
 
+            -   name: Get PHP version
+                run: |
+                    # Get current PHP version using the PHP API
+                    php_version=$(curl -s "https://www.php.net/releases/index.php?json&version=${{ matrix.php-version }}" | jq -r '.version')
+                    echo "Current PHP version: ${php_version}"
+                    echo "PHP_VERSION=${php_version}" >> $GITHUB_ENV
+
+            -   name: Set target folder
+                run: echo "TARGET_DIR=el${{ matrix.alma }}" >> $GITHUB_ENV
+
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
+            -   name: Composer install
+                run: composer install
+
+            -   name: Download artifact from spc-download.yml
+                uses: dawidd6/action-download-artifact@v11
+                with:
+                    workflow: spc-download.yml
+                    name: downloads-tarball
+
+            -   name: Extract with permissions
+                run: |
+                    mkdir -p vendor/crazywhalecc/static-php-cli/downloads
+                    tar -xzf downloads.tar.gz -C vendor/crazywhalecc/static-php-cli/downloads
+                    rm downloads.tar.gz
+
+            -   name: Build PHP and packages
+                run: |
+                    php bin/spp all --target=native-native-gnu --type=rpm --phpv=${{ matrix.php-version }}
+
             -   name: Prepare rpm signing
                 run: |
                     # Setup GPG
@@ -128,38 +160,6 @@ jobs:
                     %__gpg /usr/bin/gpg
                     %__gpg_check_password_cmd /bin/true
                     EOF
-
-            -   name: Get PHP version
-                run: |
-                    # Get current PHP version using the PHP API
-                    php_version=$(curl -s "https://www.php.net/releases/index.php?json&version=${{ matrix.php-version }}" | jq -r '.version')
-                    echo "Current PHP version: ${php_version}"
-                    echo "PHP_VERSION=${php_version}" >> $GITHUB_ENV
-
-            -   name: Set target folder
-                run: echo "TARGET_DIR=el${{ matrix.alma }}" >> $GITHUB_ENV
-
-            -   name: Checkout code
-                uses: actions/checkout@v4
-
-            -   name: Composer install
-                run: composer install
-
-            -   name: Download artifact from spc-download.yml
-                uses: dawidd6/action-download-artifact@v11
-                with:
-                    workflow: spc-download.yml
-                    name: downloads-tarball
-
-            -   name: Extract with permissions
-                run: |
-                    mkdir -p vendor/crazywhalecc/static-php-cli/downloads
-                    tar -xzf downloads.tar.gz -C vendor/crazywhalecc/static-php-cli/downloads
-                    rm downloads.tar.gz
-
-            -   name: Build PHP and packages
-                run: |
-                    php bin/spp all --target=native-native-gnu --type=rpm --phpv=${{ matrix.php-version }}
 
             -   name: Sign RPM packages
                 run: |
