@@ -21,9 +21,9 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: [ 8.4 ]
-                arch: [ arm64 ]
-                alma: [ 10 ]
+                php-version: [ 8.2, 8.3, 8.4 ]
+                arch: [ x86_64, arm64 ]
+                alma: [ 8, 9, 10 ]
         steps:
             -   name: Set architecture variables
                 run: |
@@ -175,25 +175,25 @@ jobs:
                     name: build-logs-${{ matrix.arch }}-el${{ matrix.alma }}-php${{ matrix.php-version }}
                     path: vendor/crazywhalecc/static-php-cli/log
 
-            -   name: Install tmate
-                if: ${{ failure() }}
-                run: |
-                    case "${{ matrix.arch }}" in
-                      x86_64)
-                        arch="amd64"
-                        ;;
-                      arm64)
-                        arch="arm64v8"
-                        ;;
-                    esac
-                    dir="tmate-2.4.0-static-linux-$arch"
-                    curl -L "https://github.com/tmate-io/tmate/releases/download/2.4.0/$dir.tar.xz" | tar -xJ -O "$dir/tmate" > /usr/bin/tmate
-                    chmod +x /usr/bin/tmate
-
-            -   name: Setup tmate session
-                if: ${{ failure() }}
-                uses: mxschmitt/action-tmate@v3
-                with:
-                    install-dependencies: false
-                    sudo: false
-                timeout-minutes: 10
+#            -   name: Install tmate
+#                if: ${{ failure() }}
+#                run: |
+#                    case "${{ matrix.arch }}" in
+#                      x86_64)
+#                        arch="amd64"
+#                        ;;
+#                      arm64)
+#                        arch="arm64v8"
+#                        ;;
+#                    esac
+#                    dir="tmate-2.4.0-static-linux-$arch"
+#                    curl -L "https://github.com/tmate-io/tmate/releases/download/2.4.0/$dir.tar.xz" | tar -xJ -O "$dir/tmate" > /usr/bin/tmate
+#                    chmod +x /usr/bin/tmate
+#
+#            -   name: Setup tmate session
+#                if: ${{ failure() }}
+#                uses: mxschmitt/action-tmate@v3
+#                with:
+#                    install-dependencies: false
+#                    sudo: false
+#                timeout-minutes: 10
