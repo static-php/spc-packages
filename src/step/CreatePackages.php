@@ -3,9 +3,7 @@
 namespace staticphp\step;
 
 use SPC\store\Config;
-use SPC\store\Downloader;
 use staticphp\extension;
-use staticphp\package\composer;
 use Symfony\Component\Process\Process;
 use staticphp\CraftConfig;
 
