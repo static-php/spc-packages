@@ -109,7 +109,7 @@ class CreatePackages
         $package = new $packageClass();
         $config = $package->getFpmConfig($phpVersion, $iteration);
 
-        self::createPackageWithFpm(self::getPrefix() . "-{$sapi}", $config, $phpVersion, $architecture, $iteration, $package->getFpmExtraArgs());;
+        self::createPackageWithFpm(self::getPrefix() . "-{$sapi}", $config, $phpVersion, $architecture, $iteration, $package->getFpmExtraArgs());
     }
 
     private static function createExtensionPackages(): void
@@ -143,7 +143,7 @@ class CreatePackages
             return;
         }
 
-        self::createPackageWithFpm(self::getPrefix() . "-{$extension}", $config, $extensionVersion, $architecture, $iteration, $package->getFpmExtraArgs());;
+        self::createPackageWithFpm(self::getPrefix() . "-{$extension}", $config, $extensionVersion, $architecture, $iteration, $package->getFpmExtraArgs());
     }
 
     private static function getExtensionVersion(string $extension, string $phpVersion): string
@@ -223,7 +223,9 @@ class CreatePackages
             '--architecture', $architecture,
             '--description', "Static PHP Package for {$name}",
             '--license', 'MIT',
-            '--maintainer', 'Static PHP <info@static-php.dev>'
+            '--maintainer', 'Static PHP <info@static-php.dev>',
+            '--vendor', 'Static PHP <info@static-php.dev>',
+            '--url', 'rpms.henderkes.com',
         ], ...$extraArgs];
 
         if (isset($config['provides']) && is_array($config['provides'])) {
@@ -327,7 +329,7 @@ class CreatePackages
         $debIteration = $distroCodename !== '' ? "{$iteration}~{$distroCodename}" : $iteration;
         $fullVersion = "{$phpVersion}-{$debIteration}";
 
-        $fpmArgs = [
+        $fpmArgs = [...[
             'fpm',
             '-s', 'dir',
             '-t', 'deb',
@@ -338,8 +340,10 @@ class CreatePackages
             '--iteration', $debIteration,       // Debian revision (includes distro)
             '--description', "Static PHP Package for {$name}",
             '--license', 'MIT',
-            '--maintainer', 'Static PHP <info@static-php.dev>'
-        ];
+            '--maintainer', 'Static PHP <info@static-php.dev>',
+            '--vendor', 'Static PHP <info@static-php.dev>',
+            '--url', 'debs.henderkes.com',
+        ], ...$extraArgs];
 
         if (isset($config['provides']) && is_array($config['provides'])) {
             foreach ($config['provides'] as $provide) {
