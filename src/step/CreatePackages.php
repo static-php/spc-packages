@@ -636,8 +636,7 @@ class CreatePackages
         [, $output] = shell()->execWithResult($ldLibraryPath . ' ' . BUILD_BIN_PATH . '/frankenphp --version');
         $output = implode("\n", $output);
         preg_match('/FrankenPHP v(\d+\.\d+\.\d+)/', $output, $matches);
-        $latestTag = $matches[1];
-        $version = $latestTag . '_' . $phpVersion;
+        $version = $matches[1];
 
         $name = "frankenphp";
 
