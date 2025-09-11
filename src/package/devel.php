@@ -61,8 +61,8 @@ class devel implements package
                 '"`eval echo ${prefix}/include`/php"'
             ],
             [
-                'lib64/php-zts`',
-                '"`eval echo ${prefix}/include`/php-zts"'
+                getLibdir() . CreatePackages::getPrefix() . '`',
+                '"`eval echo ${prefix}/include`/' . CreatePackages::getPrefix() . '"'
             ],
             $phpizeContent
         );
