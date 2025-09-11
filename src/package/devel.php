@@ -61,7 +61,7 @@ class devel implements package
                 '"`eval echo ${prefix}/include`/php"'
             ],
             [
-                getLibdir() . CreatePackages::getPrefix() . '`',
+                str_replace('/usr/', '', getLibdir()) . '/' . CreatePackages::getPrefix() . '`',
                 '"`eval echo ${prefix}/include`/' . CreatePackages::getPrefix() . '"'
             ],
             $phpizeContent
