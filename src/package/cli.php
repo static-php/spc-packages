@@ -13,11 +13,14 @@ class cli implements package
         $config = CraftConfig::getInstance();
         $staticExtensions = $config->getStaticExtensions();
 
+        $contents = file_get_contents(INI_PATH . '/php.ini');
+        $contents = str_replace('$libdir', getLibdir() . '/' . CreatePackages::getPrefix(), $contents);
+        file_put_contents(TEMP_DIR . '/php.ini', $contents);
         $provides = ['php-zts'];
         $replaces = [];
-        $configFiles = ['/etc/php-zts/php.ini'];
+        $configFiles = [getConfdir() . '/php.ini'];
         $files = [
-            INI_PATH . '/php.ini' => '/etc/php-zts/php.ini',
+            TEMP_DIR . '/php.ini' => getConfdir() . '/php.ini',
             BUILD_BIN_PATH . '/php' => '/usr/bin/php-zts',
         ];
 
@@ -28,8 +31,8 @@ class cli implements package
             // Add .ini files for statically compiled extensions
             $iniFile = INI_PATH . "/extension/{$ext}.ini";
             if (file_exists($iniFile)) {
-                $files[$iniFile] = "/etc/php-zts/conf.d/{$ext}.ini";
-                $configFiles[] = "/etc/php-zts/conf.d/{$ext}.ini";
+                $files[$iniFile] = getConfdir() . "/conf.d/{$ext}.ini";
+                $configFiles[] = getConfdir() . "/conf.d/{$ext}.ini";
             }
         }
 

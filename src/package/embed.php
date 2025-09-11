@@ -20,7 +20,7 @@ class embed implements package
                 CreatePackages::getPrefix() . '-embedded'
             ],
             'files' => [
-                BUILD_LIB_PATH . '/' . $name => '/usr/lib64/' . $name,
+                BUILD_LIB_PATH . '/' . $name => getLibdir() . '/' . $name,
             ]
         ];
     }

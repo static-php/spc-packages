@@ -140,16 +140,16 @@ class extension implements package
 
         return [
             'config-files' => [
-                '/etc/php-zts/conf.d/' . $this->prefix . $this->name . '.ini',
+                getConfdir() . '/conf.d/' . $this->prefix . $this->name . '.ini',
             ],
             'depends' => $depends,
             'files' => [
                 ...($this->getIniPath() ?
-                    [$this->getIniPath() => '/etc/php-zts/conf.d/' . $this->prefix . $this->name . '.ini']
+                    [$this->getIniPath() => getConfdir() . '/conf.d/' . $this->prefix . $this->name . '.ini']
                     : []
                 ),
                 ...($this->isSharedExtension() ?
-                    [BUILD_MODULES_PATH . '/' . $this->name . '.so' => '/usr/lib64/php-zts/modules/' . $this->name . '.so']
+                    [BUILD_MODULES_PATH . '/' . $this->name . '.so' => getLibdir() . '/' . CreatePackages::getPrefix() . '/modules/' . $this->name . '.so']
                     : []
                 ),
             ]

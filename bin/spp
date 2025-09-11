@@ -16,6 +16,7 @@ define('TEMP_DIR', sys_get_temp_dir() . '/spc-packages');
 // Ensure autoloading is set up
 require_once BASE_PATH . '/vendor/autoload.php';
 
+use SPC\builder\linux\SystemUtil;
 use Symfony\Component\Console\Application;
 use staticphp\Command\BuildCommand;
 use staticphp\Command\PackageCommand;
@@ -34,7 +35,8 @@ $application->setDefaultCommand('list');
 
 try {
     $exitCode = $application->run();
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     echo "Error running application: " . $e->getMessage() . "\n";
     echo "Stack trace: " . $e->getTraceAsString() . "\n";
 }
@@ -53,7 +55,8 @@ function setupGithubToken(string $method, string $url, array &$headers): void
             $headers[] = $he;
         }
         logger()->info("using basic github token for {$method} {$url}");
-    } else {
+    }
+    else {
         $auth = $token;
         $he = "Authorization: Bearer {$auth}";
         if (!in_array($he, $headers)) {
@@ -61,4 +64,15 @@ function setupGithubToken(string $method, string $url, array &$headers): void
         }
         logger()->info("using bearer github token for {$method} {$url}");
     }
+}
+
+function getLibdir(): string
+{
+    $libdir = in_array(SystemUtil::getOSRelease()['dist'], ['redhat', 'centos']) ? '/usr/lib64' : '/usr/lib';
+    return $libdir;
+}
+
+function getConfdir(): string
+{
+    return '/etc' . \staticphp\step\CreatePackages::getPrefix();
 }
