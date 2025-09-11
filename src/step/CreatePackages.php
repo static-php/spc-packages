@@ -662,7 +662,7 @@ class CreatePackages
             'libgcc_s.so.1' => 'libgcc-s1',
             'libstdc++.so.6' => 'libstdc++6',
         ];
-        foreach (self::$binaryDependencies as $lib => $version) {
+        foreach (self::$binaryDependencies as $lib => $ver) {
             if (isset($systemLibraryMap[$lib])) {
                 // Use mapped name for system libraries
                 $packageName = $systemLibraryMap[$lib];
@@ -671,7 +671,7 @@ class CreatePackages
                 $packageName = preg_replace('/\.so(\.\d+)?$/', '', $lib);
             }
 
-            $numericVersion = preg_replace('/[^0-9.]/', '', $version);
+            $numericVersion = preg_replace('/[^0-9.]/', '', $ver);
             $fpmArgs[] = '--depends';
             $fpmArgs[] = "{$packageName} (>= {$numericVersion})";
         }
