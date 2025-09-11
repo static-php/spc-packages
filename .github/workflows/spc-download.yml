@@ -36,3 +36,4 @@ jobs:
                 with:
                     name: downloads-tarball
                     path: downloads.tar.gz
+                    retention-days: 2

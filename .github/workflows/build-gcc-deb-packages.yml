@@ -87,7 +87,7 @@ jobs:
                     name: "debs-${{ matrix.os }}-${{ matrix.arch }}"
                     path: artifacts/**
                     if-no-files-found: error
-                    retention-days: 7
+                    retention-days: 2
 
             -   name: Upload logs
                 if: ${{ failure() }}
