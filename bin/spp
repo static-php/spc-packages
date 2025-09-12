@@ -74,5 +74,5 @@ function getLibdir(): string
 
 function getConfdir(): string
 {
-    return '/etc' . \staticphp\step\CreatePackages::getPrefix();
+    return '/etc/' . \staticphp\step\CreatePackages::getPrefix();
 }
