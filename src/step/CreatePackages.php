@@ -608,11 +608,14 @@ class CreatePackages
             '--iteration', $iteration,
             '--rpm-user', 'frankenphp',
             '--rpm-group', 'frankenphp',
+            '--config-files', '/etc/frankenphp/Caddyfile',
+            '--config-files', '/etc/frankenphp/Caddyfile.d',
             BUILD_BIN_PATH . '/frankenphp=/usr/bin/frankenphp',
             "{$packageFolder}/rhel/frankenphp.service=/usr/lib/systemd/system/frankenphp.service",
             "{$packageFolder}/Caddyfile=/etc/frankenphp/Caddyfile",
             "{$packageFolder}/content/=/usr/share/frankenphp",
-            "{$packageFolder}/empty/=/var/lib/frankenphp"
+            "{$packageFolder}/empty/=/var/lib/frankenphp",
+            "{$packageFolder}/empty/=/etc/frankenphp/Caddyfile.d",
         ]];
 
         $rpmProcess = new Process($fpmArgs);
