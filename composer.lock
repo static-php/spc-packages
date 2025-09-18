@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1f623ba674cac056a3c69986321812bd",
+    "content-hash": "899aa97008172e26012eb741f3425c5b",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -77,16 +77,16 @@
         },
         {
             "name": "crazywhalecc/static-php-cli",
-            "version": "dev-fix-zig",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "8680e83af33205aa7b9494e6c9a267bf94ad2f42"
+                "reference": "79ab6490fd5091d37674f5b597e9e41759df525f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/8680e83af33205aa7b9494e6c9a267bf94ad2f42",
-                "reference": "8680e83af33205aa7b9494e6c9a267bf94ad2f42",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/79ab6490fd5091d37674f5b597e9e41759df525f",
+                "reference": "79ab6490fd5091d37674f5b597e9e41759df525f",
                 "shasum": ""
             },
             "require": {
@@ -107,6 +107,7 @@
                 "phpstan/phpstan": "^1.10",
                 "phpunit/phpunit": "^10.3 || ^9.5"
             },
+            "default-branch": true,
             "bin": [
                 "bin/spc"
             ],
@@ -133,7 +134,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/fix-zig"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/main"
             },
             "funding": [
                 {
@@ -141,7 +142,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-09-16T12:43:49+00:00"
+            "time": "2025-09-18T11:37:26+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -2305,12 +2306,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "9e809d3a8829a5b870ae1c2f57706f46bb181093"
+                "reference": "662d5ecfaab913d8ce0de4521fc40ce92aa14e75"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/9e809d3a8829a5b870ae1c2f57706f46bb181093",
-                "reference": "9e809d3a8829a5b870ae1c2f57706f46bb181093",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/662d5ecfaab913d8ce0de4521fc40ce92aa14e75",
+                "reference": "662d5ecfaab913d8ce0de4521fc40ce92aa14e75",
                 "shasum": ""
             },
             "conflict": {
@@ -2699,6 +2700,7 @@
                 "laravel/socialite": ">=1,<2.0.10",
                 "latte/latte": "<2.10.8",
                 "lavalite/cms": "<=9|==10.1",
+                "lavitto/typo3-form-to-database": "<2.2.5|>=3,<3.2.2|>=4,<4.2.3|>=5,<5.0.2",
                 "lcobucci/jwt": ">=3.4,<3.4.6|>=4,<4.0.4|>=4.1,<4.1.5",
                 "league/commonmark": "<2.7",
                 "league/flysystem": "<1.1.4|>=2,<2.1.1",
@@ -3267,7 +3269,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-11T17:05:04+00:00"
+            "time": "2025-09-16T20:05:44+00:00"
         }
     ],
     "aliases": [],
