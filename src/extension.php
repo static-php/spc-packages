@@ -40,7 +40,6 @@ class extension implements package
         return '30-';
     }
 
-
     public function getExtensionDependencies(string $extensionName, array $visited = []): array
     {
         $config = Config::getExt($extensionName);
@@ -73,7 +72,15 @@ class extension implements package
             }
 
             $depConfig = Config::getExt($dependency);
-            if ($depConfig && !empty($depConfig['ext-depends'])) {
+            $hasDependencies = false;
+            foreach ($keys as $key) {
+                if (!empty($depConfig[$key])) {
+                    $hasDependencies = true;
+                    break;
+                }
+            }
+
+            if ($hasDependencies) {
                 $transitiveDeps = $this->getExtensionDependencies($dependency, $visited);
 
                 foreach ($transitiveDeps as $transitiveDep) {
@@ -105,7 +112,7 @@ class extension implements package
         /**
          * Add a package and recursively include its ext-depends.
          *
-         * @param string   $name
+         * @param string $name
          * @param callable $loadConfig function(string $name): ?array
          */
         $collect = function (string $name) use (&$collect, &$ordered, &$seen, $prefix): void {
