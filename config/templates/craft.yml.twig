@@ -61,9 +61,9 @@ extra-env:
     SPC_MICRO_PATCHES:
     SPC_DEFAULT_C_FLAGS: "{{ cflags }}"
     SPC_DEFAULT_CXX_FLAGS: "{{ cflags }}"
+    SPC_DEFAULT_LD_FLAGS: "-Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-z,noexecstack -Wl,--build-id=sha1 {{ using_gcc and is_rhel ? specs_ldflags : '' }}"
     SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "{{ cflags }} -fpie"
     SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS: "-pie -release zts-{{ php_version_nodot }}"
-    LDFLAGS: "-Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-z,noexecstack -Wl,--build-id=sha1 {{ using_gcc and is_rhel ? specs_ldflags : '' }}"
     SPC_CMD_PREFIX_PHP_CONFIGURE: "./configure --prefix= --with-valgrind=no --disable-shared --enable-static --disable-all --disable-cgi --disable-phpdbg --disable-debug --with-pic --disable-dependency-tracking --enable-rtld-now --enable-re2c-cgoto --disable-rpath"
     SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES: "--with github.com/dunglas/frankenphp/caddy --with github.com/dunglas/mercure/caddy --with github.com/dunglas/vulcain/caddy --with github.com/dunglas/caddy-cbrotli --with github.com/baldinof/caddy-supervisor"
     PHP_BUILD_PROVIDER: "Static PHP <https://static-php.dev> #StandWithUkraine"
