@@ -176,7 +176,7 @@ class CreatePackages
         $extensionVersion = preg_match('/(\d+\.\d+)(\.\d+)?/', $extensionVersion, $matches) ? $matches[0] : null;
 
         if (empty($extensionVersion)) {
-            throw new \RuntimeException("Warning: Could not detect version for extension {$extension}, using PHP version: {$phpVersion}");
+            throw new \RuntimeException("Warning: Could not detect version for extension {$extension}");
         }
 
         echo "Detected version for extension {$extension}: {$extensionVersion}\n";
