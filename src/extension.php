@@ -109,13 +109,15 @@ class extension implements package
         $seen = [];
         $ordered = [];
 
+        $keys = ['ext-depends', 'ext-suggests', 'ext-depends-unix', 'ext-suggests-unix', 'ext-depends-linux', 'ext-suggests-linux'];
+
         /**
          * Add a package and recursively include its ext-depends.
          *
          * @param string $name
          * @param callable $loadConfig function(string $name): ?array
          */
-        $collect = function (string $name) use (&$collect, &$ordered, &$seen, $prefix): void {
+        $collect = function (string $name) use (&$collect, &$ordered, &$seen, $prefix, $keys): void {
             if (isset($seen[$name])) {
                 return;
             }
@@ -129,17 +131,16 @@ class extension implements package
                 return;
             }
 
-            foreach (($cfg['ext-depends'] ?? []) as $dep) {
-                $collect($dep);
+            foreach ($keys as $key) {
+                foreach ($cfg[$key] ?? [] as $dep) {
+                    $collect($dep);
+                }
             }
         };
 
-        foreach (($config['ext-depends'] ?? []) as $dep) {
-            $collect($dep);
-        }
-        foreach (($config['ext-suggests'] ?? []) as $sug) {
-            if (Config::getExt($sug)['type'] === 'addon') {
-                $collect($sug);
+        foreach ($keys as $key) {
+            foreach (($config[$key] ?? []) as $dep) {
+                $collect($dep);
             }
         }
 
