@@ -20,7 +20,8 @@ class AllCommand extends BaseCommand
         parent::configure();
         $this
             ->addOption('type', null, InputOption::VALUE_REQUIRED, 'Specify which package types to build (rpm,deb)', 'rpm')
-            ->addOption('packages', null, InputOption::VALUE_REQUIRED, 'Specify which packages to build (comma-separated)');
+            ->addOption('packages', null, InputOption::VALUE_REQUIRED, 'Specify which packages to build (comma-separated)')
+            ->addOption('iteration', null, InputOption::VALUE_REQUIRED, 'Specify iteration number to use for packages (overrides auto-detected)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -29,6 +30,7 @@ class AllCommand extends BaseCommand
         $packageNames = $input->getOption('packages');
         $packageTypes = $input->getOption('type');
         $phpVersion = $input->getOption('phpv');
+        $iteration = $input->getOption('iteration');
 
         // Run build step
         $output->writeln("Building PHP with extensions using static-php-cli...");
@@ -51,7 +53,7 @@ class AllCommand extends BaseCommand
             $output->writeln("Creating packages for all extensions...");
         }
 
-        $packageResult = CreatePackages::run($packageNames, $packageTypes, $phpVersion);
+        $packageResult = CreatePackages::run($packageNames, $packageTypes, $phpVersion, $iteration);
 
         if (!$packageResult) {
             $output->writeln("Package creation failed.");

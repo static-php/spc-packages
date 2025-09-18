@@ -15,9 +15,10 @@ class CreatePackages
     private static $sapis = [];
     private static $binaryDependencies = [];
     private static $packageTypes = [];
+    private static ?string $iterationOverride = null;
 
 
-    public static function run($packageNames = null, string $packageTypes = 'rpm,deb', string $phpVersion = '8.4'): true
+    public static function run($packageNames = null, string $packageTypes = 'rpm,deb', string $phpVersion = '8.4', ?string $iteration = null): true
     {
         self::loadConfig();
 
@@ -25,6 +26,7 @@ class CreatePackages
         self::$binaryDependencies = self::getBinaryDependencies($phpBinary);
 
         self::$packageTypes = explode(',', strtolower($packageTypes));
+        self::$iterationOverride = $iteration !== null && $iteration !== '' ? (string)$iteration : null;
 
         if ($packageNames !== null) {
             if (is_string($packageNames)) {
@@ -98,7 +100,8 @@ class CreatePackages
 
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
 
-        $iteration = self::getNextIteration(self::getPrefix() . "-{$sapi}", $phpVersion, $architecture);
+        $computed = (string) self::getNextIteration(self::getPrefix() . "-{$sapi}", $phpVersion, $architecture);
+        $iteration = self::$iterationOverride ?? $computed;
 
         $package = new $packageClass();
         $config = $package->getFpmConfig($phpVersion, $iteration);
@@ -123,7 +126,8 @@ class CreatePackages
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
         $extensionVersion = self::getExtensionVersion($extension, $phpVersion);
 
-        $iteration = self::getNextIteration(self::getPrefix() . "-{$extension}", $extensionVersion, $architecture);
+        $computed = (string) self::getNextIteration(self::getPrefix() . "-{$extension}", $extensionVersion, $architecture);
+        $iteration = self::$iterationOverride ?? $computed;
 
         $package = new extension($extension);
         $packageClass = "\\staticphp\\package\\{$extension}";
@@ -578,7 +582,8 @@ class CreatePackages
 
         $name = "frankenphp";
 
-        $iteration = self::getNextIteration($name, $version, $architecture);
+        $computed = (string) self::getNextIteration($name, $version, $architecture);
+        $iteration = self::$iterationOverride ?? $computed;
 
         $fpmArgs = [
             'fpm',
@@ -645,7 +650,8 @@ class CreatePackages
 
         $osRelease = parse_ini_file('/etc/os-release');
         $distroCodename = $osRelease['VERSION_CODENAME'] ?? null;
-        $iteration = self::getNextIteration($name, $version, $architecture);
+        $computed = (string) self::getNextIteration($name, $version, $architecture);
+        $iteration = self::$iterationOverride ?? $computed;
         $debIteration = $distroCodename !== '' ? "{$iteration}~{$distroCodename}" : $iteration;
 
         $fpmArgs = [
