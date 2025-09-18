@@ -159,7 +159,7 @@ class CreatePackages
         $extensionC = new $extensionClass($extension);
         $dependencies = $extensionC->getExtensionDependencies($extension);
         $args = [
-            '-d', 'extension_dir=' . BUILD_MODULES_PATH,
+            '-n', '-d', 'extension_dir=' . BUILD_MODULES_PATH,
         ];
         foreach ($dependencies as $dependency) {
             $depExt = new extension($dependency);

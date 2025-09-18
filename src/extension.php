@@ -65,8 +65,6 @@ class extension implements package
                 continue;
             }
 
-            $allDependencies[] = $dependency;
-
             if (in_array($dependency, $visited)) {
                 continue;
             }
@@ -93,6 +91,8 @@ class extension implements package
                     }
                 }
             }
+
+            $allDependencies[] = $dependency;
         }
 
         return $allDependencies;
