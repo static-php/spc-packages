@@ -25,7 +25,7 @@ jobs:
 
             -   name: Download extensions
                 run: |
-                    php vendor/bin/spc download --shallow-clone -e apcu,ast,amqp,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zip,zlib,amqp,brotli,bz2,dio,ds,ev,event,ffi,ftp,gd,gettext,gmp,gmssl,grpc,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zstd
+                    php vendor/bin/spc download --shallow-clone -e amqp,apcu,ast,bcmath,brotli,bz2,calendar,ctype,curl,dba,dio,dom,ds,ev,event,exif,ffi,fileinfo,filter,ftp,gd,gettext,gmp,gmssl,grpc,iconv,igbinary,imagick,inotify,intl,ldap,libxml,lz4,mbregex,mbstring,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opcache,openssl,opentelemetry,parallel,password-argon2,pcntl,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,phar,posix,protobuf,rar,rdkafka,readline,redis,session,shmop,simplexml,sockets,sodium,spx,sqlite3,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,tokenizer,uuid,uv,xdebug,xhprof,xlswriter,xml,xmlreader,xmlwriter,xsl,xz,yac,yaml,zip,zlib,zstd
 
             -   name: Create tarball (keep permissions)
                 run: |
