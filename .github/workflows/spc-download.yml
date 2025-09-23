@@ -25,7 +25,7 @@ jobs:
 
             -   name: Download extensions
                 run: |
-                    php vendor/bin/spc download --shallow-clone -e amqp,apcu,ast,bcmath,brotli,bz2,calendar,ctype,curl,dba,dio,dom,ds,ev,event,exif,ffi,fileinfo,filter,ftp,gd,gettext,gmp,gmssl,grpc,iconv,igbinary,imagick,inotify,intl,ldap,libxml,lz4,mbregex,mbstring,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opcache,openssl,opentelemetry,parallel,password-argon2,pcntl,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,phar,posix,protobuf,rar,rdkafka,readline,redis,session,shmop,simplexml,sockets,sodium,spx,sqlite3,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,tokenizer,uuid,uv,xdebug,xhprof,xlswriter,xml,xmlreader,xmlwriter,xsl,xz,yac,yaml,zip,zlib,zstd
+                    php vendor/bin/spc download --shallow-clone -e amqp,apcu,ast,bcmath,brotli,bz2,calendar,ctype,curl,dba,dio,dom,ds,ev,event,exif,ffi,fileinfo,filter,ftp,gd,gettext,gmp,gmssl,grpc,iconv,igbinary,imagick,inotify,intl,ldap,libxml,lz4,mbregex,mbstring,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opcache,openssl,opentelemetry,parallel,password-argon2,pcntl,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,phar,posix,protobuf,rar,rdkafka,readline,redis,session,shmop,simdjson,simplexml,snappy,soap,sockets,sodium,spx,sqlite3,sqlsrv,ssh2,swoole,sysvmsg,sysvsem,sysvshm,tidy,tokenizer,uuid,uv,xdebug,xhprof,xlswriter,xml,xmlreader,xmlwriter,xsl,xz,yac,yaml,zip,zlib,zstd
 
             -   name: Create tarball (keep permissions)
                 run: |
