@@ -1,8 +1,12 @@
 php-version: {{ php_version }}
 extensions: ast,calendar,ctype,curl,dom,exif,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib
-shared-extensions: [amqp,apcu,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,grpc,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,simdjson,snappy,soap,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zip,zstd]
+{% if php_version == '8.5' %}
+shared-extensions: apcu,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,inotify,intl,ldap,lz4,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pgsql,protobuf,rdkafka,shmop,simdjson,snappy,soap,sqlite3,sqlsrv,ssh2,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xhprof,xlswriter,xsl,xz,yaml,zip,zstd
+{% else %}
+shared-extensions: amqp,apcu,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,grpc,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,simdjson,snappy,soap,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zip,zstd
+{% endif %}
 libs: [libacl, libavif, brotli, watcher]
-sapi: cli,cgi,embed,fpm,frankenphp
+sapi: cli
 debug: false
 build-options:
     enable-zts: true
@@ -30,7 +34,7 @@ craft-options:
 {% set arch_flags = arch == 'x86_64' ? ' -fcf-protection -mtls-dialect=gnu2 -m64' : '' %}
 {% if arch == 'x86_64' and os == '10' %} {% set arch_flags = arch_flags ~ ' -march=x86-64-v3' %} {% endif %}
 {% if arch == 'x86_64' and os == '9'  %} {% set arch_flags = arch_flags ~ ' -march=x86-64-v2' %} {% endif %}
-{% set using_gcc = target == 'native-native-gnu' or target == 'native-native' %}
+{% set using_gcc = target == ('native-native-gnu' or target == 'native-native') and php_version < '8.5' %}
 {% set specs_cflags = '-specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1' %}
 {% set specs_ldflags = '-specs=/usr/lib/rpm/redhat/redhat-hardened-ld -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1' ~ (os == '10' ? ' -Wl,-z,pack-relative-relocs' : '') %}
 {% set cflags =
@@ -62,8 +66,8 @@ extra-env:
     SPC_DEFAULT_C_FLAGS: "{{ cflags }}"
     SPC_DEFAULT_CXX_FLAGS: "{{ cflags }}"
     SPC_DEFAULT_LD_FLAGS: "-Wl,-z,relro -Wl,--as-needed -Wl,-z,now -Wl,-z,noexecstack -Wl,--build-id=sha1 {{ using_gcc and is_rhel ? specs_ldflags : '' }}"
-    SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "{{ cflags }} -fpie"
-    SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS: "-pie -release zts-{{ php_version_nodot }}"
+    SPC_CMD_VAR_PHP_MAKE_EXTRA_CFLAGS: "{{ cflags }} -fpie -flto=thin"
+    SPC_CMD_VAR_PHP_MAKE_EXTRA_LDFLAGS: "-pie -release zts-{{ php_version_nodot }} -flto=thin"
     SPC_CMD_PREFIX_PHP_CONFIGURE: "./configure --prefix= --with-valgrind=no --disable-shared --enable-static --disable-all --disable-cgi --disable-phpdbg --disable-debug --with-pic --disable-dependency-tracking --enable-rtld-now --enable-re2c-cgoto --disable-rpath"
     SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES: "--with github.com/dunglas/frankenphp/caddy --with github.com/dunglas/mercure/caddy --with github.com/dunglas/vulcain/caddy --with github.com/dunglas/caddy-cbrotli --with github.com/baldinof/caddy-supervisor"
     PHP_BUILD_PROVIDER: "Static PHP <https://static-php.dev> #StandWithUkraine"
