@@ -6,7 +6,7 @@ shared-extensions: apcu,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,g
 shared-extensions: amqp,apcu,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,grpc,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,simdjson,snappy,soap,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zip,zstd
 {% endif %}
 libs: [libacl, libavif, brotli, watcher]
-sapi: cli
+sapi: cli,cgi,fpm,embed,frankenphp
 debug: false
 build-options:
     enable-zts: true
