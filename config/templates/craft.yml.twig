@@ -38,7 +38,7 @@ craft-options:
 {% set specs_cflags = '-specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1' %}
 {% set specs_ldflags = '-specs=/usr/lib/rpm/redhat/redhat-hardened-ld -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1' ~ (os == '10' ? ' -Wl,-z,pack-relative-relocs' : '') %}
 {% set cflags =
-  '-g0 -fpic -O3 -pipe -fno-plt ' ~ arch_flags
+  '-g0 -fpic -O3 -pipe -fno-plt -fno-semantic-interposition' ~ arch_flags
 %}
 {% set is_rhel = os in ['7', '8', '9', '10'] %}
 {% if using_gcc and is_rhel %}
