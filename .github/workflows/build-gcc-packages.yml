@@ -11,9 +11,67 @@ on:
                 description: "Optional: override package iteration (integer). Leave empty for auto"
                 required: false
                 default: ""
+            php_versions:
+                description: "Optional: PHP versions (comma-separated, e.g., 8.2,8.5). Leave empty for all"
+                required: false
+                default: ""
+            alma_versions:
+                description: "Optional: AlmaLinux versions (comma-separated, e.g., 8,10). Leave empty for all"
+                required: false
+                default: ""
+            architectures:
+                description: "Optional: Architectures (comma-separated, e.g., x86_64,arm64). Leave empty for all"
+                required: false
+                default: ""
 
 jobs:
+    setup-matrix:
+        runs-on: ubuntu-24.04
+        outputs:
+            matrix: ${{ steps.set-matrix.outputs.matrix }}
+        steps:
+            -   name: Set up matrix
+                id: set-matrix
+                run: |
+                    # Default values
+                    default_php='["8.2","8.3","8.4","8.5"]'
+                    default_alma='["8","9","10"]'
+                    default_arch='["x86_64","arm64"]'
+
+                    # Parse inputs or use defaults
+                    if [[ -n "${{ inputs.php_versions }}" ]]; then
+                        php_versions=$(echo '${{ inputs.php_versions }}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    else
+                        php_versions=$default_php
+                    fi
+
+                    if [[ -n "${{ inputs.alma_versions }}" ]]; then
+                        alma_versions=$(echo '${{ inputs.alma_versions }}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    else
+                        alma_versions=$default_alma
+                    fi
+
+                    if [[ -n "${{ inputs.architectures }}" ]]; then
+                        arch_versions=$(echo '${{ inputs.architectures }}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    else
+                        arch_versions=$default_arch
+                    fi
+
+                    # Create matrix JSON
+                    matrix=$(jq -n \
+                        --argjson php "$php_versions" \
+                        --argjson alma "$alma_versions" \
+                        --argjson arch "$arch_versions" \
+                        '{
+                            "php-version": $php,
+                            "alma": $alma,
+                            "arch": $arch
+                        }')
+
+                    echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
     build:
+        needs: setup-matrix
         runs-on: ${{ matrix.arch == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
         container:
             image: almalinux:${{ matrix.alma }}
@@ -26,10 +84,7 @@ jobs:
             ITERATION: ${{ inputs.iteration || '' }}
         strategy:
             fail-fast: false
-            matrix:
-                php-version: [ 8.2, 8.3, 8.4, 8.5 ]
-                arch: [ x86_64, arm64 ]
-                alma: [ 8, 9, 10 ]
+            matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
         steps:
             -   name: Set architecture variables
                 run: |
@@ -178,38 +233,74 @@ jobs:
                     name: build-logs-${{ matrix.arch }}-el${{ matrix.alma }}-php${{ matrix.php-version }}
                     path: vendor/crazywhalecc/static-php-cli/log
 
-#            -   name: Install tmate
-#                if: ${{ failure() }}
-#                run: |
-#                    case "${{ matrix.arch }}" in
-#                      x86_64)
-#                        arch="amd64"
-#                        ;;
-#                      arm64)
-#                        arch="arm64v8"
-#                        ;;
-#                    esac
-#                    dir="tmate-2.4.0-static-linux-$arch"
-#                    curl -L "https://github.com/tmate-io/tmate/releases/download/2.4.0/$dir.tar.xz" | tar -xJ -O "$dir/tmate" > /usr/bin/tmate
-#                    chmod +x /usr/bin/tmate
-#
-#            -   name: Setup tmate session
-#                if: ${{ failure() }}
-#                uses: mxschmitt/action-tmate@v3
-#                with:
-#                    install-dependencies: false
-#                    sudo: false
-#                timeout-minutes: 10
+    #            -   name: Install tmate
+    #                if: ${{ failure() }}
+    #                run: |
+    #                    case "${{ matrix.arch }}" in
+    #                      x86_64)
+    #                        arch="amd64"
+    #                        ;;
+    #                      arm64)
+    #                        arch="arm64v8"
+    #                        ;;
+    #                    esac
+    #                    dir="tmate-2.4.0-static-linux-$arch"
+    #                    curl -L "https://github.com/tmate-io/tmate/releases/download/2.4.0/$dir.tar.xz" | tar -xJ -O "$dir/tmate" > /usr/bin/tmate
+    #                    chmod +x /usr/bin/tmate
+    #
+    #            -   name: Setup tmate session
+    #                if: ${{ failure() }}
+    #                uses: mxschmitt/action-tmate@v3
+    #                with:
+    #                    install-dependencies: false
+    #                    sudo: false
+    #                timeout-minutes: 10
 
-    update-repo:
+    setup-update-matrix:
         runs-on: ubuntu-24.04
         needs: build
         if: ${{ always() }}
+        outputs:
+            matrix: ${{ steps.set-matrix.outputs.matrix }}
+        steps:
+            -   name: Set up matrix
+                id: set-matrix
+                run: |
+                    # Default values
+                    default_alma='["8","9","10"]'
+                    default_arch='["x86_64","arm64"]'
+
+                    # Parse inputs or use defaults
+                    if [[ -n "${{ inputs.alma_versions }}" ]]; then
+                        alma_versions=$(echo '${{ inputs.alma_versions }}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    else
+                        alma_versions=$default_alma
+                    fi
+
+                    if [[ -n "${{ inputs.architectures }}" ]]; then
+                        arch_versions=$(echo '${{ inputs.architectures }}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    else
+                        arch_versions=$default_arch
+                    fi
+
+                    # Create matrix JSON
+                    matrix=$(jq -n \
+                        --argjson alma "$alma_versions" \
+                        --argjson arch "$arch_versions" \
+                        '{
+                            "alma": $alma,
+                            "arch": $arch
+                        }')
+
+                    echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+    update-repo:
+        runs-on: ubuntu-24.04
+        needs: setup-update-matrix
+        if: ${{ always() }}
         strategy:
             fail-fast: false
-            matrix:
-                arch: [ x86_64, arm64 ]
-                alma: [ 8, 9, 10 ]
+            matrix: ${{ fromJson(needs.setup-update-matrix.outputs.matrix) }}
         steps:
             -   name: Set architecture variables
                 run: |
