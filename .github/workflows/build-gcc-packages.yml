@@ -254,7 +254,6 @@ jobs:
 
     setup-update-matrix:
         runs-on: ubuntu-24.04
-        needs: build
         if: ${{ always() }}
         outputs:
             matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -267,26 +266,23 @@ jobs:
                     default_arch='["x86_64","arm64"]'
 
                     # Parse inputs or use defaults
-                    if [[ -n "${{ inputs.alma_versions }}" ]]; then
-                        alma_versions=$(echo '${{ inputs.alma_versions }}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    if [[ -n "${{ github.event.inputs.alma_versions }}" ]]; then
+                        alma_versions=$(echo '${{ github.event.inputs.alma_versions }}' | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         alma_versions=$default_alma
                     fi
 
-                    if [[ -n "${{ inputs.architectures }}" ]]; then
-                        arch_versions=$(echo '${{ inputs.architectures }}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    if [[ -n "${{ github.event.inputs.architectures }}" ]]; then
+                        arch_versions=$(echo '${{ github.event.inputs.architectures }}' | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         arch_versions=$default_arch
                     fi
 
-                    # Create matrix JSON
-                    matrix=$(jq -n \
+                    # Create matrix JSON (compact, single line)
+                    matrix=$(jq -nc \
                         --argjson alma "$alma_versions" \
                         --argjson arch "$arch_versions" \
-                        '{
-                            "alma": $alma,
-                            "arch": $arch
-                        }')
+                        '{"alma":$alma,"arch":$arch}')
 
                     echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
