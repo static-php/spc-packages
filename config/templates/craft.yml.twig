@@ -31,15 +31,14 @@ craft-options:
     download: true
     build: true
 
-{% set arch_flags = arch == 'x86_64' ? ' -fcf-protection -mtls-dialect=gnu2 -m64' : '' %}
+{% set arch_flags = arch == 'x86_64' ? ' -mtls-dialect=gnu2 -m64' : '' %}
 {% if arch == 'x86_64' and os == '10' %} {% set arch_flags = arch_flags ~ ' -march=x86-64-v3' %} {% endif %}
 {% if arch == 'x86_64' and os == '9'  %} {% set arch_flags = arch_flags ~ ' -march=x86-64-v2' %} {% endif %}
 {% set using_gcc = target == ('native-native-gnu' or target == 'native-native') and php_version < '8.5' %}
 {% set specs_cflags = '-specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1' %}
 {% set specs_ldflags = '-specs=/usr/lib/rpm/redhat/redhat-hardened-ld -specs=/usr/lib/rpm/redhat/redhat-annobin-cc1' ~ (os == '10' ? ' -Wl,-z,pack-relative-relocs' : '') %}
 {% set cflags =
-  '-g0 -fpic -O3 -fexceptions -pipe -fstack-protector-strong ' ~
-  '-fasynchronous-unwind-tables -fstack-clash-protection ' ~ ~ arch_flags
+  '-g0 -fpic -O3 -pipe ' ~ arch_flags
 %}
 {% set is_rhel = os in ['7', '8', '9', '10'] %}
 {% if using_gcc and is_rhel %}
