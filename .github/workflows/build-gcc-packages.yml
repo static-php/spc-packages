@@ -254,6 +254,7 @@ jobs:
 
     setup-update-matrix:
         runs-on: ubuntu-24.04
+        needs: build
         if: ${{ always() }}
         outputs:
             matrix: ${{ steps.set-matrix.outputs.matrix }}
