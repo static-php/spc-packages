@@ -42,7 +42,7 @@ jobs:
                     apt-get update
                     apt-get install -y ruby build-essential jq curl gzip sudo git wget gnupg
                     gem install --no-document fpm
-                    curl -#fSL https://dl.static-php.dev/static-php-cli/common/php-8.4.12-cli-linux-${{ env.RPM_ARCH }}.tar.gz | tar -xz -C /usr/local/bin
+                    curl -L https://files.henderkes.com/x86_64-linux/php -o /usr/local/bin/php
                     chmod +x /usr/local/bin/php
                     sudo apt install -y locales
                     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
