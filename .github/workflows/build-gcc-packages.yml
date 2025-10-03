@@ -99,8 +99,6 @@ jobs:
                       openssh rsync createrepo_c gpg \
                       git jq tar gzip which sudo xz
 
-
-
                     if [[ "${{ matrix.alma }}" -eq 8 || "${{ matrix.alma }}" -eq 9 ]]; then
                       @ruby:3.3 rubygems ruby-devel
                       dnf -y install gcc-toolset-14
