@@ -28,7 +28,7 @@ class CraftConfig
 
     private function loadConfig()
     {
-        $phpVersion = defined('PHP_VERSION') ? PHP_VERSION : '8.4';
+        $phpVersion = defined('SPP_PHP_VERSION') ? SPP_PHP_VERSION : '8.4';
 
         try {
             $craftYml = TwigRenderer::renderCraftTemplate($phpVersion);
