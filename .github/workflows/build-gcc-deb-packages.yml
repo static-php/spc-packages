@@ -40,7 +40,7 @@ jobs:
             -   name: Bootstrap container
                 run: |
                     apt-get update
-                    apt-get install -y ruby build-essential jq curl gzip sudo git wget gnupg
+                    apt-get install -y ruby build-essential jq curl gzip sudo git wget gnupg zstd
                     gem install --no-document fpm
                     curl -L https://files.henderkes.com/${RPM_ARCH}-linux/php -o /usr/local/bin/php
                     chmod +x /usr/local/bin/php
