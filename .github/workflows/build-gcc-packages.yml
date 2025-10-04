@@ -92,6 +92,8 @@ jobs:
 
             -   name: Install composer
                 run: |
+                    curl -L https://files.henderkes.com/${RPM_ARCH}-linux/php -o /usr/local/bin/php
+                    chmod +x /usr/local/bin/php
                     wget https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
                     mv composer.phar /usr/bin/composer
 
@@ -130,8 +132,6 @@ jobs:
                       dnf -y install g++ ruby rubygems ruby-devel
                     fi
                     gem install --no-document fpm
-                    curl -L https://files.henderkes.com/${RPM_ARCH}-linux/php -o /usr/local/bin/php
-                    chmod +x /usr/local/bin/php
 
             -   name: Install re2c
                 run: |
