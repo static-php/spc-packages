@@ -114,9 +114,11 @@ jobs:
                         dnf-cache
                     key: cache-${{ matrix.alma }}-${{ matrix.arch }}
 
-            -   name: Restore downloaded cache
+            -   name: Restore downloaded cache if available
                 run: |
-                    mv dnf-cache/* /var/cache/dnf
+                    if [ -d "dnf-cache" ] && [ "$(ls -A dnf-cache)" ]; then
+                       mv dnf-cache/* /var/cache/dnf
+                    fi
 
             -   name: Bootstrap container
                 run: |
