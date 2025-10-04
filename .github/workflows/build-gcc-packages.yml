@@ -128,7 +128,7 @@ jobs:
                     dnf -y install \
                       perl make rpm-build rpm-sign rpmdevtools \
                       openssh rsync createrepo_c gpg \
-                      git jq tar gzip which sudo xz
+                      git jq gzip which sudo xz
 
                     if [[ "${{ matrix.alma }}" -eq 8 || "${{ matrix.alma }}" -eq 9 ]]; then
                       dnf -y install gcc-toolset-14 @ruby:3.3 rubygems ruby-devel
