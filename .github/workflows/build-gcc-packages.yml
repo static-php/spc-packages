@@ -90,6 +90,16 @@ jobs:
                       echo "RPM_ARCH=x86_64" >> $GITHUB_ENV
                     fi
 
+            -   name: Restore DNF cache
+                uses: actions/cache@v4
+                with:
+                    key: dnf-${{ matrix.alma }}-${{ matrix.arch }}-v1
+                    restore-keys: |
+                        dnf-${{ matrix.alma }}-
+                        dnf-
+                    path: |
+                        /var/cache/dnf
+
             -   name: Bootstrap container
                 run: |
                     dnf -y install epel-release dnf-plugins-core
@@ -117,6 +127,16 @@ jobs:
                 run: |
                     wget https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
                     mv composer.phar /usr/bin/composer
+
+            -   name: Restore Composer cache
+                uses: actions/cache@v4
+                with:
+                    path: /root/.cache/composer
+                    key: composer-${{ matrix.alma }}-${{ matrix.arch }}-php${{ matrix['php-version'] }}-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        composer-${{ matrix.alma }}-${{ matrix.arch }}-php${{ matrix['php-version'] }}-
+                        composer-${{ matrix.alma }}-${{ matrix.arch }}-
+                        composer-
 
             -   name: Install re2c
                 run: |
@@ -155,7 +175,7 @@ jobs:
                 uses: actions/checkout@v4
 
             -   name: Composer install
-                run: composer install
+                run: composer install --no-interaction --prefer-dist --no-progress
 
             -   name: Download artifact from spc-download.yml
                 uses: dawidd6/action-download-artifact@v11
@@ -166,6 +186,7 @@ jobs:
             -   name: Extract with permissions
                 run: |
                     mkdir -p vendor/crazywhalecc/static-php-cli/downloads
+                    rm -rf vendor/crazywhalecc/static-php-cli/downloads/*
                     tar -xzf downloads.tar.gz -C vendor/crazywhalecc/static-php-cli/downloads
                     rm downloads.tar.gz
 
@@ -226,7 +247,7 @@ jobs:
                 run: |
                     rsync -av --ignore-existing dist/rpm/*.rpm github@${{ secrets.DEB_SERVER_IP }}:/mnt/data/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/
 
-            -   name: "Upload logs"
+            -   name: Upload logs
                 if: ${{ failure() }}
                 uses: actions/upload-artifact@v4
                 with:
@@ -237,12 +258,8 @@ jobs:
                 if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
                 run: |
                     case "${{ matrix.arch }}" in
-                      x86_64)
-                        arch="amd64"
-                        ;;
-                      arm64)
-                        arch="arm64v8"
-                        ;;
+                      x86_64) arch="amd64" ;;
+                      arm64)  arch="arm64v8" ;;
                     esac
                     dir="tmate-2.4.0-static-linux-$arch"
                     curl -L "https://github.com/tmate-io/tmate/releases/download/2.4.0/$dir.tar.xz" | tar -xJ -O "$dir/tmate" > /usr/bin/tmate
