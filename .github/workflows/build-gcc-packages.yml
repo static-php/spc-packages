@@ -93,8 +93,8 @@ jobs:
             -   name: Restore DNF cache
                 uses: actions/cache@v4
                 with:
-                    key: dnf-${{ matrix.alma }}-${{ matrix.arch }}
                     path: /var/cache/dnf
+                    key: dnf-${{ matrix.alma }}-${{ matrix.arch }}
 
             -   name: Bootstrap container
                 run: |
