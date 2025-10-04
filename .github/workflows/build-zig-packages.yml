@@ -71,6 +71,27 @@ jobs:
                     extensions: mbstring, xml, json, curl, zip
                     tools: composer:v2
 
+            -   name: Restore APT cache
+                uses: actions/cache@v4
+                with:
+                    path: /var/cache/apt/archives
+                    key: apt-ubuntu-${{ matrix.arch }}-v1
+                    restore-keys: |
+                        apt-ubuntu-${{ matrix.arch }}-
+                        apt-ubuntu-
+                        apt-
+
+            -   name: Restore Composer cache
+                uses: actions/cache@v4
+                with:
+                    path: ~/.cache/composer
+                    key: composer-ubuntu-${{ matrix.arch }}-php${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        composer-ubuntu-${{ matrix.arch }}-php${{ matrix.php-version }}-
+                        composer-ubuntu-${{ matrix.arch }}-
+                        composer-ubuntu-
+                        composer-
+
             -   name: Install dependencies
                 run: |
                     sudo apt-get update
