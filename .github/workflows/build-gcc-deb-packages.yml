@@ -43,6 +43,34 @@ jobs:
                     path: /var/cache/apt
                     key: apt-${{ matrix.os }}-${{ matrix.arch }}-v1
 
+            -   name: Install composer
+                run: |
+                    wget https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
+                    mv composer.phar /usr/bin/composer
+
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
+            -   name: Cache Composer downloads
+                uses: actions/cache@v4
+                with:
+                    path: ~/.cache/composer
+                    key: composer-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        composer-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.php-version }}-
+                        composer-${{ matrix.os }}-${{ matrix.arch }}-
+                        composer-
+
+            -   name: Cache Composer vendor
+                uses: actions/cache@v4
+                with:
+                    path: vendor
+                    key: composer-vendor-${{ runner.os }}-${{ matrix.arch }}-php${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        composer-vendor-${{ runner.os }}-${{ matrix.arch }}-php${{ matrix.php-version }}-
+                        composer-vendor-${{ runner.os }}-${{ matrix.arch }}-
+                        composer-vendor-${{ runner.os }}-
+
             -   name: Bootstrap container
                 run: |
                     apt-get update
@@ -55,24 +83,6 @@ jobs:
                     sudo locale-gen en_US.UTF-8
                     sudo update-locale LANG=en_US.UTF-8
 
-            -   name: Install composer
-                run: |
-                    wget https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
-                    mv composer.phar /usr/bin/composer
-
-            -   name: Checkout code
-                uses: actions/checkout@v4
-
-            -   name: Cache Composer
-                uses: actions/cache@v4
-                with:
-                    path: ~/.cache/composer
-                    key: composer-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
-                    restore-keys: |
-                        composer-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.php-version }}-
-                        composer-${{ matrix.os }}-${{ matrix.arch }}-
-                        composer-
-
             -   name: Install build tooling
                 run: composer install
 
@@ -84,6 +94,9 @@ jobs:
 
             -   name: Extract with permissions
                 run: |
+                    sudo rm -rf vendor/crazywhalecc/static-php-cli/downloads
+                    sudo rm -rf vendor/crazywhalecc/static-php-cli/buildroot
+                    sudo rm -rf vendor/crazywhalecc/static-php-cli/source
                     mkdir -p vendor/crazywhalecc/static-php-cli/downloads
                     tar -xzf downloads.tar.gz -C vendor/crazywhalecc/static-php-cli/downloads
                     rm downloads.tar.gz
