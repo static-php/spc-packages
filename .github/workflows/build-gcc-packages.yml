@@ -109,14 +109,14 @@ jobs:
                 uses: actions/cache@v4
                 with:
                     path: ~/.cache/composer
-                    key: composer-${{ matrix.alma }}-${{ matrix.arch }}
+                    key: composer-${{ matrix.alma }}-${{ matrix.arch }}-${{ matrix.php-version }}
 
             -   name: Restore DNF cache
                 id: dnf-restore
                 uses: actions/cache@v4
                 with:
                     path: ~/.cache/dnf
-                    key: dnf-${{ matrix.alma }}-${{ matrix.arch }}
+                    key: dnf-${{ matrix.alma }}-${{ matrix.arch }}-${{ matrix.php-version }}
 
             -   name: Bootstrap container
                 run: |
