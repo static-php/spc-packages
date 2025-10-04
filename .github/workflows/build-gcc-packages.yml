@@ -159,7 +159,6 @@ jobs:
                     ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
 
             -   name: Install tmate
-                if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
                 run: |
                     case "${{ matrix.arch }}" in
                       x86_64) arch="amd64" ;;
