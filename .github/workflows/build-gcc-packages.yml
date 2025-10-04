@@ -103,7 +103,7 @@ jobs:
             -   name: Prepare cache directories
                 run: |
                     composer config -g cache-dir
-                    mkdir -p dnf-cache
+                    mkdir -p ~/.cache/dnf
 
             -   name: Restore composer cache
                 uses: actions/cache@v4
