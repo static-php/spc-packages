@@ -99,22 +99,18 @@ jobs:
                 run: |
                     composer config -g cache-dir
 
-            -   name: Restore Composer cache
-                uses: actions/cache@v4
-                with:
-                    path: ~/.cache/composer
-                    key: composer-${{ matrix.alma }}-${{ matrix.arch }}
-
             -   name: Prepare DNF cache dir
                 run: |
                     mkdir -p /var/cache/dnf
                     rm -rf /var/cache/dnf/*
 
-            -   name: Restore DNF cache
+            -   name: Restore cache
                 uses: actions/cache@v4
                 with:
-                    path: /var/cache/dnf
-                    key: dnf-${{ matrix.alma }}-${{ matrix.arch }}
+                    path: |
+                        ~/.cache/composer
+                        /var/cache/dnf
+                    key: cache-${{ matrix.alma }}-${{ matrix.arch }}
 
             -   name: Bootstrap container
                 run: |
