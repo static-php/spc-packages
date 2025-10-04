@@ -116,8 +116,6 @@ jobs:
                     gem install --no-document fpm
                     curl -L https://files.henderkes.com/${RPM_ARCH}-linux/php -o /usr/local/bin/php
                     chmod +x /usr/local/bin/php
-                    dnf -y install glibc-langpack-en glibc-locale-source
-                    localedef -i en_US -f UTF-8 en_US.UTF-8
 
             -   name: Install composer
                 run: |
