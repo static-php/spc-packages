@@ -82,6 +82,9 @@ jobs:
             fail-fast: false
             matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
         steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
             -   name: Set architecture variables
                 run: |
                     if [[ "${{ matrix.arch }}" == "arm64" ]]; then
@@ -97,22 +100,23 @@ jobs:
                     curl -sS https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer | php -- --quiet
                     mv composer.phar /usr/bin/composer
 
-            -   name: Prepare Composer cache dir
+            -   name: Prepare cache directories
                 run: |
                     composer config -g cache-dir
-
-            -   name: Prepare DNF cache dir
-                run: |
-                    mkdir -p /var/cache/dnf
-                    rm -rf /var/cache/dnf/*
+                    mkdir -p dnf-cache
 
             -   name: Restore cache
+                id: cache-restore
                 uses: actions/cache@v4
                 with:
                     path: |
                         ~/.cache/composer
-                        /var/cache/dnf
+                        dnf-cache
                     key: cache-${{ matrix.alma }}-${{ matrix.arch }}
+
+            -   name: Restore downloaded cache
+                run: |
+                    mv dnf-cache/* /var/cache/dnf
 
             -   name: Bootstrap container
                 run: |
@@ -175,11 +179,13 @@ jobs:
             -   name: Set target folder
                 run: echo "TARGET_DIR=el${{ matrix.alma }}" >> $GITHUB_ENV
 
-            -   name: Checkout code
-                uses: actions/checkout@v4
-
             -   name: Composer install
                 run: composer install --no-interaction --prefer-dist --no-progress
+
+            -   name: Copy dnf cache to dnf-cache folder
+                if: steps.cache-restore.outputs.cache-hit != 'true'
+                run: |
+                    cp -r /var/cache/dnf dnf-cache/
 
             -   name: Download artifact from spc-download.yml
                 uses: dawidd6/action-download-artifact@v11
