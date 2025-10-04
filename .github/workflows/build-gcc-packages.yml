@@ -107,7 +107,7 @@ jobs:
             -   name: Prepare cache directories
                 run: |
                     composer config -g cache-dir
-                    mkdir -p ~/.cache/dnf
+                    mkdir -p /var/cache/dnf
 
             -   name: Restore composer cache
                 uses: actions/cache@v4
@@ -119,7 +119,7 @@ jobs:
                 id: dnf-restore
                 uses: actions/cache@v4
                 with:
-                    path: ~/.cache/dnf
+                    path: /var/cache/dnf
                     key: dnf-${{ matrix.alma }}-${{ matrix.arch }}
 
             -   name: Bootstrap container
@@ -185,11 +185,6 @@ jobs:
 
             -   name: Composer install
                 run: composer install --no-interaction --prefer-dist --no-progress
-
-            -   name: Copy dnf cache to dnf-cache folder
-                if: steps.dnf-restore.outputs.cache-hit != 'true'
-                run: |
-                    cp -r /var/cache/dnf ~/.cache/dnf
 
             -   name: Download artifact from spc-download.yml
                 uses: dawidd6/action-download-artifact@v11
