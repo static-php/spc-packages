@@ -130,7 +130,7 @@ jobs:
                 uses: actions/cache@v4
                 with:
                     path: ~/.cache/composer
-                    key: composer-${{ matrix.alma }}-${{ matrix.arch }}-php${{ matrix['php-version'] }}
+                    key: composer-${{ matrix.alma }}-${{ matrix.arch }}
 
             -   name: Install re2c
                 run: |
