@@ -79,10 +79,6 @@ jobs:
                         !/var/cache/apt/archives/lock
                         !/var/cache/apt/archives/partial
                     key: apt-ubuntu-${{ matrix.arch }}-v1
-                    restore-keys: |
-                        apt-ubuntu-${{ matrix.arch }}-
-                        apt-ubuntu-
-                        apt-
 
             -   name: Restore Composer cache
                 uses: actions/cache@v4
@@ -91,9 +87,6 @@ jobs:
                     key: composer-ubuntu-${{ matrix.arch }}-php${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
                     restore-keys: |
                         composer-ubuntu-${{ matrix.arch }}-php${{ matrix.php-version }}-
-                        composer-ubuntu-${{ matrix.arch }}-
-                        composer-ubuntu-
-                        composer-
 
             -   name: Install dependencies
                 run: |
