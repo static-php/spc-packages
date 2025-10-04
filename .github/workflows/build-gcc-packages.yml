@@ -94,11 +94,7 @@ jobs:
                 uses: actions/cache@v4
                 with:
                     key: dnf-${{ matrix.alma }}-${{ matrix.arch }}-v1
-                    restore-keys: |
-                        dnf-${{ matrix.alma }}-
-                        dnf-
-                    path: |
-                        /var/cache/dnf
+                    path: /var/cache/dnf
 
             -   name: Bootstrap container
                 run: |
@@ -127,6 +123,10 @@ jobs:
                 run: |
                     wget https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
                     mv composer.phar /usr/bin/composer
+
+            -   name: Prepare Composer cache dir
+                run: |
+                    composer config -g cache-dir
 
             -   name: Restore Composer cache
                 uses: actions/cache@v4
