@@ -131,7 +131,7 @@ jobs:
             -   name: Restore Composer cache
                 uses: actions/cache@v4
                 with:
-                    path: /root/.cache/composer
+                    path: ~/.cache/composer
                     key: composer-${{ matrix.alma }}-${{ matrix.arch }}-php${{ matrix['php-version'] }}-${{ hashFiles('**/composer.lock') }}
                     restore-keys: |
                         composer-${{ matrix.alma }}-${{ matrix.arch }}-php${{ matrix['php-version'] }}-

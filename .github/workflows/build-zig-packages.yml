@@ -74,7 +74,10 @@ jobs:
             -   name: Restore APT cache
                 uses: actions/cache@v4
                 with:
-                    path: /var/cache/apt/archives
+                    path: |
+                        /var/cache/apt/archives
+                        !/var/cache/apt/archives/lock
+                        !/var/cache/apt/archives/partial
                     key: apt-ubuntu-${{ matrix.arch }}-v1
                     restore-keys: |
                         apt-ubuntu-${{ matrix.arch }}-

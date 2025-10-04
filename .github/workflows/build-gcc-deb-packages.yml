@@ -66,7 +66,7 @@ jobs:
             -   name: Cache Composer
                 uses: actions/cache@v4
                 with:
-                    path: /root/.cache/composer
+                    path: ~/.cache/composer
                     key: composer-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
                     restore-keys: |
                         composer-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.php-version }}-
