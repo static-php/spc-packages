@@ -90,6 +90,11 @@ jobs:
                       echo "RPM_ARCH=x86_64" >> $GITHUB_ENV
                     fi
 
+            -   name: Prepare DNF cache dir
+                run: |
+                    mkdir -p /var/cache/dnf
+                    rm -rf /var/cache/dnf/*
+
             -   name: Restore DNF cache
                 uses: actions/cache@v4
                 with:
