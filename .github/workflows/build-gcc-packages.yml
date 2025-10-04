@@ -93,7 +93,7 @@ jobs:
             -   name: Restore DNF cache
                 uses: actions/cache@v4
                 with:
-                    key: dnf-${{ matrix.alma }}-${{ matrix.arch }}-v1
+                    key: dnf-${{ matrix.alma }}-${{ matrix.arch }}-
                     path: /var/cache/dnf
 
             -   name: Bootstrap container
@@ -135,8 +135,6 @@ jobs:
                     key: composer-${{ matrix.alma }}-${{ matrix.arch }}-php${{ matrix['php-version'] }}-${{ hashFiles('**/composer.lock') }}
                     restore-keys: |
                         composer-${{ matrix.alma }}-${{ matrix.arch }}-php${{ matrix['php-version'] }}-
-                        composer-${{ matrix.alma }}-${{ matrix.arch }}-
-                        composer-
 
             -   name: Install re2c
                 run: |
