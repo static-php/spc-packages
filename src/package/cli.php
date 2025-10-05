@@ -36,6 +36,9 @@ class cli implements package
             }
         }
 
+        $files[BUILD_ROOT_PATH . '/source-licenses'] = '/usr/share/licenses/php-zts/source-licenses';
+        $files[BUILD_ROOT_PATH . '/licenses'] = '/usr/share/licenses/php-zts/modules';
+
         return [
             'config_files' => $configFiles,
             'empty_directories' => [
