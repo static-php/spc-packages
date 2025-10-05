@@ -114,6 +114,8 @@ jobs:
                 with:
                     path: ~/.cache/composer
                     key: composer-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        composer-
 
             -   name: Restore DNF cache
                 id: dnf-restore
@@ -195,7 +197,6 @@ jobs:
             -   name: Extract with permissions
                 run: |
                     mkdir -p vendor/crazywhalecc/static-php-cli/downloads
-                    rm -rf vendor/crazywhalecc/static-php-cli/downloads/*
                     tar -xzf downloads.tar.gz -C vendor/crazywhalecc/static-php-cli/downloads
                     rm downloads.tar.gz
 

@@ -25,6 +25,9 @@ jobs:
                 arch: [ x86_64, arm64 ]
                 target: [ native-native-gnu.2.17 ]
         steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
             -   name: Set up SSH key
                 uses: webfactory/ssh-agent@v0.8.0
                 with:
@@ -61,15 +64,16 @@ jobs:
                       echo "TARGET_DIR=el10" >> $GITHUB_ENV
                     fi
 
-            -   name: Checkout code
-                uses: actions/checkout@v4
-
             -   name: Set up PHP
                 uses: shivammathur/setup-php@v2
                 with:
                     php-version: '8.4'
                     extensions: mbstring, xml, json, curl, zip
                     tools: composer:v2
+
+            -   name: Install caching dependencies
+                run: |
+                    apt -y install tar zstd
 
             -   name: Restore APT cache
                 uses: actions/cache@v4
@@ -78,15 +82,15 @@ jobs:
                         /var/cache/apt/archives
                         !/var/cache/apt/archives/lock
                         !/var/cache/apt/archives/partial
-                    key: apt-ubuntu-${{ matrix.arch }}-v1
+                    key: zig-apt-${{ matrix.arch }}-v1
 
             -   name: Restore Composer cache
                 uses: actions/cache@v4
                 with:
                     path: ~/.cache/composer
-                    key: composer-ubuntu-${{ matrix.arch }}-php${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+                    key: composer-${{ hashFiles('**/composer.lock') }}
                     restore-keys: |
-                        composer-ubuntu-${{ matrix.arch }}-php${{ matrix.php-version }}-
+                        composer-
 
             -   name: Install dependencies
                 run: |

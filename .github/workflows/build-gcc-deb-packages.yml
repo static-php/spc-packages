@@ -29,6 +29,9 @@ jobs:
                 os: [ 'jammy', 'noble', 'bookworm', 'trixie' ]
 
         steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
             -   name: Set architecture variables
                 run: |
                     if [[ "${{ matrix.arch }}" == "arm64" ]]; then
@@ -36,6 +39,10 @@ jobs:
                     else
                       echo "RPM_ARCH=x86_64" >> $GITHUB_ENV
                     fi
+
+            -   name: Install caching dependencies
+                run: |
+                    apt-get -y install tar zstd
 
             -   name: Restore APT cache
                 uses: actions/cache@v4
@@ -45,41 +52,24 @@ jobs:
 
             -   name: Install composer
                 run: |
-                    wget https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer -O - -q | php -- --quiet
+                    curl -L https://files.henderkes.com/${RPM_ARCH}-linux/php -o /usr/local/bin/php
+                    chmod +x /usr/local/bin/php
+                    curl -sS https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer | php -- --quiet
                     mv composer.phar /usr/bin/composer
-
-            -   name: Checkout code
-                uses: actions/checkout@v4
 
             -   name: Cache Composer downloads
                 uses: actions/cache@v4
                 with:
                     path: ~/.cache/composer
-                    key: composer-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+                    key: composer-${{ hashFiles('**/composer.lock') }}
                     restore-keys: |
-                        composer-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.php-version }}-
-
-            -   name: Cache Composer vendor
-                uses: actions/cache@v4
-                with:
-                    path: vendor
-                    key: composer-vendor-${{ runner.os }}-${{ matrix.arch }}-php${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
-                    restore-keys: |
-                        composer-vendor-${{ runner.os }}-${{ matrix.arch }}-php${{ matrix.php-version }}-
-                        composer-vendor-${{ runner.os }}-${{ matrix.arch }}-
-                        composer-vendor-${{ runner.os }}-
+                        composer-
 
             -   name: Bootstrap container
                 run: |
                     apt-get update
-                    apt-get install -y ruby build-essential jq curl gzip sudo git wget gnupg zstd
+                    apt-get install -y ruby build-essential jq curl gzip sudo git gnupg
                     gem install --no-document fpm
-                    curl -L https://files.henderkes.com/${RPM_ARCH}-linux/php -o /usr/local/bin/php
-                    chmod +x /usr/local/bin/php
-                    sudo apt install -y locales
-                    echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
-                    sudo locale-gen en_US.UTF-8
-                    sudo update-locale LANG=en_US.UTF-8
 
             -   name: Install build tooling
                 run: composer install
@@ -92,9 +82,6 @@ jobs:
 
             -   name: Extract with permissions
                 run: |
-                    sudo rm -rf vendor/crazywhalecc/static-php-cli/downloads
-                    sudo rm -rf vendor/crazywhalecc/static-php-cli/buildroot
-                    sudo rm -rf vendor/crazywhalecc/static-php-cli/source
                     mkdir -p vendor/crazywhalecc/static-php-cli/downloads
                     tar -xzf downloads.tar.gz -C vendor/crazywhalecc/static-php-cli/downloads
                     rm downloads.tar.gz
