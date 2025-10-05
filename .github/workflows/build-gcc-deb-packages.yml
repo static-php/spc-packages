@@ -40,20 +40,10 @@ jobs:
                       echo "RPM_ARCH=x86_64" >> $GITHUB_ENV
                     fi
 
-            -   name: Install caching dependencies
-                run: |
-                    apt-get update
-                    apt-get install -y tar zstd
-
-            -   name: Restore APT cache
-                uses: actions/cache@v4
-                with:
-                    path: /var/cache/apt
-                    key: apt-${{ runner.os }}-${{ runner.arch }}-v1
-
             -   name: Bootstrap container
                 run: |
-                    apt-get install -y ruby build-essential jq curl gzip sudo git gnupg
+                    apt-get update
+                    apt-get install -y ruby build-essential jq curl gzip sudo git gnupg tar zstd
                     apt-get upgrade -y
                     gem install --no-document fpm
 

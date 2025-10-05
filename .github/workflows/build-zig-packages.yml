@@ -64,23 +64,10 @@ jobs:
                       echo "TARGET_DIR=el10" >> $GITHUB_ENV
                     fi
 
-            -   name: Install caching dependencies
-                run: |
-                    apt-get update
-                    apt-get install -y tar zstd
-
-            -   name: Restore APT cache
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        /var/cache/apt/archives
-                        !/var/cache/apt/archives/lock
-                        !/var/cache/apt/archives/partial
-                    key: zig-apt-${{ runner.arch }}-v1
-
             -   name: Install APT dependencies
                 run: |
-                    apt-get install -y curl ruby rpm build-essential
+                    apt-get update
+                    apt-get install -y curl ruby rpm build-essential tar zstd
                     apt-get upgrade -y
                     gem install fpm
 
