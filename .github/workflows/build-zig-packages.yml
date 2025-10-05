@@ -73,7 +73,8 @@ jobs:
 
             -   name: Install caching dependencies
                 run: |
-                    apt -y install tar zstd
+                    apt-get update
+                    apt-get -y install tar zstd
 
             -   name: Restore APT cache
                 uses: actions/cache@v4
@@ -94,7 +95,6 @@ jobs:
 
             -   name: Install dependencies
                 run: |
-                    sudo apt-get update
                     sudo apt-get install -y ruby rpm build-essential
                     sudo gem install fpm
                     composer install
