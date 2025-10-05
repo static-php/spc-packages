@@ -222,8 +222,8 @@ class CreatePackages
             '--architecture', $architecture,
             '--description', "Static PHP Package for {$name}",
             '--license', 'MIT',
-            '--maintainer', 'Static PHP <info@static-php.dev>',
-            '--vendor', 'Static PHP <info@static-php.dev>',
+            '--maintainer', 'Marc Henderkes <rpms@henderkes.com>',
+            '--vendor', 'Marc Henderkes <rpms@henderkes.com>',
             '--url', 'rpms.henderkes.com',
         ], ...$extraArgs];
 
@@ -335,13 +335,13 @@ class CreatePackages
             '--deb-compression', 'zst',
             '-p', DIST_DEB_PATH,
             '--name', $name,
-            '--version', $phpVersion,          // upstream version
+            '--version', $phpVersion,
             '--architecture', $architecture,
             '--iteration', $debIteration,       // Debian revision (includes distro)
             '--description', "Static PHP Package for {$name}",
             '--license', 'MIT',
-            '--maintainer', 'Static PHP <info@static-php.dev>',
-            '--vendor', 'Static PHP <info@static-php.dev>',
+            '--maintainer', 'Marc Henderkes <debs@henderkes.com>',
+            '--vendor', 'Marc Henderkes <debs@henderkes.com>',
             '--url', 'debs.henderkes.com',
         ], ...$extraArgs];
 
