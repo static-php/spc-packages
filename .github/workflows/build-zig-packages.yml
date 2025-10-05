@@ -66,9 +66,9 @@ jobs:
 
             -   name: Install APT dependencies
                 run: |
-                    apt-get update
-                    apt-get install -y curl ruby rpm build-essential tar zstd
-                    apt-get upgrade -y
+                    sudo apt-get update
+                    sudo apt-get install -y curl ruby rpm build-essential tar zstd
+                    sudo apt-get upgrade -y
                     gem install fpm
 
             -   name: Install composer
