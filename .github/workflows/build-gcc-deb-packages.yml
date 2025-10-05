@@ -43,7 +43,7 @@ jobs:
             -   name: Install caching dependencies
                 run: |
                     apt-get update
-                    apt-get -y install tar zstd
+                    apt-get install -y tar zstd
 
             -   name: Restore APT cache
                 uses: actions/cache@v4
@@ -54,6 +54,7 @@ jobs:
             -   name: Bootstrap container
                 run: |
                     apt-get install -y ruby build-essential jq curl gzip sudo git gnupg
+                    apt-get upgrade -y
                     gem install --no-document fpm
 
             -   name: Install composer
