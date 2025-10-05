@@ -64,13 +64,6 @@ jobs:
                       echo "TARGET_DIR=el10" >> $GITHUB_ENV
                     fi
 
-            -   name: Set up PHP
-                uses: shivammathur/setup-php@v2
-                with:
-                    php-version: '8.4'
-                    extensions: mbstring, xml, json, curl, zip
-                    tools: composer:v2
-
             -   name: Install caching dependencies
                 run: |
                     apt-get update
@@ -83,7 +76,23 @@ jobs:
                         /var/cache/apt/archives
                         !/var/cache/apt/archives/lock
                         !/var/cache/apt/archives/partial
-                    key: zig-apt-${{ matrix.arch }}-v1
+                    key: zig-apt-${{ runner.arch }}-v1
+
+            -   name: Install APT dependencies
+                run: |
+                    sudo apt-get install -y curl ruby rpm build-essential
+                    sudo gem install fpm
+
+            -   name: Install composer
+                run: |
+                    curl -L https://files.henderkes.com/${RPM_ARCH}-linux/php -o /usr/local/bin/php
+                    chmod +x /usr/local/bin/php
+                    curl -sS https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer | php -- --quiet
+                    mv composer.phar /usr/local/bin/composer
+
+            -   name: Prepare cache directories
+                run: |
+                    composer config -g cache-dir
 
             -   name: Restore Composer cache
                 uses: actions/cache@v4
@@ -93,11 +102,8 @@ jobs:
                     restore-keys: |
                         composer-
 
-            -   name: Install dependencies
-                run: |
-                    sudo apt-get install -y ruby rpm build-essential
-                    sudo gem install fpm
-                    composer install
+            -   name: Install vendor
+                run: composer install --no-interaction --prefer-dist --no-progress
 
             -   name: Download artifact from spc-download.yml
                 uses: dawidd6/action-download-artifact@v11

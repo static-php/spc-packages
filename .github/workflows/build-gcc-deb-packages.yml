@@ -49,19 +49,23 @@ jobs:
                 uses: actions/cache@v4
                 with:
                     path: /var/cache/apt
-                    key: apt-${{ matrix.os }}-${{ matrix.arch }}-v1
+                    key: apt-${{ runner.os }}-${{ runner.arch }}-v1
 
             -   name: Bootstrap container
                 run: |
                     apt-get install -y ruby build-essential jq curl gzip sudo git gnupg
                     gem install --no-document fpm
 
-            -   name: Set up PHP
-                uses: shivammathur/setup-php@v2
-                with:
-                    php-version: '8.4'
-                    extensions: mbstring, xml, json, curl, zip
-                    tools: composer:v2
+            -   name: Install composer
+                run: |
+                    curl -L https://files.henderkes.com/${RPM_ARCH}-linux/php -o /usr/local/bin/php
+                    chmod +x /usr/local/bin/php
+                    curl -sS https://raw.githubusercontent.com/composer/getcomposer.org/f3108f64b4e1c1ce6eb462b159956461592b3e3e/web/installer | php -- --quiet
+                    mv composer.phar /usr/local/bin/composer
+
+            -   name: Prepare cache directories
+                run: |
+                    composer config -g cache-dir
 
             -   name: Cache Composer downloads
                 uses: actions/cache@v4
@@ -71,8 +75,8 @@ jobs:
                     restore-keys: |
                         composer-
 
-            -   name: Install build tooling
-                run: composer install
+            -   name: Install vendor
+                run: composer install --no-interaction --prefer-dist --no-progress
 
             -   name: Download artifact from spc-download.yml
                 uses: dawidd6/action-download-artifact@v11
