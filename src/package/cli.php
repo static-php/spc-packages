@@ -39,7 +39,7 @@ class cli implements package
         $files[BUILD_ROOT_PATH . '/license'] = '/usr/share/licenses/php-zts/';
 
         return [
-            'config_files' => $configFiles,
+            'config-files' => $configFiles,
             'empty_directories' => [
                 '/usr/share/php-zts/preload',
                 '/var/lib/php-zts/session',
