@@ -42,10 +42,10 @@ jobs:
 
             -   name: Bootstrap container
                 run: |
-                    sudo apt-get update
-                    sudo apt-get install -y ruby build-essential jq curl gzip sudo git gnupg tar zstd
-                    sudo apt-get upgrade -y
-                    sudo gem install --no-document fpm
+                    apt-get update
+                    apt-get install -y ruby build-essential jq curl gzip sudo git gnupg tar zstd
+                    apt-get upgrade -y
+                    gem install --no-document fpm
 
             -   name: Install composer
                 run: |
