@@ -23,7 +23,7 @@
     "prefer-stable": true,
     "require": {
         "php": ">=8.3",
-        "crazywhalecc/static-php-cli": "dev-fix/grpc-shared",
+        "crazywhalecc/static-php-cli": "dev-feature/shared-exts",
         "laravel/helpers": "^1.7",
         "ext-zlib": "*",
         "twig/twig": "^3.0"
