@@ -1,5 +1,5 @@
 php-version: {{ php_version }}
-extensions: ast,calendar,ctype,curl,dom,exif,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib
+extensions: {% if php_version != '8.5' %}ast,{% endif %}calendar,ctype,curl,dom,exif,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib
 {% if php_version == '8.5' %}
 shared-extensions: apcu,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,inotify,intl,ldap,lz4,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pgsql,protobuf,rdkafka,shmop,simdjson,snappy,soap,sqlite3,sqlsrv,ssh2,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xhprof,xlswriter,xsl,xz,yaml,zip,zstd
 {% else %}
