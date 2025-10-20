@@ -47,7 +47,7 @@ class TwigRenderer
             } elseif (str_contains(SPP_TARGET, '.2.39')) {
                 $majorOsVersion = '10';
             } else {
-                $majorOsVersion = '18'; // other OS = pretend we're on el10
+                $majorOsVersion = '10'; // other OS = pretend we're on el10
             }
         }
 
