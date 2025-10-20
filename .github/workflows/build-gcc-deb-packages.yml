@@ -10,7 +10,7 @@ on:
 jobs:
     build:
         name: Build for ${{ matrix.arch }} PHP ${{ matrix.php-version }}
-        runs-on: ubuntu-24.04${{ matrix.arch == 'amd64' && '' || '-arm' }}
+        runs-on: ubuntu-24.04${{ matrix.arch == 'arm64' && '-arm' }}
         container:
             image: debian:11
         permissions:
