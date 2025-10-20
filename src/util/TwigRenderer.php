@@ -2,6 +2,7 @@
 
 namespace staticphp\util;
 
+use staticphp\step\CreatePackages;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
@@ -56,7 +57,8 @@ class TwigRenderer
             'php_version_nodot' => str_replace('.', '', $phpVersion),
             'target' => SPP_TARGET,
             'arch' => $arch,
-            'os' => $majorOsVersion
+            'os' => $majorOsVersion,
+            'prefix' => CreatePackages::getPrefix(),
         ];
 
         try {
