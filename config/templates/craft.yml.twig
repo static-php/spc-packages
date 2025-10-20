@@ -1,5 +1,5 @@
 php-version: {{ php_version }}
-extensions: {% if php_version != '8.5' %}ast,{% endif %}calendar,ctype,curl,dom,exif,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib
+extensions: ast,calendar,ctype,curl,dom,exif,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib
 {% if php_version == '8.5' %}
 shared-extensions: apcu,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,inotify,intl,ldap,lz4,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pgsql,protobuf,rdkafka,shmop,simdjson,snappy,soap,sqlite3,sqlsrv,ssh2,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xhprof,xlswriter,xsl,xz,yaml,zip,zstd
 {% else %}
@@ -70,4 +70,6 @@ extra-env:
     SPC_CMD_VAR_FRANKENPHP_XCADDY_MODULES: "--with github.com/dunglas/frankenphp/caddy --with github.com/dunglas/mercure/caddy --with github.com/dunglas/vulcain/caddy --with github.com/dunglas/caddy-cbrotli --with github.com/baldinof/caddy-supervisor"
     PHP_BUILD_PROVIDER: "Static PHP <https://static-php.dev> #StandWithUkraine"
     PHP_BUILD_ARCH: '{{ arch }}'
+    {% if is_rhel -%}
     PHP_BUILD_SYSTEM: 'Red Hat Enterprise Linux {{ os }}'
+    {% endif -%}

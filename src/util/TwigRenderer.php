@@ -30,7 +30,7 @@ class TwigRenderer
 
         if ($majorOsVersion === null || $majorOsVersion === '') {
             // Try Ubuntu / Debian detection
-            $lsb = trim((string) shell_exec('lsb_release -rs 2>/dev/null')) ?: null;
+            $lsb = trim((string) shell_exec('. /etc/os-release && echo $VERSION')) ?: null;
             if ($lsb !== null && $lsb !== '') {
                 // Use full version string, e.g. "22.04"
                 $majorOsVersion = $lsb;
