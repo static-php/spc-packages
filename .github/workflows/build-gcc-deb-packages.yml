@@ -46,6 +46,12 @@ jobs:
                     apt-get upgrade -y
                     gem install --no-document fpm
 
+            -   name: Install cmake
+                run: |
+                    curl -o cmake.tar.gz -fsSL https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-$(uname -m).tar.gz && \
+                    sudo tar -xzf cmake.tar.gz -C /usr/local --strip-components=1 && \
+                    rm cmake.tar.gz
+
             -   name: Install composer
                 run: |
                     sudo curl -L https://files.henderkes.com/${RPM_ARCH}-linux/php -o /usr/local/bin/php
