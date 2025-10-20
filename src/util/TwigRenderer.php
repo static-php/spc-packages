@@ -26,11 +26,11 @@ class TwigRenderer
         // Use Twig to render the craft.yml template
         $loader = new FilesystemLoader(BASE_PATH . '/config/templates');
         $twig = new Environment($loader);
-        $majorOsVersion = trim(shell_exec('rpm -E %rhel 2>/dev/null')) ?: null;
+        $majorOsVersion = trim((string) shell_exec('rpm -E %rhel 2>/dev/null')) ?: null;
 
         if ($majorOsVersion === null || $majorOsVersion === '') {
             // Try Ubuntu / Debian detection
-            $lsb = trim(shell_exec('lsb_release -rs 2>/dev/null')) ?: null;
+            $lsb = trim((string) shell_exec('lsb_release -rs 2>/dev/null')) ?: null;
             if ($lsb !== null && $lsb !== '') {
                 // Use full version string, e.g. "22.04"
                 $majorOsVersion = $lsb;
