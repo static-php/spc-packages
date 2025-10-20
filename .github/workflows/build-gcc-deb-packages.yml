@@ -9,10 +9,10 @@ on:
 
 jobs:
     build:
-        name: Build for ${{ matrix.os }} ${{ matrix.arch }} PHP ${{ matrix.php-version }}
+        name: Build for ${{ matrix.arch }} PHP ${{ matrix.php-version }}
         runs-on: ubuntu-${{ matrix.arch == 'amd64' && '24.04' || '24.04-arm' }}
         container:
-            image: ${{ (matrix.os == 'bookworm' || matrix.os == 'trixie') && format('debian:{0}', matrix.os) || format('ubuntu:{0}', matrix.os) }}
+            image: ubuntu:22.04
         permissions:
             contents: read
         defaults:
@@ -26,7 +26,6 @@ jobs:
             matrix:
                 php-version: [ 8.4 ]
                 arch: [ amd64, arm64 ]
-                os: [ 'jammy', 'noble', 'bookworm', 'trixie' ]
 
         steps:
             -   name: Checkout code
@@ -86,14 +85,14 @@ jobs:
 
             -   name: Stage deb artifacts
                 run: |
-                    mkdir -p "artifacts/${{ matrix.os }}/${{ matrix.arch }}"
+                    mkdir -p "artifacts/${{ matrix.arch }}"
                     shopt -s nullglob
-                    mv dist/deb/*.deb "artifacts/${{ matrix.os }}/${{ matrix.arch }}/"
+                    mv dist/deb/*.deb "artifacts/${{ matrix.arch }}/"
 
             -   name: Upload debs
                 uses: actions/upload-artifact@v4
                 with:
-                    name: "debs-${{ matrix.os }}-${{ matrix.arch }}"
+                    name: "debs-${{ matrix.arch }}"
                     path: artifacts/**
                     if-no-files-found: error
                     retention-days: 2
@@ -102,7 +101,7 @@ jobs:
                 if: ${{ failure() }}
                 uses: actions/upload-artifact@v4
                 with:
-                    name: build-logs-${{ matrix.arch }}-${{ matrix.os }}-php${{ matrix.php-version }}
+                    name: build-logs-${{ matrix.arch }}-php${{ matrix.php-version }}
                     path: vendor/crazywhalecc/static-php-cli/log
 
     #            -   name: Setup tmate session
@@ -162,34 +161,7 @@ jobs:
                     rm -f "$t"
 
                     cat > "${REPO_ROOT}/conf/distributions" <<EOF
-                    Codename: jammy
-                    Suite: stable
-                    Components: ${COMPONENT}
-                    Architectures: amd64 arm64
-                    Origin: ${ORIGIN}
-                    Label: ${LABEL}
-                    Description: ${DESC}
-                    SignWith: ${FPR}
-
-                    Codename: noble
-                    Suite: stable
-                    Components: ${COMPONENT}
-                    Architectures: amd64 arm64
-                    Origin: ${ORIGIN}
-                    Label: ${LABEL}
-                    Description: ${DESC}
-                    SignWith: ${FPR}
-
-                    Codename: bookworm
-                    Suite: stable
-                    Components: ${COMPONENT}
-                    Architectures: amd64 arm64
-                    Origin: ${ORIGIN}
-                    Label: ${LABEL}
-                    Description: ${DESC}
-                    SignWith: ${FPR}
-
-                    Codename: trixie
+                    Codename: stable
                     Suite: stable
                     Components: ${COMPONENT}
                     Architectures: amd64 arm64
@@ -200,15 +172,9 @@ jobs:
                     EOF
 
                     shopt -s nullglob globstar
-                    jammy_debs=( collected/jammy/**/*.deb )
-                    noble_debs=( collected/noble/**/*.deb )
-                    bookworm_debs=( collected/bookworm/**/*.deb )
-                    trixie_debs=( collected/trixie/**/*.deb )
+                    debs=( collected/**/*.deb )
 
-                    reprepro -b "${REPO_ROOT}" includedeb jammy "${jammy_debs[@]}"
-                    reprepro -b "${REPO_ROOT}" includedeb noble "${noble_debs[@]}"
-                    reprepro -b "${REPO_ROOT}" includedeb bookworm "${bookworm_debs[@]}"
-                    reprepro -b "${REPO_ROOT}" includedeb trixie "${trixie_debs[@]}"
+                    reprepro -b "${REPO_ROOT}" includedeb stable "${debs[@]}"
 
                     reprepro -b "${REPO_ROOT}" export
 

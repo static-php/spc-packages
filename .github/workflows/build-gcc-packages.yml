@@ -202,12 +202,7 @@ jobs:
 
             -   name: Build PHP and packages
                 run: |
-                    if [ "${{ matrix.php-version }}" = "8.5" ] && [ "${{ matrix.alma }}" = "9" ] && [ "${{ matrix.arch }}" = "x86_64" ]; then
-                      TARGET="native-native-gnu.2.34"
-                    else
-                      TARGET="native-native-gnu"
-                    fi
-                    php bin/spp all --target=$TARGET --type=rpm --phpv=${{ matrix.php-version }} --iteration="${{ env.ITERATION }}"
+                    php bin/spp all --target=native-native-gnu --type=rpm --phpv=${{ matrix.php-version }} --iteration="${{ env.ITERATION }}"
 
             -   name: Prepare rpm signing
                 run: |

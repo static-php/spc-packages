@@ -323,9 +323,10 @@ class CreatePackages
 
         $phpVersion = preg_replace('/_\d+$/', '', $phpVersion);
 
-        $osRelease = parse_ini_file('/etc/os-release');
-        $distroCodename = $osRelease['VERSION_CODENAME'] ?? null;
-        $debIteration = $distroCodename !== '' ? "{$iteration}~{$distroCodename}" : $iteration;
+        //$osRelease = parse_ini_file('/etc/os-release');
+        //$distroCodename = $osRelease['VERSION_CODENAME'] ?? null;
+        //$debIteration = $distroCodename !== '' ? "{$iteration}~{$distroCodename}" : $iteration;
+        $debIteration = $iteration;
         $fullVersion = "{$phpVersion}-{$debIteration}";
 
         $fpmArgs = [...[
@@ -651,11 +652,12 @@ class CreatePackages
 
         $name = "frankenphp";
 
-        $osRelease = parse_ini_file('/etc/os-release');
-        $distroCodename = $osRelease['VERSION_CODENAME'] ?? null;
+        //$osRelease = parse_ini_file('/etc/os-release');
+        //$distroCodename = $osRelease['VERSION_CODENAME'] ?? null;
         $computed = (string) self::getNextIteration($name, $version, $architecture);
         $iteration = self::$iterationOverride ?? $computed;
-        $debIteration = $distroCodename !== '' ? "{$iteration}~{$distroCodename}" : $iteration;
+        //$debIteration = $distroCodename !== '' ? "{$iteration}~{$distroCodename}" : $iteration;
+        $debIteration = $iteration;
 
         $fpmArgs = [
             'fpm',
