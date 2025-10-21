@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "513ceab7e6a5557101fba7bdc7cf14cf",
+    "content-hash": "899aa97008172e26012eb741f3425c5b",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -77,16 +77,16 @@
         },
         {
             "name": "crazywhalecc/static-php-cli",
-            "version": "dev-fix/embed-modules",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "bba390dbcc8718f48f6cd559e20e6d4571fa91e8"
+                "reference": "6a153f9aa0795d5ec435767552065a0506f7879d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/bba390dbcc8718f48f6cd559e20e6d4571fa91e8",
-                "reference": "bba390dbcc8718f48f6cd559e20e6d4571fa91e8",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/6a153f9aa0795d5ec435767552065a0506f7879d",
+                "reference": "6a153f9aa0795d5ec435767552065a0506f7879d",
                 "shasum": ""
             },
             "require": {
@@ -107,6 +107,7 @@
                 "phpstan/phpstan": "^1.10",
                 "phpunit/phpunit": "^10.3 || ^9.5"
             },
+            "default-branch": true,
             "bin": [
                 "bin/spc"
             ],
@@ -133,7 +134,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/fix/embed-modules"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/main"
             },
             "funding": [
                 {
@@ -141,7 +142,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-10-20T21:04:33+00:00"
+            "time": "2025-10-21T03:06:56+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -2304,12 +2305,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "b8812a1af9e8f8b07fd47267a82e1a2add3c1c20"
+                "reference": "b8a07f2b49070920a65c1e5089a21509d0358345"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/b8812a1af9e8f8b07fd47267a82e1a2add3c1c20",
-                "reference": "b8812a1af9e8f8b07fd47267a82e1a2add3c1c20",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/b8a07f2b49070920a65c1e5089a21509d0358345",
+                "reference": "b8a07f2b49070920a65c1e5089a21509d0358345",
                 "shasum": ""
             },
             "conflict": {
@@ -2723,7 +2724,7 @@
                 "luyadev/yii-helpers": "<1.2.1",
                 "macropay-solutions/laravel-crud-wizard-free": "<3.4.17",
                 "maestroerror/php-heic-to-jpg": "<1.0.5",
-                "magento/community-edition": "<=2.4.5.0-patch14|==2.4.6|>=2.4.6.0-patch1,<=2.4.6.0-patch12|>=2.4.7.0-beta1,<=2.4.7.0-patch7|>=2.4.8.0-beta1,<=2.4.8.0-patch2|>=2.4.9.0-alpha1,<=2.4.9.0-alpha2|==2.4.9",
+                "magento/community-edition": "<2.4.6.0-patch13|>=2.4.7.0-beta1,<2.4.7.0-patch8|>=2.4.8.0-beta1,<2.4.8.0-patch3|>=2.4.9.0-alpha1,<2.4.9.0-alpha3|==2.4.9",
                 "magento/core": "<=1.9.4.5",
                 "magento/magento1ce": "<1.9.4.3-dev",
                 "magento/magento1ee": ">=1,<1.14.4.3-dev",
@@ -3276,7 +3277,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-10-20T18:07:29+00:00"
+            "time": "2025-10-20T22:05:40+00:00"
         }
     ],
     "aliases": [],
