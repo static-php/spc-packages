@@ -364,6 +364,11 @@ class CreatePackages
             'ld-linux-x86-64.so.2' => 'libc6',
             'libm.so.6' => 'libc6',
             'libc.so.6' => 'libc6',
+            'libpthread.so.0' => 'libc6',
+            'libutil.so.1' => 'libc6',
+            'libdl.so.2' => 'libc6',
+            'librt.so.1' => 'libc6',
+            'libresolv.so.2' => 'libc6',
             'libgcc_s.so.1' => 'libgcc-s1',
             'libstdc++.so.6' => 'libstdc++6',
         ];
@@ -674,6 +679,11 @@ class CreatePackages
             'ld-linux-x86-64.so.2' => 'libc6',
             'libm.so.6' => 'libc6',
             'libc.so.6' => 'libc6',
+            'libpthread.so.0' => 'libc6',
+            'libutil.so.1' => 'libc6',
+            'libdl.so.2' => 'libc6',
+            'librt.so.1' => 'libc6',
+            'libresolv.so.2' => 'libc6',
             'libgcc_s.so.1' => 'libgcc-s1',
             'libstdc++.so.6' => 'libstdc++6',
         ];
