@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "620621529949888a956141f475b415c4",
+    "content-hash": "c566ce5a1aeca2c51d8d31d9b730deb9",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -77,16 +77,16 @@
         },
         {
             "name": "crazywhalecc/static-php-cli",
-            "version": "dev-revert-spx-temp",
+            "version": "dev-fix/php85",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "ba02c8625ad2c61560717946ccaaeeae1a4a9bb7"
+                "reference": "89baabc76304a555ebcd25c4fa3322db35dcd608"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/ba02c8625ad2c61560717946ccaaeeae1a4a9bb7",
-                "reference": "ba02c8625ad2c61560717946ccaaeeae1a4a9bb7",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/89baabc76304a555ebcd25c4fa3322db35dcd608",
+                "reference": "89baabc76304a555ebcd25c4fa3322db35dcd608",
                 "shasum": ""
             },
             "require": {
@@ -133,7 +133,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/revert-spx-temp"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/fix/php85"
             },
             "funding": [
                 {
@@ -141,7 +141,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-10-22T12:27:16+00:00"
+            "time": "2025-10-23T18:12:52+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -2304,18 +2304,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "9556ff86e44e97158e11fe5ba808f9ba92a7099e"
+                "reference": "785bf86a070e8e21eb07b875d8790a960984d6ca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/9556ff86e44e97158e11fe5ba808f9ba92a7099e",
-                "reference": "9556ff86e44e97158e11fe5ba808f9ba92a7099e",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/785bf86a070e8e21eb07b875d8790a960984d6ca",
+                "reference": "785bf86a070e8e21eb07b875d8790a960984d6ca",
                 "shasum": ""
             },
             "conflict": {
                 "3f/pygmentize": "<1.2",
                 "adaptcms/adaptcms": "<=1.3",
-                "admidio/admidio": "<4.3.12",
+                "admidio/admidio": "<=4.3.16",
                 "adodb/adodb-php": "<=5.22.9",
                 "aheinze/cockpit": "<2.2",
                 "aimeos/ai-admin-graphql": ">=2022.04.1,<2022.10.10|>=2023.04.1,<2023.10.6|>=2024.04.1,<2024.07.2",
@@ -3277,7 +3277,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-10-21T23:05:28+00:00"
+            "time": "2025-10-22T17:05:47+00:00"
         }
     ],
     "aliases": [],
