@@ -265,7 +265,7 @@ jobs:
                 with:
                     install-dependencies: false
                     sudo: false
-                timeout-minutes: 10
+                timeout-minutes: 30
 
     setup-update-matrix:
         runs-on: ubuntu-24.04
