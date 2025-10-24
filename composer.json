@@ -22,7 +22,7 @@
     },
     "prefer-stable": true,
     "require": {
-        "php": ">=8.4",g
+        "php": ">=8.4",
         "crazywhalecc/static-php-cli": "dev-main",
         "laravel/helpers": "^1.7",
         "ext-zlib": "*",
