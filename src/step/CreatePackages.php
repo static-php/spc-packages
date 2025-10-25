@@ -227,6 +227,23 @@ class CreatePackages
             '--url', 'rpms.henderkes.com',
         ], ...$extraArgs];
 
+        // Ensure non-CLI packages depend on the same PHP major.minor as php-zts-cli (ignore iteration/patch)
+        if ($name !== self::getPrefix() . '-cli') {
+            [$fullPhpVersion] = self::getPhpVersionAndArchitecture();
+            if (preg_match('/^(\d+)\.(\d+)/', $fullPhpVersion, $m)) {
+                $maj = (int)$m[1];
+                $min = (int)$m[2];
+                $nextMin = $min + 1;
+                $lowerBound = sprintf('%d.%d', $maj, $min);
+                $upperBound = sprintf('%d.%d', $maj, $nextMin);
+                // RPM range: >= X.Y and < X.(Y+1)
+                $fpmArgs[] = '--depends';
+                $fpmArgs[] = self::getPrefix() . "-cli >= {$lowerBound}";
+                $fpmArgs[] = '--depends';
+                $fpmArgs[] = self::getPrefix() . "-cli < {$upperBound}";
+            }
+        }
+
         if (isset($config['provides']) && is_array($config['provides'])) {
             foreach ($config['provides'] as $provide) {
                 $fpmArgs[] = '--provides';
@@ -345,6 +362,22 @@ class CreatePackages
             '--vendor', 'Marc Henderkes <debs@henderkes.com>',
             '--url', 'debs.henderkes.com',
         ], ...$extraArgs];
+
+        // Ensure non-CLI packages depend on the same PHP major.minor as php-zts-cli (ignore iteration/patch)
+        if ($name !== self::getPrefix() . '-cli') {
+            if (preg_match('/^(\d+)\.(\d+)/', $phpVersion, $m)) {
+                $maj = (int)$m[1];
+                $min = (int)$m[2];
+                $nextMin = $min + 1;
+                $lowerBound = sprintf('%d.%d', $maj, $min);
+                // For Debian, use an upper bound with tilde to exclude the next minor and its pre-releases
+                $upperBound = sprintf('%d.%d~', $maj, $nextMin);
+                $fpmArgs[] = '--depends';
+                $fpmArgs[] = self::getPrefix() . "-cli (>= {$lowerBound})";
+                $fpmArgs[] = '--depends';
+                $fpmArgs[] = self::getPrefix() . "-cli (<< {$upperBound})";
+            }
+        }
 
         if (isset($config['provides']) && is_array($config['provides'])) {
             foreach ($config['provides'] as $provide) {
