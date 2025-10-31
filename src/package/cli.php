@@ -18,7 +18,10 @@ class cli implements package
         file_put_contents(TEMP_DIR . '/php.ini', $contents);
         $provides = ['php-zts'];
         $replaces = [];
-        $configFiles = [getConfdir() . '/php.ini'];
+        $configFiles = [
+            getConfdir(),
+            getConfdir() . '/php.ini'
+        ];
         $files = [
             TEMP_DIR . '/php.ini' => getConfdir() . '/php.ini',
             BUILD_BIN_PATH . '/php' => '/usr/bin/php-zts',
