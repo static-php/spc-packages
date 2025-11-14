@@ -94,6 +94,7 @@ class RunSPC
             self::replaceInFiles(BUILD_BIN_PATH . '/php-config', '/app/buildroot', $movedDir);
             self::replaceInFiles(BUILD_LIB_PATH . '/pkgconfig', $builtDir, $movedDir);
             self::replaceInFiles(BUILD_LIB_PATH . '/pkgconfig', '/app/buildroot', $movedDir);
+            rmdir(BASE_PATH . '/vendor/crazywhalecc/static-php-cli/source/grpc'); // we need space
 
             return true;
         } catch (Exception $e) {
