@@ -200,10 +200,18 @@ jobs:
                     tar -xzf downloads.tar.gz -C vendor/crazywhalecc/static-php-cli/downloads
                     rm downloads.tar.gz
 
-            -   name: Build PHP and packages
+            -   name: Build PHP
                 run: |
                     TARGET=${{ matrix.alma == 9 && matrix.arch == 'x86_64' && 'native-native-gnu.2.34' || 'native-native-gnu' }}
-                    php bin/spp all --target=$TARGET --type=rpm --phpv=${{ matrix.php-version }} --iteration="${{ env.ITERATION }}"
+                    php bin/spp build --target=$TARGET --phpv=${{ matrix.php-version }}
+
+            -   name: Remove spc build dir to clear up space for gh runners
+                run: rm -rf vendor/crazywhalecc/static-php-cli/source vendor/crazywhalecc/static-php-cli/buildroot
+
+            -   name: Build rpm packages
+                run: |
+                    TARGET=${{ matrix.alma == 9 && matrix.arch == 'x86_64' && 'native-native-gnu.2.34' || 'native-native-gnu' }}
+                    php bin/spp package --target=$TARGET --type=rpm --phpv=${{ matrix.php-version }} --iteration="${{ env.ITERATION }}"
 
             -   name: Prepare rpm signing
                 run: |

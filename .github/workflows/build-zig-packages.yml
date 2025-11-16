@@ -107,7 +107,14 @@ jobs:
 
             -   name: Build PHP and packages
                 run: |
-                    php bin/spp all --target=${{ matrix.target }} --type=rpm --phpv=${{ matrix.php-version }} --iteration="${{ env.ITERATION }}"
+                    php bin/spp build --target=${{ matrix.target }} --phpv=${{ matrix.php-version }}
+
+            -   name: Remove spc build dir to clear up space for gh runners
+                run: sudo rm -rf vendor/crazywhalecc/static-php-cli/source vendor/crazywhalecc/static-php-cli/buildroot
+
+            -   name: Build PHP and packages
+                run: |
+                    php bin/spp package --target=${{ matrix.target }} --type=rpm --phpv=${{ matrix.php-version }} --iteration="${{ env.ITERATION }}"
 
             -   name: Prepare rpm signing
                 run: |

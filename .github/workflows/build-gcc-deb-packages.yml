@@ -86,8 +86,14 @@ jobs:
                     tar -xzf downloads.tar.gz -C vendor/crazywhalecc/static-php-cli/downloads
                     rm downloads.tar.gz
 
-            -   name: Build PHP and packages (deb)
-                run: php bin/spp all --target=native-native-gnu --type=deb --phpv=${{ matrix.php-version }}
+            -   name: Build PHP
+                run: php bin/spp build --target=native-native-gnu --phpv=${{ matrix.php-version }}
+
+            -   name: Remove spc build dir to clear up space for gh runners
+                run: sudo rm -rf vendor/crazywhalecc/static-php-cli/source vendor/crazywhalecc/static-php-cli/buildroot
+
+            -   name: Build deb packages
+                run: php bin/spp package --target=native-native-gnu --type=deb --phpv=${{ matrix.php-version }}
 
             -   name: Stage deb artifacts
                 run: |

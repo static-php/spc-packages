@@ -23,7 +23,7 @@
     "prefer-stable": true,
     "require": {
         "php": ">=8.4",
-        "crazywhalecc/static-php-cli": "dev-frankenphp/mbed",
+        "crazywhalecc/static-php-cli": "dev-feat/no-strip",
         "laravel/helpers": "^1.7",
         "ext-zlib": "*",
         "twig/twig": "^3.0"
