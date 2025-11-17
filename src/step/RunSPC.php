@@ -84,6 +84,12 @@ class RunSPC
 
             echo "Static PHP CLI build completed successfully.\n";
 
+            // Free up space for github runners
+            if (getenv('CI') || getenv('GITHUB_ACTION')) {
+                rmdir(BASE_PATH . '/vendor/crazywhalecc/static-php-cli/source');
+                rmdir(BASE_PATH . '/vendor/crazywhalecc/static-php-cli/downloads');
+            }
+
             // Copy the built files to our build directory
             self::copyBuiltFiles($phpVersion);
 
