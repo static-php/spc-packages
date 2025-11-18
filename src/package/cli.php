@@ -84,10 +84,24 @@ BASH;
         chmod(TEMP_DIR . '/cli-after-install.sh', 0755);
         chmod(TEMP_DIR . '/cli-after-remove.sh', 0755);
 
-        // Set the package as architecture-independent (noarch) and add metadata
         return [
             '--after-install', TEMP_DIR . '/cli-after-install.sh',
             '--after-remove', TEMP_DIR . '/cli-after-remove.sh'
+        ];
+    }
+
+    public function getDebuginfoFpmConfig(): array
+    {
+        $src = BUILD_ROOT_PATH . '/debug/php-zts.debug';
+        if (!file_exists($src)) {
+            return [];
+        }
+        $target = '/usr/lib/debug/usr/bin/php-zts.debug';
+        return [
+            'depends' => [CreatePackages::getPrefix() . '-cli'],
+            'files' => [
+                $src => $target,
+            ],
         ];
     }
 }

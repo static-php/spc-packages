@@ -199,4 +199,23 @@ class extension implements package
     {
         return [];
     }
+
+    public function getDebuginfoFpmConfig(): array
+    {
+        if (!$this->isSharedExtension()) {
+            return [];
+        }
+        $src = BUILD_ROOT_PATH . '/debug/' . $this->name . '.so.debug';
+        if (!file_exists($src)) {
+            return [];
+        }
+        $targetSo = getLibdir() . '/' . CreatePackages::getPrefix() . '/modules/' . $this->name . '.so';
+        $target = '/usr/lib/debug' . $targetSo . '.debug';
+        return [
+            'depends' => [CreatePackages::getPrefix() . '-' . $this->name],
+            'files' => [
+                $src => $target,
+            ],
+        ];
+    }
 }

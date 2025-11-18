@@ -8,10 +8,10 @@ After=network.target
 
 [Service]
 Type=notify
-ExecStart=/usr/sbin/php-zts-fpm --nodaemonize
+ExecStart=/usr/sbin/php-fpm-zts --nodaemonize
 ExecReload=/bin/kill -USR2 $MAINPID
 PrivateTmp=true
-RuntimeDirectory=php-zts-fpm
+RuntimeDirectory=php-fpm-zts
 RuntimeDirectoryMode=0755
 
 [Install]

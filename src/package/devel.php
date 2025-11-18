@@ -91,4 +91,9 @@ class devel implements package
     {
         return [];
     }
+
+    public function getDebuginfoFpmConfig(): array
+    {
+        return [];
+    }
 }

@@ -29,4 +29,21 @@ class embed implements package
     {
         return [];
     }
+
+    public function getDebuginfoFpmConfig(): array
+    {
+        $phpVersionDigits = str_replace('.', '', SPP_PHP_VERSION);
+        $libName = 'lib' . CreatePackages::getPrefix() . "-{$phpVersionDigits}.so";
+        $src = BUILD_ROOT_PATH . '/debug/' . $libName . '.debug';
+        if (!file_exists($src)) {
+            return [];
+        }
+        $target = '/usr/lib/debug' . getLibdir() . '/' . $libName . '.debug';
+        return [
+            'depends' => [CreatePackages::getPrefix() . '-embed'],
+            'files' => [
+                $src => $target,
+            ],
+        ];
+    }
 }

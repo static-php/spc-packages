@@ -47,6 +47,70 @@ class RunSPC
         }
     }
 
+    private static function fixGnuDebugLinks(): void
+    {
+        $debugDir = BUILD_ROOT_PATH . '/debug';
+        $binDir = BUILD_BIN_PATH;
+
+        if (!is_dir($debugDir)) {
+            echo "No debug directory found at {$debugDir}, skipping GNU debuglink normalization.\n";
+            return;
+        }
+
+        $ensureRename = function (string $from, string $to) {
+            if ($from === $to) {
+                return;
+            }
+            if (file_exists($from)) {
+                if (!file_exists($to)) {
+                    if (!@rename($from, $to)) {
+                        echo "Failed to rename {$from} -> {$to}\n";
+                    } else {
+                        echo "Renamed {$from} -> {$to}\n";
+                    }
+                } else {
+                    @unlink($from);
+                }
+            }
+        };
+
+        $sapiMap = [
+            $binDir . '/php' => $debugDir . '/php-zts.debug',
+            $binDir . '/php-fpm' => $debugDir . '/php-fpm-zts.debug',
+            $binDir . '/php-cgi' => $debugDir . '/php-cgi-zts.debug',
+            $binDir . '/frankenphp' => $debugDir . '/frankenphp.debug',
+        ];
+
+        $ensureRename($debugDir . '/php.debug', $debugDir . '/php-zts.debug');
+        $ensureRename($debugDir . '/php-fpm.debug', $debugDir . '/php-fpm-zts.debug');
+        $ensureRename($debugDir . '/php-cgi.debug', $debugDir . '/php-cgi-zts.debug');
+
+        foreach ($sapiMap as $binary => $dbgFile) {
+            if (!file_exists($binary)) {
+                continue;
+            }
+            self::runProcess(['objcopy', '--remove-gnu-debuglink', $binary], "Removed existing gnu-debuglink from {$binary}");
+            if (file_exists($dbgFile)) {
+                self::runProcess(['objcopy', '--add-gnu-debuglink=' . $dbgFile, $binary], "Added gnu-debuglink to {$binary} -> {$dbgFile}");
+            }
+        }
+    }
+
+
+    private static function runProcess(array $cmd, string $okMessage): void
+    {
+        $p = new Process($cmd);
+        $p->setTimeout(null);
+        $p->run();
+        if ($p->isSuccessful()) {
+            echo $okMessage . "\n";
+        } else {
+            // Log but do not fail the build
+            $bin = is_array($cmd) ? implode(' ', $cmd) : (string)$cmd;
+            echo "Warning: command failed: {$bin}\n" . $p->getErrorOutput() . "\n";
+        }
+    }
+
     public static function run(bool $debug = false, string $phpVersion = '8.4'): bool
     {
         $craftYmlDest = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/craft.yml';
@@ -101,6 +165,9 @@ class RunSPC
             self::replaceInFiles(BUILD_BIN_PATH . '/php-config', '/app/buildroot', $movedDir);
             self::replaceInFiles(BUILD_LIB_PATH . '/pkgconfig', $builtDir, $movedDir);
             self::replaceInFiles(BUILD_LIB_PATH . '/pkgconfig', '/app/buildroot', $movedDir);
+
+            // After files are copied and paths fixed, normalize GNU debug links
+            self::fixGnuDebugLinks();
 
             return true;
         } catch (Exception $e) {

@@ -19,8 +19,8 @@ class fpm implements package
             'files' => [
                 TEMP_DIR . '/php-fpm.conf' => getConfdir() . '/php-fpm.conf',
                 INI_PATH . '/www.conf' => getConfdir() . '/fpm.d/www.conf',
-                INI_PATH . '/php-fpm.service' => '/usr/lib/systemd/system/php-zts-fpm.service',
-                BUILD_BIN_PATH . '/php-fpm' => '/usr/sbin/php-zts-fpm',
+                INI_PATH . '/php-fpm.service' => '/usr/lib/systemd/system/php-fpm-zts.service',
+                BUILD_BIN_PATH . '/php-fpm' => '/usr/sbin/php-fpm-zts',
             ],
             'empty_directories' => [
                 getConfdir() . '/fpm.d/',
@@ -36,5 +36,20 @@ class fpm implements package
     public function getFpmExtraArgs(): array
     {
         return [];
+    }
+
+    public function getDebuginfoFpmConfig(): array
+    {
+        $src = BUILD_ROOT_PATH . '/debug/php-fpm-zts.debug';
+        if (!file_exists($src)) {
+            return [];
+        }
+        $target = '/usr/lib/debug/usr/sbin/php-fpm-zts.debug';
+        return [
+            'depends' => [CreatePackages::getPrefix() . '-fpm'],
+            'files' => [
+                $src => $target,
+            ],
+        ];
     }
 }

@@ -107,6 +107,11 @@ class CreatePackages
         $config = $package->getFpmConfig($phpVersion, $iteration);
 
         self::createPackageWithFpm(self::getPrefix() . "-{$sapi}", $config, $phpVersion, $architecture, $iteration, $package->getFpmExtraArgs());
+
+        $dbgConfig = $package->getDebuginfoFpmConfig();
+        if (is_array($dbgConfig) && !empty($dbgConfig['files'])) {
+            self::createPackageWithFpm(self::getPrefix() . "-{$sapi}-debuginfo", $dbgConfig, $phpVersion, $architecture, $iteration);
+        }
     }
 
     private static function createExtensionPackages(): void
@@ -142,6 +147,11 @@ class CreatePackages
         }
 
         self::createPackageWithFpm(self::getPrefix() . "-{$extension}", $config, $extensionVersion, $architecture, $iteration, $package->getFpmExtraArgs());
+
+        $dbgConfig = $package->getDebuginfoFpmConfig();
+        if (is_array($dbgConfig) && !empty($dbgConfig['files'])) {
+            self::createPackageWithFpm(self::getPrefix() . "-{$extension}-debuginfo", $dbgConfig, $extensionVersion, $architecture, $iteration);
+        }
     }
 
     private static function getExtensionVersion(string $extension, string $phpVersion): string
@@ -242,6 +252,12 @@ class CreatePackages
                 $fpmArgs[] = '--depends';
                 $fpmArgs[] = self::getPrefix() . "-cli < {$upperBound}";
             }
+        }
+
+        if (str_ends_with($name, '-debuginfo')) {
+            $base = preg_replace('/-debuginfo$/', '', $name);
+            $fpmArgs[] = '--depends';
+            $fpmArgs[] = sprintf('%s = %s-%s', $base, $phpVersion, $iteration);
         }
 
         if (isset($config['provides']) && is_array($config['provides'])) {
@@ -377,6 +393,13 @@ class CreatePackages
                 $fpmArgs[] = '--depends';
                 $fpmArgs[] = self::getPrefix() . "-cli (<< {$upperBound})";
             }
+        }
+
+        // If this is a debuginfo package, make it depend exactly on its base package version-iteration
+        if (str_ends_with($name, '-debuginfo')) {
+            $base = preg_replace('/-debuginfo$/', '', $name);
+            $fpmArgs[] = '--depends';
+            $fpmArgs[] = sprintf('%s (= %s)', $base, $fullVersion);
         }
 
         if (isset($config['provides']) && is_array($config['provides'])) {
@@ -672,6 +695,32 @@ class CreatePackages
         });
 
         echo "RPM package created: " . DIST_RPM_PATH . "/{$name}-{$version}-{$iteration}.{$architecture}.rpm\n";
+
+        // Create FrankenPHP debuginfo package if debug file exists
+        $frankenDbg = BUILD_ROOT_PATH . '/debug/frankenphp.debug';
+        if (file_exists($frankenDbg)) {
+            $dbgArgs = [
+                'fpm',
+                '-s', 'dir',
+                '-t', 'rpm',
+                '--rpm-compression', 'xz',
+                '-p', DIST_RPM_PATH,
+                '-n', $name . '-debuginfo',
+                '-v', $version,
+                '--iteration', $iteration,
+                '--architecture', $architecture,
+                '--depends', sprintf('%s = %s-%s', $name, $version, $iteration),
+                $frankenDbg . '=/usr/lib/debug/usr/bin/frankenphp.debug',
+            ];
+            $dbgProcess = new Process($dbgArgs);
+            $dbgProcess->setTimeout(null);
+            $dbgProcess->run(function ($type, $buffer) {
+                echo $buffer;
+            });
+            if (!$dbgProcess->isSuccessful()) {
+                throw new \RuntimeException("RPM debuginfo package creation failed: " . $dbgProcess->getErrorOutput());
+            }
+        }
     }
 
     private static function createDebFrankenPhpPackage(mixed $architecture)
@@ -760,6 +809,32 @@ class CreatePackages
         });
 
         echo "DEB package created: " . DIST_DEB_PATH . "/{$name}-{$version}-{$debIteration}.{$architecture}.deb\n";
+
+        // Create FrankenPHP debuginfo package if debug file exists
+        $frankenDbg = BUILD_ROOT_PATH . '/debug/frankenphp.debug';
+        if (file_exists($frankenDbg)) {
+            $dbgArgs = [
+                'fpm',
+                '-s', 'dir',
+                '-t', 'deb',
+                '--deb-compression', 'xz',
+                '-p', DIST_DEB_PATH,
+                '-n', $name . '-debuginfo',
+                '-v', $version,
+                '--iteration', $debIteration,
+                '--architecture', $architecture,
+                '--depends', sprintf('%s (= %s-%s)', $name, $version, $debIteration),
+                $frankenDbg . '=/usr/lib/debug/usr/bin/frankenphp.debug',
+            ];
+            $dbgProcess = new Process($dbgArgs);
+            $dbgProcess->setTimeout(null);
+            $dbgProcess->run(function ($type, $buffer) {
+                echo $buffer;
+            });
+            if (!$dbgProcess->isSuccessful()) {
+                throw new \RuntimeException("DEB debuginfo package creation failed: " . $dbgProcess->getErrorOutput());
+            }
+        }
     }
 
     private static function prepareFrankenPhpRepository(): string
