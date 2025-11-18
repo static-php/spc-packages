@@ -81,21 +81,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-<<<<<<< HEAD
-                "reference": "d69826eb4a19170662fc0cde02bfce4f938e07e6"
+                "reference": "875e1d05cd3f2be99a9593ea1664a9f1ee8e7836"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/d69826eb4a19170662fc0cde02bfce4f938e07e6",
-                "reference": "d69826eb4a19170662fc0cde02bfce4f938e07e6",
-=======
-                "reference": "ecea6c12cd30ffaee76e79805e004d33641615b0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/ecea6c12cd30ffaee76e79805e004d33641615b0",
-                "reference": "ecea6c12cd30ffaee76e79805e004d33641615b0",
->>>>>>> e97a0bc (update spc)
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/875e1d05cd3f2be99a9593ea1664a9f1ee8e7836",
+                "reference": "875e1d05cd3f2be99a9593ea1664a9f1ee8e7836",
                 "shasum": ""
             },
             "require": {
@@ -150,11 +141,7 @@
                     "type": "other"
                 }
             ],
-<<<<<<< HEAD
-            "time": "2025-11-16T10:30:53+00:00"
-=======
-            "time": "2025-11-18T13:35:58+00:00"
->>>>>>> e97a0bc (update spc)
+            "time": "2025-11-18T16:50:49+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -2325,21 +2312,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-<<<<<<< HEAD
-                "reference": "6c7e6e7ebf679f9228c82ec3f7a432b4e8df538e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/6c7e6e7ebf679f9228c82ec3f7a432b4e8df538e",
-                "reference": "6c7e6e7ebf679f9228c82ec3f7a432b4e8df538e",
-=======
                 "reference": "78c716e0d0b6c32de522e299c42b977977d21cb3"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/78c716e0d0b6c32de522e299c42b977977d21cb3",
                 "reference": "78c716e0d0b6c32de522e299c42b977977d21cb3",
->>>>>>> e97a0bc (update spc)
                 "shasum": ""
             },
             "conflict": {
@@ -3318,11 +3296,7 @@
                     "type": "tidelift"
                 }
             ],
-<<<<<<< HEAD
-            "time": "2025-11-14T21:05:13+00:00"
-=======
             "time": "2025-11-17T18:06:55+00:00"
->>>>>>> e97a0bc (update spc)
         }
     ],
     "aliases": [],
