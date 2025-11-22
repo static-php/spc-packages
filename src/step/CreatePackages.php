@@ -418,6 +418,7 @@ class CreatePackages
 
         $systemLibraryMap = [
             'ld-linux-x86-64.so.2' => 'libc6',
+            'ld-linux-aarch64.so.1' => 'libc6',
             'libm.so.6' => 'libc6',
             'libc.so.6' => 'libc6',
             'libpthread.so.0' => 'libc6',
@@ -759,6 +760,7 @@ class CreatePackages
 
         $systemLibraryMap = [
             'ld-linux-x86-64.so.2' => 'libc6',
+            'ld-linux-aarch64.so.1' => 'libc6',
             'libm.so.6' => 'libc6',
             'libc.so.6' => 'libc6',
             'libpthread.so.0' => 'libc6',
