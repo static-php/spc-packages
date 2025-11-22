@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f5d658896f6f905d99d3075ec50ace33",
+    "content-hash": "d474ed0aa723d219f97a58fca1c2ce33",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -77,16 +77,16 @@
         },
         {
             "name": "crazywhalecc/static-php-cli",
-            "version": "dev-feat/libcurl-extra",
+            "version": "dev-fix/musl-dl",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "e9ad3c0011b0bcf1170b1c97c803cb429eefa117"
+                "reference": "5606b70c1cd259c0526904aeeab6cbb1a9b96881"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/e9ad3c0011b0bcf1170b1c97c803cb429eefa117",
-                "reference": "e9ad3c0011b0bcf1170b1c97c803cb429eefa117",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/5606b70c1cd259c0526904aeeab6cbb1a9b96881",
+                "reference": "5606b70c1cd259c0526904aeeab6cbb1a9b96881",
                 "shasum": ""
             },
             "require": {
@@ -133,7 +133,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/feat/libcurl-extra"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/fix/musl-dl"
             },
             "funding": [
                 {
@@ -141,7 +141,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-11-21T08:21:22+00:00"
+            "time": "2025-11-22T08:04:17+00:00"
         },
         {
             "name": "doctrine/inflector",
