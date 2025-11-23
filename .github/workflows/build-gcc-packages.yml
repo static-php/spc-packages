@@ -23,6 +23,10 @@ on:
                 description: "Optional: Architectures (comma-separated, e.g., x86_64,arm64). Leave empty for all"
                 required: false
                 default: ""
+            packages:
+                description: "Optional: override packages list. Leave empty for default"
+                required: false
+                default: ""
 
 jobs:
     setup-matrix:
@@ -78,6 +82,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             BASH_ENV: /tmp/gha-bashenv
             ITERATION: ${{ inputs.iteration || '' }}
+            PACKAGES: ${{ inputs.packages || '' }}
         strategy:
             fail-fast: false
             matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
@@ -203,7 +208,11 @@ jobs:
             -   name: Build PHP
                 run: |
                     TARGET=${{ matrix.alma == 9 && matrix.arch == 'x86_64' && 'native-native-gnu.2.34' || 'native-native-gnu' }}
-                    php bin/spp build --target=$TARGET --phpv=${{ matrix.php-version }}
+                    PACKAGES_FLAG=""
+                    if [[ -n "${{ env.PACKAGES }}" ]]; then
+                      PACKAGES_FLAG="--packages=${{ env.PACKAGES }}"
+                    fi
+                    php bin/spp build --target=$TARGET --phpv=${{ matrix.php-version }} $PACKAGES_FLAG
 
             -   name: Remove spc build dir to clear up space for gh runners
                 run: rm -rf vendor/crazywhalecc/static-php-cli/source vendor/crazywhalecc/static-php-cli/buildroot
@@ -211,7 +220,11 @@ jobs:
             -   name: Build rpm packages
                 run: |
                     TARGET=${{ matrix.alma == 9 && matrix.arch == 'x86_64' && 'native-native-gnu.2.34' || 'native-native-gnu' }}
-                    php bin/spp package --target=$TARGET --type=rpm --phpv=${{ matrix.php-version }} --iteration="${{ env.ITERATION }}"
+                    PACKAGES_FLAG=""
+                    if [[ -n "${{ env.PACKAGES }}" ]]; then
+                      PACKAGES_FLAG="--packages=${{ env.PACKAGES }}"
+                    fi
+                    php bin/spp package --target=$TARGET --type=rpm --phpv=${{ matrix.php-version }} --iteration="${{ env.ITERATION }}" $PACKAGES_FLAG
 
             -   name: Prepare rpm signing
                 run: |
