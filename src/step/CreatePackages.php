@@ -380,8 +380,10 @@ class CreatePackages
         ], ...$extraArgs];
 
         // Ensure non-CLI packages depend on the same PHP major.minor as php-zts-cli (ignore iteration/patch)
+        // IMPORTANT: Use the actual PHP runtime version, not the package's own version (extensions have their own versioning)
         if ($name !== self::getPrefix() . '-cli') {
-            if (preg_match('/^(\d+)\.(\d+)/', $phpVersion, $m)) {
+            [$fullPhpVersion] = self::getPhpVersionAndArchitecture();
+            if (preg_match('/^(\d+)\.(\d+)/', $fullPhpVersion, $m)) {
                 $maj = (int)$m[1];
                 $min = (int)$m[2];
                 $nextMin = $min + 1;
