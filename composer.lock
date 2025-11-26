@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d474ed0aa723d219f97a58fca1c2ce33",
+    "content-hash": "42577d73d70f0eea0b2ee760a77c78d6",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -77,16 +77,16 @@
         },
         {
             "name": "crazywhalecc/static-php-cli",
-            "version": "dev-fix/musl-dl",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "5606b70c1cd259c0526904aeeab6cbb1a9b96881"
+                "reference": "5d1043334da415fae3f05576e95b040c60b08515"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/5606b70c1cd259c0526904aeeab6cbb1a9b96881",
-                "reference": "5606b70c1cd259c0526904aeeab6cbb1a9b96881",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/5d1043334da415fae3f05576e95b040c60b08515",
+                "reference": "5d1043334da415fae3f05576e95b040c60b08515",
                 "shasum": ""
             },
             "require": {
@@ -107,6 +107,7 @@
                 "phpstan/phpstan": "^1.10",
                 "phpunit/phpunit": "^10.3 || ^9.5"
             },
+            "default-branch": true,
             "bin": [
                 "bin/spc"
             ],
@@ -133,7 +134,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/fix/musl-dl"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/main"
             },
             "funding": [
                 {
@@ -141,7 +142,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-11-22T08:04:17+00:00"
+            "time": "2025-11-26T07:32:26+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -235,7 +236,7 @@
         },
         {
             "name": "illuminate/collections",
-            "version": "v11.46.1",
+            "version": "v11.46.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/collections.git",
@@ -291,7 +292,7 @@
         },
         {
             "name": "illuminate/conditionable",
-            "version": "v11.46.1",
+            "version": "v11.46.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/conditionable.git",
@@ -337,7 +338,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v11.46.1",
+            "version": "v11.46.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -385,7 +386,7 @@
         },
         {
             "name": "illuminate/macroable",
-            "version": "v11.46.1",
+            "version": "v11.46.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/macroable.git",
@@ -431,7 +432,7 @@
         },
         {
             "name": "illuminate/support",
-            "version": "v11.46.1",
+            "version": "v11.46.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
@@ -508,16 +509,16 @@
         },
         {
             "name": "laravel/helpers",
-            "version": "v1.8.1",
+            "version": "v1.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/helpers.git",
-                "reference": "d0094b4bc4364560c8ee3a9e956596d760d4afab"
+                "reference": "98499eea4c1cca76fb0fb37ed365a468773daf0a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/helpers/zipball/d0094b4bc4364560c8ee3a9e956596d760d4afab",
-                "reference": "d0094b4bc4364560c8ee3a9e956596d760d4afab",
+                "url": "https://api.github.com/repos/laravel/helpers/zipball/98499eea4c1cca76fb0fb37ed365a468773daf0a",
+                "reference": "98499eea4c1cca76fb0fb37ed365a468773daf0a",
                 "shasum": ""
             },
             "require": {
@@ -526,7 +527,7 @@
             },
             "require-dev": {
                 "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "^7.0|^8.0|^9.0|^10.0"
+                "phpunit/phpunit": "^7.0|^8.0|^9.0|^10.0|^11.0|^12.0"
             },
             "type": "library",
             "extra": {
@@ -559,9 +560,9 @@
                 "laravel"
             ],
             "support": {
-                "source": "https://github.com/laravel/helpers/tree/v1.8.1"
+                "source": "https://github.com/laravel/helpers/tree/v1.8.2"
             },
-            "time": "2025-09-02T15:31:25+00:00"
+            "time": "2025-11-25T14:46:28+00:00"
         },
         {
             "name": "laravel/prompts",
@@ -2312,12 +2313,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "f5a58d09ea64ab1d080876ee3abbd3b90dd022d6"
+                "reference": "3f393e137e490ecb2ac77989a692129c31192de7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/f5a58d09ea64ab1d080876ee3abbd3b90dd022d6",
-                "reference": "f5a58d09ea64ab1d080876ee3abbd3b90dd022d6",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/3f393e137e490ecb2ac77989a692129c31192de7",
+                "reference": "3f393e137e490ecb2ac77989a692129c31192de7",
                 "shasum": ""
             },
             "conflict": {
@@ -2443,7 +2444,7 @@
                 "contao/comments-bundle": ">=2,<4.13.40|>=5.0.0.0-RC1-dev,<5.3.4",
                 "contao/contao": ">=3,<3.5.37|>=4,<4.4.56|>=4.5,<4.13.56|>=5,<5.3.38|>=5.4.0.0-RC1-dev,<5.6.1",
                 "contao/core": "<3.5.39",
-                "contao/core-bundle": "<4.13.56|>=5,<5.3.38|>=5.4,<5.6.1",
+                "contao/core-bundle": "<4.13.57|>=5,<5.3.42|>=5.4,<5.6.5",
                 "contao/listing-bundle": ">=3,<=3.5.30|>=4,<4.4.8",
                 "contao/managed-edition": "<=1.5",
                 "corveda/phpsandbox": "<1.3.5",
@@ -2608,7 +2609,7 @@
                 "genix/cms": "<=1.1.11",
                 "georgringer/news": "<1.3.3",
                 "geshi/geshi": "<=1.0.9.1",
-                "getformwork/formwork": "<1.13.1|>=2.0.0.0-beta1,<2.0.0.0-beta4",
+                "getformwork/formwork": "<2.2",
                 "getgrav/grav": "<1.7.46",
                 "getkirby/cms": "<3.9.8.3-dev|>=3.10,<3.10.1.2-dev|>=4,<4.7.1|>=5,<5.1.4",
                 "getkirby/kirby": "<3.9.8.3-dev|>=3.10,<3.10.1.2-dev|>=4,<4.7.1",
@@ -2948,7 +2949,7 @@
                 "rap2hpoutre/laravel-log-viewer": "<0.13",
                 "react/http": ">=0.7,<1.9",
                 "really-simple-plugins/complianz-gdpr": "<6.4.2",
-                "redaxo/source": "<5.18.3",
+                "redaxo/source": "<5.20.1",
                 "remdex/livehelperchat": "<4.29",
                 "renolit/reint-downloadmanager": "<4.0.2|>=5,<5.0.1",
                 "reportico-web/reportico": "<=8.1",
@@ -3300,7 +3301,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-11-20T22:05:30+00:00"
+            "time": "2025-11-26T00:22:38+00:00"
         }
     ],
     "aliases": [],
