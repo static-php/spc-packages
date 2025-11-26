@@ -1,9 +1,9 @@
 php-version: {{ php_version }}
 extensions: calendar,ctype,curl,dom,exif,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib
 {% if php_version == '8.5' %}
-shared-extensions: apcu,ast,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,inotify,intl,ldap,lz4,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pgsql,protobuf,rar,rdkafka,shmop,simdjson,snappy,soap,sqlite3,sqlsrv,ssh2,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xhprof,xlswriter,xsl,xz,yaml,zip,zstd
+shared-extensions: apcu,ast,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,inotify,intl,ldap,lz4,maxminddb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pgsql,protobuf,rar,rdkafka,shmop,simdjson,snappy,soap,sqlite3,sqlsrv,ssh2,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xhprof,xlswriter,xsl,xz,yaml,zip,zstd
 {% else %}
-shared-extensions: amqp,apcu,ast,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,simdjson,snappy,soap,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,trader,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zip,zstd
+shared-extensions: amqp,apcu,ast,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,maxminddb,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,simdjson,snappy,soap,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,trader,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zip,zstd
 {% endif %}
 libs: [libacl, libavif, brotli, watcher]
 sapi: cli,cgi,fpm,embed,frankenphp
