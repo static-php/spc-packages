@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "42577d73d70f0eea0b2ee760a77c78d6",
+    "content-hash": "8f7293ea40808737e22f650dc4cc3a36",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -77,7 +77,7 @@
         },
         {
             "name": "crazywhalecc/static-php-cli",
-            "version": "dev-main",
+            "version": "2.7.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
@@ -107,7 +107,6 @@
                 "phpstan/phpstan": "^1.10",
                 "phpunit/phpunit": "^10.3 || ^9.5"
             },
-            "default-branch": true,
             "bin": [
                 "bin/spc"
             ],
@@ -134,7 +133,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/main"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/2.7.8"
             },
             "funding": [
                 {
@@ -3307,7 +3306,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "crazywhalecc/static-php-cli": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,
