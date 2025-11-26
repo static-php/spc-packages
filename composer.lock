@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8f7293ea40808737e22f650dc4cc3a36",
+    "content-hash": "1009e38654ffd3fb3e0d2a229da0b25d",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -77,16 +77,16 @@
         },
         {
             "name": "crazywhalecc/static-php-cli",
-            "version": "2.7.8",
+            "version": "dev-fix/maxminddb-shared",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "5d1043334da415fae3f05576e95b040c60b08515"
+                "reference": "5b8c9e6f09a5f1467f77e553f445e76bd787f6e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/5d1043334da415fae3f05576e95b040c60b08515",
-                "reference": "5d1043334da415fae3f05576e95b040c60b08515",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/5b8c9e6f09a5f1467f77e553f445e76bd787f6e0",
+                "reference": "5b8c9e6f09a5f1467f77e553f445e76bd787f6e0",
                 "shasum": ""
             },
             "require": {
@@ -133,7 +133,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/2.7.8"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/fix/maxminddb-shared"
             },
             "funding": [
                 {
@@ -141,7 +141,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-11-26T07:32:26+00:00"
+            "time": "2025-11-26T08:37:21+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -3306,6 +3306,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "crazywhalecc/static-php-cli": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,

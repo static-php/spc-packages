@@ -23,7 +23,7 @@
     "prefer-stable": true,
     "require": {
         "php": ">=8.4",
-        "crazywhalecc/static-php-cli": "^2.7.8",
+        "crazywhalecc/static-php-cli": "dev-fix/maxminddb-shared",
         "laravel/helpers": "^1.7",
         "ext-zlib": "*",
         "twig/twig": "^3.0"
