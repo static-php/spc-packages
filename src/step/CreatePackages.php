@@ -46,18 +46,51 @@ class CreatePackages
                     self::createExtensionPackage($packageName);
                 }
                 else {
-                    echo "Warning: Package {$packageName} not found in configuration.\n";
+                    $genericClass = "\\staticphp\\package\\{$packageName}";
+                    if (class_exists($genericClass)) {
+                        self::createGenericPackage($packageName);
+                    } else {
+                        echo "Warning: Package {$packageName} not found in configuration.\n";
+                    }
                 }
             }
         }
         else {
             self::createSapiPackages();
             self::createSapiPackage('devel');
+            self::createGenericPackage('pie');
             self::createExtensionPackages();
         }
 
         echo "Package creation completed.\n";
         return true;
+    }
+
+    /**
+     * Create a generic package defined in src/package/{name}.php implementing staticphp\package
+     */
+    private static function createGenericPackage(string $name): void
+    {
+        $packageClass = "\\staticphp\\package\\{$name}";
+        if (!class_exists($packageClass)) {
+            echo "Warning: Package class not found: {$name}\n";
+            return;
+        }
+
+        [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
+        $computed = (string) self::getNextIteration(self::getPrefix() . "-{$name}", $phpVersion, $architecture);
+        $iteration = self::$iterationOverride ?? $computed;
+
+        $package = new $packageClass();
+        // Keep compatibility with packages that do not accept parameters
+        $config = $package->getFpmConfig();
+
+        self::createPackageWithFpm(self::getPrefix() . "-{$name}", $config, $phpVersion, $architecture, $iteration, $package->getFpmExtraArgs());
+
+        $dbgConfig = $package->getDebuginfoFpmConfig();
+        if (is_array($dbgConfig) && !empty($dbgConfig['files'])) {
+            self::createPackageWithFpm(self::getPrefix() . "-{$name}-debuginfo", $dbgConfig, $phpVersion, $architecture, $iteration);
+        }
     }
 
     private static function loadConfig(): void

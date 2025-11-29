@@ -1,0 +1,18 @@
+#!/bin/sh
+# pie-zts wrapper
+# Runs php/pie with the ZTS PHP binary. Adds --with-php-config only when not provided by the user.
+
+have_cfg=0
+for arg in "$@"; do
+  case "$arg" in
+    --with-php-config|--with-php-config=*)
+      have_cfg=1
+      ;;
+  esac
+done
+
+if [ "$have_cfg" -eq 1 ]; then
+  exec /usr/bin/php-zts /usr/share/php-zts/pie.phar "$@"
+else
+  exec /usr/bin/php-zts /usr/share/php-zts/pie.phar --with-php-config=/usr/bin/php-config-zts "$@"
+fi
