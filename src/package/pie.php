@@ -6,9 +6,44 @@ use SPC\store\CurlHook;
 use SPC\store\Downloader;
 use staticphp\package;
 use staticphp\step\CreatePackages;
+use Symfony\Component\Process\Process;
 
 class pie implements package
 {
+    /**
+     * Return the PIE application version (e.g., 1.3.1) parsed from `pie.phar -V`.
+     * CreatePackages will use this as the package version when available.
+     */
+    public function getVersion(): string
+    {
+        // Ensure artifacts exist and get the staged phar path
+        [$pharSource] = $this->prepareArtifacts();
+
+        $phpBin = BUILD_BIN_PATH . '/php';
+        if (!file_exists($phpBin)) {
+            throw new \RuntimeException('php binary not found at ' . $phpBin);
+        }
+
+        $proc = new Process([$phpBin, $pharSource, '-V']);
+        $proc->setTimeout(2);
+        $proc->run();
+        if (!$proc->isSuccessful()) {
+            // Include both stdout and stderr for parsing attempt/fallback
+            $output = $proc->getOutput() . "\n" . $proc->getErrorOutput();
+        } else {
+            $output = $proc->getOutput() . "\n" . $proc->getErrorOutput();
+        }
+
+        // Example: "🥧 PHP Installer for Extensions (PIE) 1.3.1"
+        if (preg_match('/\(PIE\)\s+([0-9][0-9A-Za-z.-]*)/u', $output, $m)) {
+            return $m[1];
+        }
+        if (preg_match('/PIE\s+([0-9][0-9A-Za-z.-]*)/u', $output, $m)) {
+            return $m[1];
+        }
+
+        throw new \RuntimeException('Unable to detect PIE version from output: ' . trim($output));
+    }
     public function getFpmConfig(): array
     {
         [$pharSource, $wrapperSource] = $this->prepareArtifacts();
@@ -38,7 +73,7 @@ class pie implements package
 
     private function prepareArtifacts(): array
     {
-        $pharPath = TEMP_DIR . '/pie.phar';
+        $pharPath = DOWNLOAD_PATH . '/pie.phar';
         if (!file_exists($pharPath)) {
             $this->downloadLatestPiePhar($pharPath);
         }

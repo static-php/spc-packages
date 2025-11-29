@@ -89,13 +89,12 @@ class RunSPC
             if (!file_exists($binary)) {
                 continue;
             }
-            self::runProcess(['objcopy', '--remove-gnu-debuglink', $binary], "Removed existing gnu-debuglink from {$binary}");
+            self::runProcess(['objcopy', '--remove-section=.gnu_debuglink', $binary], "Removed existing gnu-debuglink from {$binary}");
             if (file_exists($dbgFile)) {
                 self::runProcess(['objcopy', '--add-gnu-debuglink=' . $dbgFile, $binary], "Added gnu-debuglink to {$binary} -> {$dbgFile}");
             }
         }
     }
-
 
     private static function runProcess(array $cmd, string $okMessage): void
     {

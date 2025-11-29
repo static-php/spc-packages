@@ -22,6 +22,9 @@ class CreatePackages
     {
         self::loadConfig();
 
+        define('DOWNLOAD_PATH', BUILD_ROOT_PATH . '/download');
+        @mkdir(DOWNLOAD_PATH, 0755, true);
+
         $phpBinary = BUILD_BIN_PATH . '/php';
         self::$binaryDependencies = self::getBinaryDependencies($phpBinary);
 
@@ -78,18 +81,33 @@ class CreatePackages
         }
 
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
-        $computed = (string) self::getNextIteration(self::getPrefix() . "-{$name}", $phpVersion, $architecture);
+
+        // Allow generic packages to define their own version (e.g., pie.phar version)
+        $pkgVersion = $phpVersion;
+        try {
+            $pkg = new $packageClass();
+            if (method_exists($pkg, 'getVersion')) {
+                $ver = $pkg->getVersion();
+                if (is_string($ver) && $ver !== '') {
+                    $pkgVersion = $ver;
+                }
+            }
+        } catch (\Throwable) {
+            // Fallback to PHP version if package-specific version cannot be determined
+        }
+
+        $computed = (string) self::getNextIteration(self::getPrefix() . "-{$name}", $pkgVersion, $architecture);
         $iteration = self::$iterationOverride ?? $computed;
 
-        $package = new $packageClass();
+        $package = $pkg ?? new $packageClass();
         // Keep compatibility with packages that do not accept parameters
         $config = $package->getFpmConfig();
 
-        self::createPackageWithFpm(self::getPrefix() . "-{$name}", $config, $phpVersion, $architecture, $iteration, $package->getFpmExtraArgs());
+        self::createPackageWithFpm(self::getPrefix() . "-{$name}", $config, $pkgVersion, $architecture, $iteration, $package->getFpmExtraArgs());
 
         $dbgConfig = $package->getDebuginfoFpmConfig();
         if (is_array($dbgConfig) && !empty($dbgConfig['files'])) {
-            self::createPackageWithFpm(self::getPrefix() . "-{$name}-debuginfo", $dbgConfig, $phpVersion, $architecture, $iteration);
+            self::createPackageWithFpm(self::getPrefix() . "-{$name}-debuginfo", $dbgConfig, $pkgVersion, $architecture, $iteration);
         }
     }
 
