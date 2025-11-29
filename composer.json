@@ -23,7 +23,7 @@
     "prefer-stable": true,
     "require": {
         "php": ">=8.4",
-        "crazywhalecc/static-php-cli": "dev-fix/musl-dl",
+        "crazywhalecc/static-php-cli": "dev-feat/pcov",
         "laravel/helpers": "^1.7",
         "ext-zlib": "*",
         "twig/twig": "^3.0"
