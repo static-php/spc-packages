@@ -96,18 +96,19 @@ class CreatePackages
             // Fallback to PHP version if package-specific version cannot be determined
         }
 
-        $computed = (string) self::getNextIteration(self::getPrefix() . "-{$name}", $pkgVersion, $architecture);
-        $iteration = self::$iterationOverride ?? $computed;
-
         $package = $pkg ?? new $packageClass();
         // Keep compatibility with packages that do not accept parameters
         $config = $package->getFpmConfig();
+        $baseName = $package->getName() ?: self::getPrefix() . "-{$name}";
 
-        self::createPackageWithFpm(self::getPrefix() . "-{$name}", $config, $pkgVersion, $architecture, $iteration, $package->getFpmExtraArgs());
+        $computed = (string) self::getNextIteration($baseName, $pkgVersion, $architecture);
+        $iteration = self::$iterationOverride ?? $computed;
+
+        self::createPackageWithFpm($baseName, $config, $pkgVersion, $architecture, $iteration, $package->getFpmExtraArgs());
 
         $dbgConfig = $package->getDebuginfoFpmConfig();
         if (is_array($dbgConfig) && !empty($dbgConfig['files'])) {
-            self::createPackageWithFpm(self::getPrefix() . "-{$name}-debuginfo", $dbgConfig, $pkgVersion, $architecture, $iteration);
+            self::createPackageWithFpm($baseName . '-debuginfo', $dbgConfig, $pkgVersion, $architecture, $iteration);
         }
     }
 

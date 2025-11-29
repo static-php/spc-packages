@@ -10,6 +10,11 @@ use Symfony\Component\Process\Process;
 
 class pie implements package
 {
+    public function getName(): string
+    {
+        return 'pie-zts';
+    }
+
     /**
      * Return the PIE application version (e.g., 1.3.1) parsed from `pie.phar -V`.
      * CreatePackages will use this as the package version when available.

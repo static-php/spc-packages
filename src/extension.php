@@ -218,4 +218,9 @@ class extension implements package
             ],
         ];
     }
+
+    public function getName(): string
+    {
+        return CreatePackages::getPrefix() . '-' . $this->name;
+    }
 }

@@ -7,6 +7,11 @@ use staticphp\step\CreatePackages;
 
 class cgi implements package
 {
+    public function getName(): string
+    {
+        return CreatePackages::getPrefix() . '-' . $this->name;
+    }
+
     public function getFpmConfig(): array
     {
         return [

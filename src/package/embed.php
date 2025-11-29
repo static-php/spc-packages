@@ -7,6 +7,11 @@ use staticphp\step\CreatePackages;
 
 class embed implements package
 {
+    public function getName(): string
+    {
+        return CreatePackages::getPrefix() . '-' . $this->name;
+    }
+
     public function getFpmConfig(): array
     {
         $phpVersion = str_replace('.', '', SPP_PHP_VERSION);

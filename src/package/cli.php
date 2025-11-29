@@ -8,6 +8,11 @@ use staticphp\step\CreatePackages;
 
 class cli implements package
 {
+    public function getName(): string
+    {
+        return CreatePackages::getPrefix() . '-' . $this->name;
+    }
+
     public function getFpmConfig(): array
     {
         $config = CraftConfig::getInstance();

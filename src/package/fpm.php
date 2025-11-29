@@ -7,6 +7,11 @@ use staticphp\step\CreatePackages;
 
 class fpm implements package
 {
+    public function getName(): string
+    {
+        return CreatePackages::getPrefix() . '-' . $this->name;
+    }
+    
     public function getFpmConfig(): array
     {
         $contents = file_get_contents(INI_PATH . '/php-fpm.conf');

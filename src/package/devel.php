@@ -7,6 +7,10 @@ use staticphp\step\CreatePackages;
 
 class devel implements package
 {
+    public function getName(): string
+    {
+        return CreatePackages::getPrefix() . '-' . $this->name;
+    }
     public function getFpmConfig(): array
     {
         $phpConfigPath = BUILD_BIN_PATH . '/php-config';
