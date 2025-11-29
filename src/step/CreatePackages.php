@@ -87,9 +87,16 @@ class CreatePackages
         try {
             $pkg = new $packageClass();
             if (method_exists($pkg, 'getVersion')) {
-                $ver = $pkg->getVersion();
-                if (is_string($ver) && $ver !== '') {
-                    $pkgVersion = $ver;
+                $pkgVersion = $pkg->getVersion();
+                if ($pkgVersion !== $phpVersion) {
+                    // Extract major and minor version numbers from PHP version
+                    if (preg_match('/^(\d+)\.(\d+)/', $phpVersion, $matches)) {
+                        $majorMinor = $matches[1] . $matches[2]; // Combine major and minor without dot
+                        $pkgVersion .= '_' . $majorMinor;
+                    }
+                    else {
+                        throw new \RuntimeException("Warning: Could not extract major.minor from PHP version: {$phpVersion}");
+                    }
                 }
             }
         } catch (\Throwable) {
