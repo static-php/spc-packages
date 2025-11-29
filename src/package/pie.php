@@ -53,6 +53,7 @@ class pie implements package
         return [
             'depends' => [
                 $prefix . '-cli',
+                $prefix . '-devel',
             ],
             'files' => [
                 $pharSource => '/usr/share/php-zts/pie.phar',
