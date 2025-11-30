@@ -14,15 +14,25 @@ php-version: {{ php_version }}
 {# Apply optional filtering #}
 {%- if filter_packages is defined and filter_packages -%}
 {%-   set extensions = base_extensions|filter(v => v in filter_packages) -%}
-{%-   set extensions = extensions|length ? extensions : ['filter'] -%}
 {%-   set shared_ext = base_shared|filter(v => v in filter_packages) -%}
 {%-   set sapi_list = base_sapi|filter(v => v in filter_packages) -%}
-{%-   set sapi_list = sapi_list|length ? sapi_list : ['cli'] -%}
+{%-   if 'cli' not in sapi_list -%}
+{%-     set sapi_list = ['cli']|merge(sapi_list) -%}
+{%-   endif -%}
 {%- else -%}
 {%-   set extensions = base_extensions -%}
 {%-   set shared_ext = base_shared -%}
 {%-   set sapi_list = base_sapi -%}
-{%- endif %}
+{%- endif -%}
+
+{# Ensure minimum builtin extensions are always present: merge + unique #}
+{%- set required_min_str = 'filter,phar,calendar,ctype,opcache,session,sockets' -%}
+{%- set required_min = required_min_str|split(',')|map(v => v|trim) -%}
+{%- for req in required_min -%}
+{%-   if req not in extensions -%}
+{%-     set extensions = extensions|merge([req]) -%}
+{%-   endif -%}
+{%- endfor -%}
 
 extensions: {{ extensions|join(',') }}
 shared-extensions: {{ shared_ext|join(',') }}
