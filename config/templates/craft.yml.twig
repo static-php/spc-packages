@@ -32,7 +32,7 @@ php-version: {{ php_version }}
 {%-   if req not in extensions -%}
 {%-     set extensions = extensions|merge([req]) -%}
 {%-   endif -%}
-{%- endfor -%}
+{%- endfor %}
 
 extensions: {{ extensions|join(',') }}
 shared-extensions: {{ shared_ext|join(',') }}
