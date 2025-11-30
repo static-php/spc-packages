@@ -26,7 +26,7 @@ php-version: {{ php_version }}
 {%- endif -%}
 
 {# Ensure minimum builtin extensions are always present: merge + unique #}
-{%- set required_min_str = 'filter,phar,calendar,ctype,opcache,session,sockets' -%}
+{%- set required_min_str = 'filter,phar,calendar,ctype,opcache,session,sockets,openssl' -%}
 {%- set required_min = required_min_str|split(',')|map(v => v|trim) -%}
 {%- for req in required_min -%}
 {%-   if req not in extensions -%}
