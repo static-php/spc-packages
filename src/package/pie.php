@@ -84,7 +84,7 @@ class pie implements package
             $this->downloadLatestPiePhar($pharPath);
         }
 
-        $wrapperPath = BASE_PATH . '/src/ini/pie-zts';
+        $wrapperPath = INI_PATH . '/pie-zts';
         return [$pharPath, $wrapperPath];
     }
 

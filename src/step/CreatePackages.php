@@ -52,7 +52,8 @@ class CreatePackages
                     $genericClass = "\\staticphp\\package\\{$packageName}";
                     if (class_exists($genericClass)) {
                         self::createGenericPackage($packageName);
-                    } else {
+                    }
+                    else {
                         echo "Warning: Package {$packageName} not found in configuration.\n";
                     }
                 }
@@ -84,23 +85,19 @@ class CreatePackages
 
         // Allow generic packages to define their own version (e.g., pie.phar version)
         $pkgVersion = $phpVersion;
-        try {
-            $pkg = new $packageClass();
-            if (method_exists($pkg, 'getVersion')) {
-                $pkgVersion = $pkg->getVersion();
-                if ($pkgVersion !== $phpVersion) {
-                    // Extract major and minor version numbers from PHP version
-                    if (preg_match('/^(\d+)\.(\d+)/', $phpVersion, $matches)) {
-                        $majorMinor = $matches[1] . $matches[2]; // Combine major and minor without dot
-                        $pkgVersion .= '_' . $majorMinor;
-                    }
-                    else {
-                        throw new \RuntimeException("Warning: Could not extract major.minor from PHP version: {$phpVersion}");
-                    }
+        $pkg = new $packageClass();
+        if (method_exists($pkg, 'getVersion')) {
+            $pkgVersion = $pkg->getVersion();
+            if ($pkgVersion !== $phpVersion) {
+                // Extract major and minor version numbers from PHP version
+                if (preg_match('/^(\d+)\.(\d+)/', $phpVersion, $matches)) {
+                    $majorMinor = $matches[1] . $matches[2]; // Combine major and minor without dot
+                    $pkgVersion .= '_' . $majorMinor;
+                }
+                else {
+                    throw new \RuntimeException("Warning: Could not extract major.minor from PHP version: {$phpVersion}");
                 }
             }
-        } catch (\Throwable) {
-            // Fallback to PHP version if package-specific version cannot be determined
         }
 
         $package = $pkg ?? new $packageClass();
@@ -108,7 +105,7 @@ class CreatePackages
         $config = $package->getFpmConfig();
         $baseName = $package->getName() ?: self::getPrefix() . "-{$name}";
 
-        $computed = (string) self::getNextIteration($baseName, $pkgVersion, $architecture);
+        $computed = (string)self::getNextIteration($baseName, $pkgVersion, $architecture);
         $iteration = self::$iterationOverride ?? $computed;
 
         self::createPackageWithFpm($baseName, $config, $pkgVersion, $architecture, $iteration, $package->getFpmExtraArgs());
@@ -159,7 +156,7 @@ class CreatePackages
 
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
 
-        $computed = (string) self::getNextIteration(self::getPrefix() . "-{$sapi}", $phpVersion, $architecture);
+        $computed = (string)self::getNextIteration(self::getPrefix() . "-{$sapi}", $phpVersion, $architecture);
         $iteration = self::$iterationOverride ?? $computed;
 
         $package = new $packageClass();
@@ -190,7 +187,7 @@ class CreatePackages
         [$phpVersion, $architecture] = self::getPhpVersionAndArchitecture();
         $extensionVersion = self::getExtensionVersion($extension, $phpVersion);
 
-        $computed = (string) self::getNextIteration(self::getPrefix() . "-{$extension}", $extensionVersion, $architecture);
+        $computed = (string)self::getNextIteration(self::getPrefix() . "-{$extension}", $extensionVersion, $architecture);
         $iteration = self::$iterationOverride ?? $computed;
 
         $package = new extension($extension);
@@ -256,7 +253,8 @@ class CreatePackages
             if (preg_match('/^(\d+)\.(\d+)/', $phpVersion, $matches)) {
                 $majorMinor = $matches[1] . $matches[2]; // Combine major and minor without dot
                 $extensionVersion .= '_' . $majorMinor;
-            } else {
+            }
+            else {
                 throw new \RuntimeException("Warning: Could not extract major.minor from PHP version: {$phpVersion}");
             }
         }
@@ -405,12 +403,13 @@ class CreatePackages
 
     private static function createDebPackage(
         string $name,
-        array $config,
+        array  $config,
         string $phpVersion,
         string $architecture,
         string $iteration,
-        array $extraArgs = [],
-    ): void {
+        array  $extraArgs = [],
+    ): void
+    {
         echo "Creating DEB package for {$name}...\n";
 
         $phpVersion = preg_replace('/_\d+$/', '', $phpVersion);
@@ -494,7 +493,8 @@ class CreatePackages
             if (isset($systemLibraryMap[$lib])) {
                 // Use mapped name for system libraries
                 $packageName = $systemLibraryMap[$lib];
-            } else {
+            }
+            else {
                 // For other libraries, remove .so suffix
                 $packageName = preg_replace('/\.so(\.\d+)?$/', '', $lib);
             }
@@ -529,7 +529,8 @@ class CreatePackages
             foreach ($config['files'] as $source => $dest) {
                 if (file_exists($source)) {
                     $fpmArgs[] = $source . '=' . $dest;
-                } else {
+                }
+                else {
                     echo "Warning: Source file not found: {$source}\n";
                 }
             }
@@ -541,7 +542,7 @@ class CreatePackages
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $emptyDir));
             }
             if (is_dir($emptyDir)) {
-                $files = array_diff((array) scandir($emptyDir), ['.', '..']);
+                $files = array_diff((array)scandir($emptyDir), ['.', '..']);
                 if (!empty($files)) {
                     exec('rm -rf ' . escapeshellarg($emptyDir . '/*'));
                 }
@@ -578,7 +579,8 @@ class CreatePackages
         if (!empty($detectedVersion)) {
             $fullPhpVersion = $detectedVersion;
             echo "Detected full PHP version from binary: {$fullPhpVersion}\n";
-        } else {
+        }
+        else {
             throw new \RuntimeException("Warning: Could not detect PHP version from binary using base version: {$basePhpVersion}");
         }
 
@@ -708,7 +710,7 @@ class CreatePackages
 
         $name = "frankenphp";
 
-        $computed = (string) self::getNextIteration($name, $version, $architecture);
+        $computed = (string)self::getNextIteration($name, $version, $architecture);
         $iteration = self::$iterationOverride ?? $computed;
 
         $fpmArgs = [
@@ -803,7 +805,7 @@ class CreatePackages
 
         //$osRelease = parse_ini_file('/etc/os-release');
         //$distroCodename = $osRelease['VERSION_CODENAME'] ?? null;
-        $computed = (string) self::getNextIteration($name, $version, $architecture);
+        $computed = (string)self::getNextIteration($name, $version, $architecture);
         $iteration = self::$iterationOverride ?? $computed;
         //$debIteration = $distroCodename !== '' ? "{$iteration}~{$distroCodename}" : $iteration;
         $debIteration = $iteration;
@@ -836,7 +838,8 @@ class CreatePackages
             if (isset($systemLibraryMap[$lib])) {
                 // Use mapped name for system libraries
                 $packageName = $systemLibraryMap[$lib];
-            } else {
+            }
+            else {
                 // For other libraries, remove .so suffix
                 $packageName = preg_replace('/\.so(\.\d+)?$/', '', $lib);
             }
@@ -922,7 +925,8 @@ class CreatePackages
             if (!$clone->isSuccessful()) {
                 throw new \RuntimeException("Git clone failed: " . $clone->getErrorOutput());
             }
-        } else {
+        }
+        else {
             echo "FrankenPHP already exists, fetching tags...\n";
             $fetch = new Process(['git', 'fetch', '--tags'], cwd: $targetPath);
             $fetch->run();
