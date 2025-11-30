@@ -24,12 +24,7 @@ class pie implements package
         // Ensure artifacts exist and get the staged phar path
         [$pharSource] = $this->prepareArtifacts();
 
-        $phpBin = BUILD_BIN_PATH . '/php';
-        if (!file_exists($phpBin)) {
-            throw new \RuntimeException('php binary not found at ' . $phpBin);
-        }
-
-        $proc = new Process([$phpBin, $pharSource, '-V']);
+        $proc = new Process(['php', $pharSource, '-V']);
         $proc->setTimeout(2);
         $proc->run();
         if (!$proc->isSuccessful()) {
