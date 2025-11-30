@@ -110,13 +110,13 @@ class RunSPC
         }
     }
 
-    public static function run(bool $debug = false, string $phpVersion = '8.4'): bool
+    public static function run(bool $debug = false, string $phpVersion = '8.4', ?array $packages = null): bool
     {
         $craftYmlDest = BASE_PATH . '/vendor/crazywhalecc/static-php-cli/craft.yml';
 
         // Render the template using the TwigRenderer
         try {
-            $craftYml = TwigRenderer::renderCraftTemplate($phpVersion);
+            $craftYml = TwigRenderer::renderCraftTemplate($phpVersion, null, $packages);
 
             // Write the rendered craft.yml to the destination
             if (!file_put_contents($craftYmlDest, $craftYml)) {

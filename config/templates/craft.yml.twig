@@ -1,18 +1,39 @@
 php-version: {{ php_version }}
-extensions: calendar,ctype,curl,dom,exif,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib
-{% if php_version == '8.5' %}
-shared-extensions: apcu,ast,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,inotify,intl,ldap,lz4,maxminddb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pgsql,protobuf,rar,rdkafka,shmop,simdjson,snappy,soap,sqlite3,sqlsrv,ssh2,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xhprof,xlswriter,xsl,xz,yaml,zip,zstd
-{% else %}
-shared-extensions: amqp,apcu,ast,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,maxminddb,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pcov,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,simdjson,snappy,soap,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,trader,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zip,zstd
-{% endif %}
-libs: [libacl, libavif, brotli, watcher]
-sapi: cli,cgi,fpm,embed,frankenphp
+{%- set base_sapi_str = 'cli,cgi,fpm,embed,frankenphp' -%}
+{%- set base_extensions_str = 'calendar,ctype,curl,dom,exif,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib' -%}
+{%- if php_version == '8.5' -%}
+{%-   set base_shared_str = 'apcu,ast,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,inotify,intl,ldap,lz4,maxminddb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pgsql,protobuf,rar,rdkafka,shmop,simdjson,snappy,soap,sqlite3,sqlsrv,ssh2,sysvmsg,sysvsem,sysvshm,tidy,uuid,uv,xhprof,xlswriter,xsl,xz,yaml,zip,zstd' -%}
+{%- else -%}
+{%-   set base_shared_str = 'amqp,apcu,ast,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,maxminddb,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pcov,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,simdjson,snappy,soap,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,trader,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zip,zstd' -%}
+{%- endif -%}
+
+{%- set base_extensions = base_extensions_str|split(',')|map(v => v|trim) -%}
+{%- set base_shared = base_shared_str|split(',')|map(v => v|trim) -%}
+{%- set base_sapi = base_sapi_str|split(',')|map(v => v|trim) -%}
+
+{# Apply optional filtering #}
+{%- if filter_packages is defined and filter_packages -%}
+{%-   set extensions = base_extensions|filter(v => v in filter_packages) -%}
+{%-   set extensions = extensions|length ? extensions : ['filter'] -%}
+{%-   set shared_ext = base_shared|filter(v => v in filter_packages) -%}
+{%-   set sapi_list = base_sapi|filter(v => v in filter_packages) -%}
+{%-   set sapi_list = sapi_list|length ? sapi_list : ['cli'] -%}
+{%- else -%}
+{%-   set extensions = base_extensions -%}
+{%-   set shared_ext = base_shared -%}
+{%-   set sapi_list = base_sapi -%}
+{%- endif %}
+
+extensions: {{ extensions|join(',') }}
+shared-extensions: {{ shared_ext|join(',') }}
+libs: []
+sapi: {{ sapi_list|join(',') }}
 debug: false
 build-options:
     enable-zts: true
     with-clean: false
     with-suggested-libs: true
-    with-suggested-exts: false
+    with-suggested-exts: true
     no-strip: false
     with-config-file-path: '/etc/{{ prefix }}'
     with-config-file-scan-dir: '/etc/{{ prefix }}/conf.d'

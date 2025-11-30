@@ -4,6 +4,7 @@ namespace staticphp\Command;
 
 use staticphp\step\RunSPC;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -13,18 +14,33 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class BuildCommand extends BaseCommand
 {
+    protected function configure(): void
+    {
+        parent::configure();
+        $this
+            ->addOption('packages', null, InputOption::VALUE_REQUIRED, 'Specify which packages to build (comma-separated)');
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $debug = $input->getOption('debug');
         $phpVersion = $input->getOption('phpv');
         $target = $input->getOption('target');
+        $packagesOpt = $input->getOption('packages');
+        $packages = null;
+        if (is_string($packagesOpt) && $packagesOpt !== '') {
+            $packages = array_values(array_filter(array_map('trim', explode(',', $packagesOpt))));
+        }
 
         $output->writeln("Command options:");
         $output->writeln("  debug: " . ($debug ? 'true' : 'false'));
         $output->writeln("  version: {$phpVersion}");
         $output->writeln("  target: {$target}");
+        if ($packages) {
+            $output->writeln("  packages: " . implode(', ', $packages));
+        }
 
-        $result = RunSPC::run($debug, $phpVersion);
+        $result = RunSPC::run($debug, $phpVersion, $packages);
 
         if ($result) {
             $output->writeln("Build completed successfully.");

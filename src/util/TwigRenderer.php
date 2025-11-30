@@ -16,7 +16,7 @@ class TwigRenderer
      * @return string The rendered template content
      * @throws \RuntimeException If there's an error rendering the template
      */
-    public static function renderCraftTemplate(string $phpVersion = '8.4', ?string $arch = null): string
+    public static function renderCraftTemplate(string $phpVersion = '8.4', ?string $arch = null, ?array $packages = null): string
     {
         // Detect architecture if not provided
         if ($arch === null) {
@@ -59,6 +59,9 @@ class TwigRenderer
             'arch' => $arch,
             'os' => $majorOsVersion,
             'prefix' => CreatePackages::getPrefix(),
+            // Optional filter: when provided, craft.yml will include only selected packages
+            // across extensions/shared-extensions/sapi, while always including cli SAPI.
+            'filter_packages' => $packages,
         ];
 
         try {
