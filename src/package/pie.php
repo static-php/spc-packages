@@ -106,9 +106,8 @@ class pie implements package
             throw new \RuntimeException('PIE download did not produce expected file: ' . $downloaded);
         }
 
-        if (!@copy($downloaded, $targetPath)) {
+        if ($downloaded !== $targetPath && !@copy($downloaded, $targetPath)) {
             throw new \RuntimeException('Failed to stage pie.phar to build directory.');
         }
-        @chmod($targetPath, 0644);
     }
 }
