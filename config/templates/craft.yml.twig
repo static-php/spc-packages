@@ -20,19 +20,10 @@ php-version: {{ php_version }}
 {%-     set sapi_list = ['cli']|merge(sapi_list) -%}
 {%-   endif -%}
 {%- else -%}
-{%-   set extensions = base_extensions -%}
+{%-   set extensions = base_extensions|length ? base_extensions : ['opcache'] -%}
 {%-   set shared_ext = base_shared -%}
 {%-   set sapi_list = base_sapi -%}
-{%- endif -%}
-
-{# Ensure minimum builtin extensions are always present: merge + unique #}
-{%- set required_min_str = 'filter,phar,calendar,ctype,opcache,session,sockets' -%}
-{%- set required_min = required_min_str|split(',')|map(v => v|trim) -%}
-{%- for req in required_min -%}
-{%-   if req not in extensions -%}
-{%-     set extensions = extensions|merge([req]) -%}
-{%-   endif -%}
-{%- endfor %}
+{%- endif %}
 
 extensions: {{ extensions|join(',') }}
 shared-extensions: {{ shared_ext|join(',') }}
