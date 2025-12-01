@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a6034327e798fbad4826d36b0e2ce2eb",
+    "content-hash": "3a028b36b942ff3da62d5e6cc6d84937",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -77,16 +77,16 @@
         },
         {
             "name": "crazywhalecc/static-php-cli",
-            "version": "dev-feat/pcov",
+            "version": "dev-henderkes-patch-1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "e6591ffe9c690eff2ba73ee464f54eb7381c7c0c"
+                "reference": "7204d277b4f3e92b3b3dd9fe030b1ae7bc9b7cb5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/e6591ffe9c690eff2ba73ee464f54eb7381c7c0c",
-                "reference": "e6591ffe9c690eff2ba73ee464f54eb7381c7c0c",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/7204d277b4f3e92b3b3dd9fe030b1ae7bc9b7cb5",
+                "reference": "7204d277b4f3e92b3b3dd9fe030b1ae7bc9b7cb5",
                 "shasum": ""
             },
             "require": {
@@ -133,7 +133,7 @@
             "description": "Build single static PHP binary, with PHP project together, with popular extensions included.",
             "support": {
                 "issues": "https://github.com/crazywhalecc/static-php-cli/issues",
-                "source": "https://github.com/crazywhalecc/static-php-cli/tree/feat/pcov"
+                "source": "https://github.com/crazywhalecc/static-php-cli/tree/henderkes-patch-1"
             },
             "funding": [
                 {
@@ -141,7 +141,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-11-29T13:03:17+00:00"
+            "time": "2025-12-01T10:39:56+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -2088,16 +2088,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v3.22.0",
+            "version": "v3.22.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "4509984193026de413baf4ba80f68590a7f2c51d"
+                "reference": "1de2ec1fc43ab58a4b7e80b214b96bfc895750f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/4509984193026de413baf4ba80f68590a7f2c51d",
-                "reference": "4509984193026de413baf4ba80f68590a7f2c51d",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/1de2ec1fc43ab58a4b7e80b214b96bfc895750f3",
+                "reference": "1de2ec1fc43ab58a4b7e80b214b96bfc895750f3",
                 "shasum": ""
             },
             "require": {
@@ -2151,7 +2151,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.22.0"
+                "source": "https://github.com/twigphp/Twig/tree/v3.22.1"
             },
             "funding": [
                 {
@@ -2163,7 +2163,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-10-29T15:56:47+00:00"
+            "time": "2025-11-16T16:01:12+00:00"
         },
         {
             "name": "voku/portable-ascii",
@@ -3323,5 +3323,5 @@
     "platform-overrides": {
         "php": "8.4.0"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }

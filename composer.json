@@ -23,7 +23,7 @@
     "prefer-stable": true,
     "require": {
         "php": ">=8.4",
-        "crazywhalecc/static-php-cli": "dev-dev-henderkes-patch-1",
+        "crazywhalecc/static-php-cli": "dev-henderkes-patch-1",
         "laravel/helpers": "^1.7",
         "ext-zlib": "*",
         "twig/twig": "^3.0"
