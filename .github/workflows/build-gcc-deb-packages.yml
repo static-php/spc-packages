@@ -1,10 +1,6 @@
 name: Build and upload gcc deb packages
 
 on:
-    workflow_run:
-        workflows: [ "spc-download" ]
-        types:
-            - completed
     workflow_dispatch:
 
 permissions:
@@ -14,7 +10,6 @@ jobs:
     build:
         name: Build for ${{ matrix.arch }} PHP ${{ matrix.php-version }}
         runs-on: ubuntu-24.04${{ matrix.arch == 'arm64' && '-arm' || '' }}
-        if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
         container:
             image: debian:11
         permissions:

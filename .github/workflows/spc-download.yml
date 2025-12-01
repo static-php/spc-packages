@@ -7,17 +7,19 @@ on:
 
 permissions:
     contents: read
+    actions: write
 
 jobs:
     download:
         runs-on: ubuntu-24.04
         permissions:
             contents: read
+            actions: write
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         steps:
             -   name: Set up PHP
-                uses: shivammathur/setup-php@v2
+                uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
                 with:
                     php-version: '8.4'
                     tools: composer:v2
@@ -44,3 +46,15 @@ jobs:
                     name: downloads-tarball
                     path: downloads.tar.gz
                     retention-days: 2
+
+            -   name: Trigger build-gcc-packages workflow
+                if: success()
+                run: gh workflow run build-gcc-packages.yml
+                env:
+                    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            -   name: Trigger build-gcc-deb-packages workflow
+                if: success()
+                run: gh workflow run build-gcc-deb-packages.yml
+                env:
+                    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

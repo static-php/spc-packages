@@ -1,10 +1,6 @@
 name: Build and upload gcc rpm packages
 
 on:
-    workflow_run:
-        workflows: [ "spc-download" ]
-        types:
-            - completed
     workflow_dispatch:
         inputs:
             iteration:
