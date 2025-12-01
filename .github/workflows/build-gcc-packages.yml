@@ -46,19 +46,19 @@ jobs:
 
                     # Parse inputs or use defaults
                     if [[ -n "${INPUTS_PHP_VERSIONS}" ]]; then
-                        php_versions=$(echo '${INPUTS_PHP_VERSIONS}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                        php_versions=$(echo "${INPUTS_PHP_VERSIONS}" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         php_versions=$default_php
                     fi
 
                     if [[ -n "${INPUTS_ALMA_VERSIONS}" ]]; then
-                        alma_versions=$(echo '${INPUTS_ALMA_VERSIONS}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                        alma_versions=$(echo "${INPUTS_ALMA_VERSIONS}" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         alma_versions=$default_alma
                     fi
 
                     if [[ -n "${INPUTS_ARCHITECTURES}" ]]; then
-                        arch_versions=$(echo '${INPUTS_ARCHITECTURES}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                        arch_versions=$(echo "${INPUTS_ARCHITECTURES}" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         arch_versions=$default_arch
                     fi
@@ -329,13 +329,13 @@ jobs:
 
                     # Parse inputs or use defaults
                     if [[ -n "${GITHUB_EVENT_INPUTS_ALMA_VERSIONS}" ]]; then
-                        alma_versions=$(echo '${GITHUB_EVENT_INPUTS_ALMA_VERSIONS}' | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                        alma_versions=$(echo "${GITHUB_EVENT_INPUTS_ALMA_VERSIONS}" | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         alma_versions=$default_alma
                     fi
 
                     if [[ -n "${GITHUB_EVENT_INPUTS_ARCHITECTURES}" ]]; then
-                        arch_versions=$(echo '${GITHUB_EVENT_INPUTS_ARCHITECTURES}' | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                        arch_versions=$(echo "${GITHUB_EVENT_INPUTS_ARCHITECTURES}" | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         arch_versions=$default_arch
                     fi
