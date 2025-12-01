@@ -16,6 +16,9 @@ on:
                 required: false
                 default: ""
 
+permissions:
+    contents: read
+
 jobs:
     build:
         runs-on: ${{ matrix.arch == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
@@ -32,9 +35,11 @@ jobs:
         steps:
             -   name: Checkout code
                 uses: actions/checkout@v4
+                with:
+                    persist-credentials: false
 
             -   name: Set up SSH key
-                uses: webfactory/ssh-agent@v0.8.0
+                uses: webfactory/ssh-agent@d4b9b8ff72958532804b70bbe600ad43b36d5f2e # v0.8.0
                 with:
                     ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
 
@@ -99,7 +104,7 @@ jobs:
                 run: composer install --no-interaction --prefer-dist --no-progress
 
             -   name: Download artifact from spc-download.yml
-                uses: dawidd6/action-download-artifact@v11
+                uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
                 with:
                     workflow: spc-download.yml
                     name: downloads-tarball

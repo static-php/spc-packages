@@ -28,9 +28,15 @@ on:
                 required: false
                 default: ""
 
+permissions:
+    contents: read
+
 jobs:
     setup-matrix:
         runs-on: ubuntu-24.04
+        if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
+        permissions:
+            contents: read
         outputs:
             matrix: ${{ steps.set-matrix.outputs.matrix }}
         steps:
@@ -43,20 +49,20 @@ jobs:
                     default_arch='["x86_64","arm64"]'
 
                     # Parse inputs or use defaults
-                    if [[ -n "${{ inputs.php_versions }}" ]]; then
-                        php_versions=$(echo '${{ inputs.php_versions }}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    if [[ -n "${INPUTS_PHP_VERSIONS}" ]]; then
+                        php_versions=$(echo '${INPUTS_PHP_VERSIONS}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         php_versions=$default_php
                     fi
 
-                    if [[ -n "${{ inputs.alma_versions }}" ]]; then
-                        alma_versions=$(echo '${{ inputs.alma_versions }}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    if [[ -n "${INPUTS_ALMA_VERSIONS}" ]]; then
+                        alma_versions=$(echo '${INPUTS_ALMA_VERSIONS}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         alma_versions=$default_alma
                     fi
 
-                    if [[ -n "${{ inputs.architectures }}" ]]; then
-                        arch_versions=$(echo '${{ inputs.architectures }}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    if [[ -n "${INPUTS_ARCHITECTURES}" ]]; then
+                        arch_versions=$(echo '${INPUTS_ARCHITECTURES}' | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         arch_versions=$default_arch
                     fi
@@ -69,6 +75,10 @@ jobs:
                         '{"php-version":$php,"alma":$alma,"arch":$arch}')
 
                     echo "matrix=$matrix" >> $GITHUB_OUTPUT
+                env:
+                    INPUTS_PHP_VERSIONS: ${{ inputs.php_versions }}
+                    INPUTS_ALMA_VERSIONS: ${{ inputs.alma_versions }}
+                    INPUTS_ARCHITECTURES: ${{ inputs.architectures }}
 
     build:
         needs: setup-matrix
@@ -89,14 +99,18 @@ jobs:
         steps:
             -   name: Checkout code
                 uses: actions/checkout@v4
+                with:
+                    persist-credentials: false
 
             -   name: Set architecture variables
                 run: |
-                    if [[ "${{ matrix.arch }}" == "arm64" ]]; then
+                    if [[ "${MATRIX_ARCH}" == "arm64" ]]; then
                       echo "RPM_ARCH=aarch64" >> $GITHUB_ENV
                     else
                       echo "RPM_ARCH=x86_64" >> $GITHUB_ENV
                     fi
+                env:
+                    MATRIX_ARCH: ${{ matrix.arch }}
 
             -   name: Install composer
                 run: |
@@ -137,7 +151,7 @@ jobs:
                       openssh rsync createrepo_c gpg \
                       git jq gzip which sudo xz
 
-                    if [[ "${{ matrix.alma }}" -eq 8 || "${{ matrix.alma }}" -eq 9 ]]; then
+                    if [[ "${MATRIX_ALMA}" -eq 8 || "${MATRIX_ALMA}" -eq 9 ]]; then
                       dnf -y install gcc-toolset-14 @ruby:3.3 rubygems ruby-devel
                       source /opt/rh/gcc-toolset-14/enable
                       touch "$BASH_ENV"
@@ -146,10 +160,12 @@ jobs:
                       dnf -y install g++ ruby rubygems ruby-devel
                     fi
                     gem install --no-document fpm
+                env:
+                    MATRIX_ALMA: ${{ matrix.alma }}
 
             -   name: Install re2c
                 run: |
-                    if [[ "${{ matrix.alma }}" -eq 9 || "${{ matrix.alma }}" -eq 10 ]]; then
+                    if [[ "${MATRIX_ALMA}" -eq 9 || "${MATRIX_ALMA}" -eq 10 ]]; then
                       dnf -y install re2c
                     else
                       dnf -y install python39
@@ -161,21 +177,25 @@ jobs:
                       cd ..
                       rm -rf re2c-4.3
                     fi
+                env:
+                    MATRIX_ALMA: ${{ matrix.alma }}
 
             -   name: Set up SSH key
-                uses: webfactory/ssh-agent@v0.8.0
+                uses: webfactory/ssh-agent@d4b9b8ff72958532804b70bbe600ad43b36d5f2e # v0.8.0
                 with:
                     ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
 
             -   name: Install tmate
                 run: |
-                    case "${{ matrix.arch }}" in
+                    case "${MATRIX_ARCH}" in
                       x86_64) arch="amd64" ;;
                       arm64)  arch="arm64v8" ;;
                     esac
                     dir="tmate-2.4.0-static-linux-$arch"
                     curl -L "https://github.com/tmate-io/tmate/releases/download/2.4.0/$dir.tar.xz" | tar -xJ -O "$dir/tmate" > /usr/bin/tmate
                     chmod +x /usr/bin/tmate
+                env:
+                    MATRIX_ARCH: ${{ matrix.arch }}
 
             -   name: Add remote host to known_hosts
                 run: |
@@ -188,13 +208,17 @@ jobs:
                     chmod 600 /root/.ssh/known_hosts
 
             -   name: Set target folder
-                run: echo "TARGET_DIR=el${{ matrix.alma }}" >> $GITHUB_ENV
+                run: |
+                    TARGET_DIR="el${MATRIX_ALMA}"
+                    echo "TARGET_DIR=${TARGET_DIR}" >> "$GITHUB_ENV"
+                env:
+                    MATRIX_ALMA: ${{ matrix.alma }}
 
             -   name: Composer install
                 run: composer install --no-interaction --prefer-dist --no-progress
 
             -   name: Download artifact from spc-download.yml
-                uses: dawidd6/action-download-artifact@v11
+                uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
                 with:
                     workflow: spc-download.yml
                     name: downloads-tarball
@@ -209,10 +233,12 @@ jobs:
                 run: |
                     TARGET=${{ matrix.alma == 9 && matrix.arch == 'x86_64' && 'native-native-gnu.2.34' || 'native-native-gnu' }}
                     PACKAGES_FLAG=""
-                    if [[ -n "${{ env.PACKAGES }}" ]]; then
-                      PACKAGES_FLAG="--packages=${{ env.PACKAGES }}"
+                    if [[ -n "${PACKAGES}" ]]; then
+                      PACKAGES_FLAG="--packages=${PACKAGES}"
                     fi
-                    php bin/spp build --target=$TARGET --phpv=${{ matrix.php-version }} $PACKAGES_FLAG
+                    php bin/spp build --target=$TARGET --phpv=${MATRIX_PHP_VERSION} $PACKAGES_FLAG
+                env:
+                    MATRIX_PHP_VERSION: ${{ matrix.php-version }}
 
             -   name: Remove spc build dir to clear up space for gh runners
                 run: rm -rf vendor/crazywhalecc/static-php-cli/source vendor/crazywhalecc/static-php-cli/buildroot
@@ -221,10 +247,12 @@ jobs:
                 run: |
                     TARGET=${{ matrix.alma == 9 && matrix.arch == 'x86_64' && 'native-native-gnu.2.34' || 'native-native-gnu' }}
                     PACKAGES_FLAG=""
-                    if [[ -n "${{ env.PACKAGES }}" ]]; then
-                      PACKAGES_FLAG="--packages=${{ env.PACKAGES }}"
+                    if [[ -n "${PACKAGES}" ]]; then
+                      PACKAGES_FLAG="--packages=${PACKAGES}"
                     fi
-                    php bin/spp package --target=$TARGET --type=rpm --phpv=${{ matrix.php-version }} --iteration="${{ env.ITERATION }}" $PACKAGES_FLAG
+                    php bin/spp package --target=$TARGET --type=rpm --phpv=${MATRIX_PHP_VERSION} --iteration="${ITERATION}" $PACKAGES_FLAG
+                env:
+                    MATRIX_PHP_VERSION: ${{ matrix.php-version }}
 
             -   name: Prepare rpm signing
                 run: |
@@ -272,7 +300,7 @@ jobs:
 
             -   name: Upload packages
                 run: |
-                    rsync -av --ignore-existing dist/rpm/*.rpm github@${{ secrets.DEB_SERVER_IP }}:/mnt/data/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/
+                    rsync -av --ignore-existing dist/rpm/*.rpm github@${{ secrets.DEB_SERVER_IP }}:/mnt/data/rpm/${RPM_ARCH}/${TARGET_DIR}/
 
             -   name: Upload logs
                 if: ${{ failure() }}
@@ -283,7 +311,7 @@ jobs:
 
             -   name: Setup tmate session
                 if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
-                uses: mxschmitt/action-tmate@v3
+                uses: mxschmitt/action-tmate@c0afd6f790e3a5564914980036ebf83216678101 # v3
                 with:
                     install-dependencies: false
                     sudo: false
@@ -304,14 +332,14 @@ jobs:
                     default_arch='["x86_64","arm64"]'
 
                     # Parse inputs or use defaults
-                    if [[ -n "${{ github.event.inputs.alma_versions }}" ]]; then
-                        alma_versions=$(echo '${{ github.event.inputs.alma_versions }}' | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    if [[ -n "${GITHUB_EVENT_INPUTS_ALMA_VERSIONS}" ]]; then
+                        alma_versions=$(echo '${GITHUB_EVENT_INPUTS_ALMA_VERSIONS}' | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         alma_versions=$default_alma
                     fi
 
-                    if [[ -n "${{ github.event.inputs.architectures }}" ]]; then
-                        arch_versions=$(echo '${{ github.event.inputs.architectures }}' | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+                    if [[ -n "${GITHUB_EVENT_INPUTS_ARCHITECTURES}" ]]; then
+                        arch_versions=$(echo '${GITHUB_EVENT_INPUTS_ARCHITECTURES}' | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$";""))')
                     else
                         arch_versions=$default_arch
                     fi
@@ -323,6 +351,9 @@ jobs:
                         '{"alma":$alma,"arch":$arch}')
 
                     echo "matrix=$matrix" >> $GITHUB_OUTPUT
+                env:
+                    GITHUB_EVENT_INPUTS_ALMA_VERSIONS: ${{ github.event.inputs.alma_versions }}
+                    GITHUB_EVENT_INPUTS_ARCHITECTURES: ${{ github.event.inputs.architectures }}
 
     update-repo:
         runs-on: ubuntu-24.04
@@ -334,17 +365,23 @@ jobs:
         steps:
             -   name: Set architecture variables
                 run: |
-                    if [[ "${{ matrix.arch }}" == "arm64" ]]; then
+                    if [[ "${MATRIX_ARCH}" == "arm64" ]]; then
                       echo "RPM_ARCH=aarch64" >> $GITHUB_ENV
                     else
                       echo "RPM_ARCH=x86_64" >> $GITHUB_ENV
                     fi
+                env:
+                    MATRIX_ARCH: ${{ matrix.arch }}
 
             -   name: Set target folder
-                run: echo "TARGET_DIR=el${{ matrix.alma }}" >> $GITHUB_ENV
+                run: |
+                    TARGET_DIR="el${MATRIX_ALMA}"
+                    echo "TARGET_DIR=${TARGET_DIR}" >> "$GITHUB_ENV"
+                env:
+                    MATRIX_ALMA: ${{ matrix.alma }}
 
             -   name: Set up SSH key
-                uses: webfactory/ssh-agent@v0.8.0
+                uses: webfactory/ssh-agent@d4b9b8ff72958532804b70bbe600ad43b36d5f2e # v0.8.0
                 with:
                     ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
 
@@ -360,4 +397,4 @@ jobs:
 
             -   name: Update repository metadata
                 run: |
-                    ssh github@${{ secrets.DEB_SERVER_IP }} "cd /mnt/data/rpm/${{ env.RPM_ARCH }}/${{ env.TARGET_DIR }}/ && rm -rf repodata && createrepo_static && createrepo_c ."
+                    ssh github@${{ secrets.DEB_SERVER_IP }} "cd /mnt/data/rpm/${RPM_ARCH}/${TARGET_DIR}/ && rm -rf repodata && createrepo_static && createrepo_c ."

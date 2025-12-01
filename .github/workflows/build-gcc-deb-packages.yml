@@ -7,10 +7,14 @@ on:
             - completed
     workflow_dispatch:
 
+permissions:
+    contents: read
+
 jobs:
     build:
         name: Build for ${{ matrix.arch }} PHP ${{ matrix.php-version }}
         runs-on: ubuntu-24.04${{ matrix.arch == 'arm64' && '-arm' || '' }}
+        if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
         container:
             image: debian:11
         permissions:
@@ -30,6 +34,8 @@ jobs:
         steps:
             -   name: Checkout code
                 uses: actions/checkout@v4
+                with:
+                    persist-credentials: false
 
             -   name: Set architecture variables
                 run: |
@@ -75,7 +81,7 @@ jobs:
                 run: composer install --no-interaction --prefer-dist --no-progress
 
             -   name: Download artifact from spc-download.yml
-                uses: dawidd6/action-download-artifact@v11
+                uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
                 with:
                     workflow: spc-download.yml
                     name: downloads-tarball
@@ -124,11 +130,15 @@ jobs:
     assemble-repo:
         needs: build
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
         env:
             DEB_GPG_PRIVATE_KEY: ${{ secrets.DEB_GPG_PRIVATE_KEY }}
             DEB_GPG_PASSWORD: ${{ secrets.DEB_GPG_PASSWORD }}
         steps:
             -   uses: actions/checkout@v4
+                with:
+                    persist-credentials: false
 
             -   name: Install repo tooling
                 run: |
@@ -191,7 +201,7 @@ jobs:
                     reprepro -b "${REPO_ROOT}" export
 
             -   name: Set up SSH key
-                uses: webfactory/ssh-agent@v0.8.0
+                uses: webfactory/ssh-agent@d4b9b8ff72958532804b70bbe600ad43b36d5f2e # v0.8.0
                 with:
                     ssh-private-key: ${{ secrets.GITHUBRPMHENDERKESPRIVATEKEY }}
 
