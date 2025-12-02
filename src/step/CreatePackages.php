@@ -225,7 +225,7 @@ class CreatePackages
         $extensionC = new $extensionClass($extension);
         $dependencies = $extensionC->getExtensionDependencies($extension);
         $args = [
-            '-n', '-d', 'extension_dir=' . BUILD_MODULES_PATH,
+            '-n', '-d', 'error_reporting=0', '-d', 'extension_dir=' . BUILD_MODULES_PATH,
         ];
         foreach ($dependencies as $dependency) {
             $depExt = new extension($dependency);
@@ -239,6 +239,7 @@ class CreatePackages
         $versionProcess = new Process([$phpBinary, ...$args, '-r', "echo phpversion('{$extension}');"]);
         $versionProcess->run();
         $rawExtensionVersion = trim($versionProcess->getOutput());
+        $rawExtensionVersion = trim(preg_replace('/^Warning:.*$/m', '', $rawExtensionVersion));
 
         // Parse the extension version preserving a possible pre-release suffix
         // Examples of inputs we want to support:
@@ -251,7 +252,7 @@ class CreatePackages
         //  - 1.2.3~beta1 / 1.2.3~alpha2 / 1.2.3~dev
         $extensionVersion = null;
         $suffix = null;
-        if (preg_match('/^(\d+\.\d+(?:\.\d+)?)(?:[.-]?(alpha|beta|rc|dev)(\d*)?)?$/i', $rawExtensionVersion, $m)) {
+        if (preg_match('/(\d+\.\d+(?:\.\d+)?)(?:[.-]?((?:alpha|beta|rc|dev)\d*))?/i', $rawExtensionVersion, $m)) {
             $extensionVersion = $m[1];
             if (!empty($m[2])) {
                 $suffix = strtolower($m[2]) . (isset($m[3]) ? $m[3] : '');
