@@ -1,11 +1,7 @@
 php-version: {{ php_version }}
 {%- set base_sapi_str = 'cli,cgi,fpm,embed,frankenphp' -%}
 {%- set base_extensions_str = 'calendar,ctype,curl,dom,exif,filter,iconv,libxml,mbregex,mbstring,opcache,openssl,password-argon2,pcntl,phar,posix,readline,session,simplexml,sockets,sodium,tokenizer,xml,xmlreader,xmlwriter,zlib' -%}
-{%- if php_version == '8.5' -%}
-{%-   set base_shared_str = 'apcu,ast,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,maxminddb,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pcov,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pgsql,protobuf,rar,redis,rdkafka,shmop,simdjson,snappy,soap,spx,sqlite3,sqlsrv,ssh2,sysvmsg,sysvsem,sysvshm,tidy,trader,uuid,uv,xhprof,xlswriter,xsl,xz,yac,yaml,zip,zstd' -%}
-{%- else -%}
-{%-   set base_shared_str = 'amqp,apcu,ast,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,maxminddb,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pcov,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,simdjson,snappy,soap,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,trader,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zip,zstd' -%}
-{%- endif -%}
+{%- set base_shared_str = 'amqp,apcu,ast,bcmath,brotli,bz2,dba,dio,ds,ev,event,ffi,fileinfo,ftp,gd,gettext,gmp,gmssl,igbinary,imagick,inotify,intl,ldap,lz4,maxminddb,memcache,memcached,mongodb,msgpack,mysqli,mysqlnd,odbc,opentelemetry,parallel,pcov,pdo,pdo_mysql,pdo_odbc,pdo_pgsql,pdo_sqlite,pdo_sqlsrv,pgsql,protobuf,rar,redis,rdkafka,shmop,simdjson,snappy,soap,spx,sqlite3,sqlsrv,ssh2,swoole,swoole-hook-mysql,swoole-hook-pgsql,swoole-hook-sqlite,swoole-hook-odbc,sysvmsg,sysvsem,sysvshm,tidy,trader,uuid,uv,xdebug,xhprof,xlswriter,xsl,xz,yac,yaml,zip,zstd' -%}
 
 {%- set base_extensions = base_extensions_str|split(',')|map(v => v|trim) -%}
 {%- set base_shared = base_shared_str|split(',')|map(v => v|trim) -%}
@@ -46,9 +42,18 @@ build-options:
 download-options:
     prefer-pre-built: false
     no-alt: false
-    ignore-cache-sources: 'php-src'
     shallow-clone: true
-
+{% if php_version == '8.5' %}
+    ignore-cache-sources: 'php-src,swoole,apcu,xdebug,memcache,pdo_sqlsrv'
+    custom-url:
+        - 'pdo_sqlsrv:https://github.com/stancl/msphpsql/archive/refs/heads/push-posxmnwpksqv.tar.gz'
+        - 'swoole:https://github.com/swoole/swoole-src/archive/refs/heads/master.tar.gz'
+        - 'apcu:https://github.com/php-amqp/php-amqp/archive/refs/pull/595/merge.tar.gz'
+        - 'xdebug:https://github.com/xdebug/xdebug/archive/refs/tags/3.5.0alpha3.tar.gz'
+        - 'memcache:https://github.com/remicollet/pecl-memcache/archive/refs/heads/issue-85RC2.tar.gz'
+{% else -%}
+    ignore-cache-sources: 'php-src'
+{% endif -%}
 craft-options:
     doctor: true
     download: true

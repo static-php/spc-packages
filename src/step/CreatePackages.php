@@ -238,8 +238,32 @@ class CreatePackages
         $args[] = "extension={$extension}";
         $versionProcess = new Process([$phpBinary, ...$args, '-r', "echo phpversion('{$extension}');"]);
         $versionProcess->run();
-        $extensionVersion = trim($versionProcess->getOutput());
-        $extensionVersion = preg_match('/(\d+\.\d+)(\.\d+)?/', $extensionVersion, $matches) ? $matches[0] : null;
+        $rawExtensionVersion = trim($versionProcess->getOutput());
+
+        // Parse the extension version preserving a possible pre-release suffix
+        // Examples of inputs we want to support:
+        //  - 1.2.3
+        //  - 1.2.3RC2 / 1.2.3-rc2 / 1.2.3.rc2
+        //  - 1.2.3beta1 / 1.2.3-alpha2 / 1.2.3dev
+        // We must transform them to:
+        //  - 1.2.3
+        //  - 1.2.3~rc2 (tilde separator, lowercase suffix)
+        //  - 1.2.3~beta1 / 1.2.3~alpha2 / 1.2.3~dev
+        $extensionVersion = null;
+        $suffix = null;
+        if (preg_match('/^(\d+\.\d+(?:\.\d+)?)(?:[.-]?(alpha|beta|rc|dev)(\d*)?)?$/i', $rawExtensionVersion, $m)) {
+            $extensionVersion = $m[1];
+            if (!empty($m[2])) {
+                $suffix = strtolower($m[2]) . (isset($m[3]) ? $m[3] : '');
+            }
+        }
+        // Fallback: try to extract just the numeric part if the above fails
+        if ($extensionVersion === null && preg_match('/(\d+\.\d+(?:\.\d+)?)/', $rawExtensionVersion, $m2)) {
+            $extensionVersion = $m2[1];
+        }
+        if ($extensionVersion !== null && $suffix) {
+            $extensionVersion .= "~{$suffix}";
+        }
 
         if (empty($extensionVersion)) {
             throw new \RuntimeException("Warning: Could not detect version for extension {$extension}");
