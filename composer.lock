@@ -81,12 +81,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/crazywhalecc/static-php-cli.git",
-                "reference": "b8444070eea11ca75bd29764a5dfd159580e01d8"
+                "reference": "719d818fd1e75be83a9b34c90551c7b1ed0bb0a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/b8444070eea11ca75bd29764a5dfd159580e01d8",
-                "reference": "b8444070eea11ca75bd29764a5dfd159580e01d8",
+                "url": "https://api.github.com/repos/crazywhalecc/static-php-cli/zipball/719d818fd1e75be83a9b34c90551c7b1ed0bb0a8",
+                "reference": "719d818fd1e75be83a9b34c90551c7b1ed0bb0a8",
                 "shasum": ""
             },
             "require": {
@@ -141,7 +141,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-12-01T19:41:58+00:00"
+            "time": "2025-12-02T20:34:32+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -2316,12 +2316,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "3f393e137e490ecb2ac77989a692129c31192de7"
+                "reference": "6e9ea9dcd100b6dcc0b1cdfc139df3695ad73e38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/3f393e137e490ecb2ac77989a692129c31192de7",
-                "reference": "3f393e137e490ecb2ac77989a692129c31192de7",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/6e9ea9dcd100b6dcc0b1cdfc139df3695ad73e38",
+                "reference": "6e9ea9dcd100b6dcc0b1cdfc139df3695ad73e38",
                 "shasum": ""
             },
             "conflict": {
@@ -2613,7 +2613,7 @@
                 "georgringer/news": "<1.3.3",
                 "geshi/geshi": "<=1.0.9.1",
                 "getformwork/formwork": "<2.2",
-                "getgrav/grav": "<1.7.46",
+                "getgrav/grav": "<1.11.0.0-beta1",
                 "getkirby/cms": "<3.9.8.3-dev|>=3.10,<3.10.1.2-dev|>=4,<4.7.1|>=5,<5.1.4",
                 "getkirby/kirby": "<3.9.8.3-dev|>=3.10,<3.10.1.2-dev|>=4,<4.7.1",
                 "getkirby/panel": "<2.5.14",
@@ -3304,7 +3304,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-11-26T00:22:38+00:00"
+            "time": "2025-12-02T01:33:57+00:00"
         }
     ],
     "aliases": [],

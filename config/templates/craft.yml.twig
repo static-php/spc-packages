@@ -11,13 +11,14 @@ php-version: {{ php_version }}
 {# Apply optional filtering #}
 {%- if filter_packages is defined and filter_packages -%}
 {%-   set extensions = base_extensions|filter(v => v in filter_packages) -%}
+{%-   set extensions = extensions|length ? extensions : ['opcache'] -%}
 {%-   set shared_ext = base_shared|filter(v => v in filter_packages) -%}
 {%-   set sapi_list = base_sapi|filter(v => v in filter_packages) -%}
 {%-   if 'cli' not in sapi_list -%}
 {%-     set sapi_list = ['cli']|merge(sapi_list) -%}
 {%-   endif -%}
 {%- else -%}
-{%-   set extensions = base_extensions|length ? base_extensions : ['opcache'] -%}
+{%-   set extensions = base_extensions -%}
 {%-   set shared_ext = base_shared -%}
 {%-   set sapi_list = base_sapi -%}
 {%- endif %}
@@ -49,7 +50,7 @@ download-options:
     custom-url:
         - 'pdo_sqlsrv:https://github.com/stancl/msphpsql/archive/refs/heads/push-posxmnwpksqv.tar.gz'
         - 'swoole:https://github.com/swoole/swoole-src/archive/refs/heads/master.tar.gz'
-        - 'apcu:https://github.com/php-amqp/php-amqp/archive/refs/pull/595/merge.tar.gz'
+        - 'amqp:https://github.com/php-amqp/php-amqp/archive/refs/pull/595/merge.tar.gz'
         - 'xdebug:https://github.com/xdebug/xdebug/archive/refs/tags/3.5.0alpha3.tar.gz'
 {% else -%}
     ignore-cache-sources: 'php-src'
