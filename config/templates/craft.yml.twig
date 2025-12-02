@@ -5,6 +5,7 @@ php-version: {{ php_version }}
 
 {%- set base_extensions = base_extensions_str|split(',')|map(v => v|trim) -%}
 {%- set base_shared = base_shared_str|split(',')|map(v => v|trim) -%}
+{%- set base_shared = php_version == 8.5 ? base_shared|filter(v => v != 'memcache') : base_shared -%}
 {%- set base_sapi = base_sapi_str|split(',')|map(v => v|trim) -%}
 
 {# Apply optional filtering #}
@@ -44,13 +45,12 @@ download-options:
     no-alt: false
     shallow-clone: true
 {% if php_version == '8.5' %}
-    ignore-cache-sources: 'php-src,swoole,apcu,xdebug,memcache,pdo_sqlsrv'
+    ignore-cache-sources: 'php-src,swoole,apcu,xdebug,pdo_sqlsrv'
     custom-url:
         - 'pdo_sqlsrv:https://github.com/stancl/msphpsql/archive/refs/heads/push-posxmnwpksqv.tar.gz'
         - 'swoole:https://github.com/swoole/swoole-src/archive/refs/heads/master.tar.gz'
         - 'apcu:https://github.com/php-amqp/php-amqp/archive/refs/pull/595/merge.tar.gz'
         - 'xdebug:https://github.com/xdebug/xdebug/archive/refs/tags/3.5.0alpha3.tar.gz'
-        - 'memcache:https://github.com/remicollet/pecl-memcache/archive/refs/heads/issue-85RC2.tar.gz'
 {% else -%}
     ignore-cache-sources: 'php-src'
 {% endif -%}

@@ -65,7 +65,6 @@ class TwigRenderer
         ];
 
         try {
-            // Render the template
             return $twig->render('craft.yml.twig', $templateVars);
         } catch (\Exception $e) {
             throw new \RuntimeException("Error rendering craft.yml template: " . $e->getMessage());
