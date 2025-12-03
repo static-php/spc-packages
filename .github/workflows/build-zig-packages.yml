@@ -15,6 +15,11 @@ on:
                 description: "Optional: override packages list. Leave empty for default"
                 required: false
                 default: ""
+            debug_tmate:
+                description: "Open tmate session on failure"
+                type: boolean
+                required: false
+                default: false
 
 permissions:
     contents: read
@@ -193,7 +198,7 @@ jobs:
                     name: build-logs-${{ matrix.arch }}-el7-php${{ matrix.php-version }}
                     path: vendor/crazywhalecc/static-php-cli/log
 
-#            -   name: Setup tmate session
-#                if: ${{ failure() }}
-#                uses: mxschmitt/action-tmate@v3
-#                timeout-minutes: 10
+            -   name: Setup tmate session
+                if: ${{ failure() && inputs.debug_tmate == true }}
+                uses: mxschmitt/action-tmate@v3
+                timeout-minutes: 10

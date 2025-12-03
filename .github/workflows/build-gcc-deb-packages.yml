@@ -2,6 +2,12 @@ name: Build and upload gcc deb packages
 
 on:
     workflow_dispatch:
+        inputs:
+            debug_tmate:
+                description: "Open tmate session on failure"
+                type: boolean
+                required: false
+                default: false
 
 permissions:
     contents: read
@@ -118,7 +124,7 @@ jobs:
                     path: vendor/crazywhalecc/static-php-cli/log
 
             -   name: Setup tmate session
-                if: ${{ failure() }}
+                if: ${{ failure() && inputs.debug_tmate == true }}
                 uses: mxschmitt/action-tmate@c0afd6f790e3a5564914980036ebf83216678101 # v3
                 timeout-minutes: 10
 
@@ -220,3 +226,4 @@ jobs:
 #                if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
 #                uses: mxschmitt/action-tmate@v3
 #                timeout-minutes: 10
+#                token:

@@ -51,10 +51,10 @@ jobs:
                 if: success()
                 run: gh workflow run build-gcc-packages.yml
                 env:
-                    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                    GH_TOKEN: ${{ secrets.GH_PAT }} # use our own user as the triggering user
 
             -   name: Trigger build-gcc-deb-packages workflow
                 if: success()
                 run: gh workflow run build-gcc-deb-packages.yml
                 env:
-                    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                    GH_TOKEN: ${{ secrets.GH_PAT }} # use our own user as the triggering user
