@@ -46,12 +46,11 @@ download-options:
     no-alt: false
     shallow-clone: true
 {% if php_version == '8.5' %}
-    ignore-cache-sources: 'php-src,swoole,apcu,xdebug,pdo_sqlsrv'
+    ignore-cache-sources: 'php-src,swoole,apcu,pdo_sqlsrv'
     custom-url:
         - 'pdo_sqlsrv:https://github.com/stancl/msphpsql/archive/refs/heads/push-posxmnwpksqv.tar.gz'
         - 'swoole:https://github.com/swoole/swoole-src/archive/refs/heads/master.tar.gz'
         - 'amqp:https://github.com/php-amqp/php-amqp/archive/refs/pull/595/merge.tar.gz'
-        - 'xdebug:https://github.com/xdebug/xdebug/archive/refs/tags/3.5.0alpha3.tar.gz'
 {% else -%}
     ignore-cache-sources: 'php-src'
 {% endif -%}
